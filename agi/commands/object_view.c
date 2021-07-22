@@ -58,6 +58,8 @@ void _draw_view(uint8_t viewNo, uint8_t loopNo, uint8_t cellNo, uint8_t x, uint8
 	uint8_t mirroring = cell->transparent_color_and_mirroring >> 4;
 	bool mirrored = (mirroring & 0x0F) && (loopNo != (mirroring & 7));
 
+	//y += state.play_top;
+
 	uint8_t* pixel_data = cell->pixel_data;
 	for (size_t sy = 0; sy < cell->height; sy++)
 	{
@@ -221,6 +223,10 @@ void _set_dir_from_moveDistance(uint8_t objNo) {
 	}
 }
 
+inline bool point_in_rect(const int x_obj, const int y_obj, const rect_t rect) {
+	return x_obj >= rect.x1 && y_obj >= rect.y1 && x_obj <= rect.x2 && y_obj <= rect.y2;
+}
+
 void _update_object(uint8_t objNo) {
 	if (objNo == 0) {
 		if (state.program_control) {
@@ -240,8 +246,9 @@ void _update_object(uint8_t objNo) {
 
 		_set_loop_from_dir(objNo, OBJ.direction);
 
+		int width = _view_width(OBJ.view_no, OBJ.loop_no, OBJ.cel_no);
+
 		if (OBJ.steps_to_next_update == 0) {
-			int width = _view_width(OBJ.view_no, OBJ.loop_no, OBJ.cel_no);
 
 			if (OBJ.direction != DIR_STOPPED) {
 				int newX = OBJ.x;
@@ -273,7 +280,7 @@ void _update_object(uint8_t objNo) {
 				}
 
 				bool unconditionalStop = _obj_baseline_on_pri(newX, newY, width, 0);
-				bool conditionalStop = OBJ.collide_with_blocks && _obj_baseline_on_pri(newX, newY, width, 1);
+				bool conditionalStop = OBJ.collide_with_blocks && (_obj_baseline_on_pri(newX, newY, width, 1) || (state.block_active && point_in_rect(newX, newY, state.block)));
 				bool confinedOnWater = (OBJ.allowed_on == WATER) && _obj_baseline_on_pri(newX, newY, width, 3);
 				bool confinedOnLand = (OBJ.allowed_on == LAND) && _obj_baseline_on_pri(newX, newY, width, 3);
 				bool stop = unconditionalStop || conditionalStop || confinedOnWater || confinedOnLand;
@@ -286,7 +293,6 @@ void _update_object(uint8_t objNo) {
 						OBJ.direction = _random_between(1, 9);
 					}
 				}
-
 
 				if (OBJ.move_mode == OBJ_MOVEMODE_WANDER && OBJ.move_distance_x == 0 && OBJ.move_distance_y == 0) {
 					wander(objNo);
@@ -305,48 +311,47 @@ void _update_object(uint8_t objNo) {
 				OBJ.y = newY;
 			}
 
-
-			if (objNo == 0) {
-				state.flags[FLAG_3_EGO_TOUCHED_TRIGGER] = _obj_baseline_on_pri(OBJ.x, OBJ.y, width, 2);
-			}
-
-			if (objNo == 0) {
-				state.flags[FLAG_0_EGO_ON_WATER] = _obj_baseline_on_pri(OBJ.x, OBJ.y, width, 3);
-			}
-
 			OBJ.steps_to_next_update = OBJ.step_time;
 		}
 		OBJ.steps_to_next_update--;
 
+		if (objNo == 0) {
+			state.flags[FLAG_3_EGO_TOUCHED_TRIGGER] = _obj_baseline_on_pri(OBJ.x, OBJ.y, width, 2);
+			state.flags[FLAG_0_EGO_ON_WATER] = _obj_baseline_on_pri(OBJ.x, OBJ.y, width, 3);
+		}
 
 		if (OBJ.cycling_mode) {
 			if (OBJ.cycles_to_next_update == 0) {
 				int numCels = _view_num_cels(OBJ.view_no, OBJ.loop_no);
 
 				if (OBJ.cycling_mode == REVERSE_CYCLE || OBJ.cycling_mode == REVERSE_LOOP) {
-					OBJ.cel_no--;
-					if (OBJ.cel_no < 0) {
+					if (OBJ.cel_no <= 0) {
 						if (OBJ.cycling_mode == REVERSE_LOOP) {
 							state.flags[OBJ.end_of_loop_flag] = true;
-							OBJ.end_of_loop_flag = -1;
+							OBJ.cycling_mode = NO_CYCLING;
 							OBJ.cel_no = 0;
 						}
 						else {
 							OBJ.cel_no = numCels - 1;
 						}
 					}
+					else {
+						OBJ.cel_no--;
+					}
 				}
 				else {
-					OBJ.cel_no++;
-					if (OBJ.cel_no > numCels - 1) {
+					if (OBJ.cel_no >= numCels - 1) {
 						if (OBJ.cycling_mode == END_OF_LOOP) {
 							state.flags[OBJ.end_of_loop_flag] = true;
-							OBJ.end_of_loop_flag = -1;
+							OBJ.cycling_mode = NO_CYCLING;
 							OBJ.cel_no = numCels - 1;
 						}
 						else {
 							OBJ.cel_no = 0;
 						}
+					}
+					else {
+						OBJ.cel_no++;
 					}
 				}
 
@@ -413,8 +418,12 @@ void animate_obj(uint8_t objNo) {
 	OBJ.direction = 0;
 }
 
-void block(uint8_t num, uint8_t num2) {
-	UNIMPLEMENTED
+void block(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2) {
+	state.block_active = true;
+	state.block.x1 = x1;
+	state.block.y1 = y1;
+	state.block.x2 = x2;
+	state.block.y2 = y2;
 }
 
 void current_cel(uint8_t objNo, uint8_t var) {
@@ -460,7 +469,7 @@ void end_of_loop(uint8_t objNo, uint8_t flag) {
 }
 
 void erase(uint8_t objNo) {
-	//draw_view(OBJ.viewNo, OBJ.loopNo, OBJ.celNo, OBJ.x, OBJ.y, _get_priority(objNo), true, false);
+	//_draw_view(OBJ.view_no, OBJ.loop_no, OBJ.cel_no, OBJ.x, OBJ.y, _get_priority(objNo), true, false);
 	OBJ.drawn = false;
 }
 
@@ -643,7 +652,7 @@ void set_priority_v(uint8_t objNo, uint8_t var) {
 }
 
 void set_upper_left(uint8_t num, uint8_t num2) {
-	NOTSUPPORTED
+	UNIMPLEMENTED
 }
 
 void set_view(uint8_t objNo, uint8_t viewNo) {
@@ -699,7 +708,7 @@ void unanimate_all() {
 }
 
 void unblock() {
-	UNIMPLEMENTED
+	state.block_active = false;
 }
 
 void wander(uint8_t objNo) {

@@ -6,7 +6,7 @@
 void clear_lines(uint8_t top, uint8_t bottom, uint8_t color) {
 	for (int row = top; row <= bottom; row++)
 	{
-		_draw_text(row, 0, "                                        ", 0, 0);
+		_draw_text(row, 0, "                                        ", 0, color);
 	}
 }
 
@@ -51,14 +51,115 @@ void open_dialogue() {
 	UNIMPLEMENTED
 }
 
+void _next_word(const char* str, char** end_i) {
+	for (char* c = str;; c++) {
+		if (*c == '\0' || *c == ' ' || *c == '\n') {
+			*end_i = c;
+			return;
+		}
+	}
+}
+
+void _find_longest_line(const char* message, uint8_t max_cols, uint8_t* num_cols, uint8_t* num_lines) {
+	int col = 0;
+	int row = 0;
+	char* start = message;
+	char* end = start;
+	*num_cols = 0;
+
+	while (*end != '\0') {
+		_next_word(start, &end);
+		int word_len = end - start + 1;
+
+		if (col + word_len >= max_cols) {
+			if (col > *num_cols) {
+				*num_cols = col;
+			}
+			col = 0;
+			row++;
+		}
+
+		col += word_len;
+
+		if (*end == '\n') {
+			col = 0;
+			row++;
+		}
+
+		start = end + 1;
+	}
+
+	*num_lines = row;
+}
+
+void _print(const char* message, int col, int row, uint8_t max_width) {
+	
+	uint8_t width, height;
+	_find_longest_line(message, max_width, &width, &height);
+
+	if (col == -1)
+		col = 20 - (max_width >> 1);
+	if (row == -1)
+		row = 10 - (height >> 1);
+
+	int start_col = col;
+	int written_line_chars = 0;
+	char* start = message;
+	char* end = start;
+
+	draw_char(col * 8, row * 8, '³', 4, 15);
+	col++;
+
+	while(*end != '\0') {
+		_next_word(start, &end);
+		int word_len = end - start + 1;
+
+		if (written_line_chars + word_len >= max_width) {
+			for (size_t i = written_line_chars; i < width; i++)
+			{
+				draw_char((start_col + i) * 8, row * 8, ' ', 0, 15);
+			}
+			col = start_col;
+			row++;
+			draw_char(col * 8, row * 8, '³', 4, 15);
+			col++;
+			written_line_chars = 0;
+		}
+
+		for (; start <= end; start++) {
+			if (*start == '\0')
+				break;
+			draw_char(col * 8, row * 8, *start, 0, 15);
+			col++;
+			written_line_chars++;
+		}
+		
+		if (*end == '\n') {
+			col = start_col;
+			row++;
+			draw_char(col * 8, row * 8, '³', 4, 15);
+			col++;
+			written_line_chars = 0;
+		}
+	}
+
+	for (size_t i = written_line_chars; i < width; i++)
+	{
+		draw_char((start_col + i) * 8, row * 8, ' ', 4, 15);
+	}
+
+	wait_for_enter();
+	show_pic();
+}
+
 void print(uint8_t msg) {
-	//_print(msg, -1, -1, 40);
-	UNIMPLEMENTED
+	_read_message(msg);
+	_print(message_buffer, -1, -1, 32);
 }
 
 void print_at(uint8_t msg, uint8_t row, uint8_t col, uint8_t maxWidth) {
-	//_print(msg, col, row, maxWidth);
-	UNIMPLEMENTED
+	_read_message(msg);
+	_print(message_buffer, col, row, maxWidth);	
 }
 
 void print_at_v(uint8_t var, uint8_t row, uint8_t col, uint8_t maxWidth) {
@@ -87,7 +188,10 @@ void status_line_off() {
 }
 
 void status_line_on() {
-	UNIMPLEMENTED
+	clear_lines(state.status_line, state.status_line, 15);
+	char line[41];
+	sprintf(line, " Score: %d", state.variables[VAR_3_SCORE]);
+	_draw_text(state.status_line, 0, line, 0, 15);
 }
 
 void text_screen() {

@@ -1,4 +1,5 @@
 #include "../actions.h"
+#include "../state.h"
 
 void allow_menu(uint8_t a) {
 	UNIMPLEMENTED

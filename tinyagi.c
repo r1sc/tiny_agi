@@ -28,7 +28,7 @@ void panic(const char* fmt, ...) {
 	exit(1);
 }
 
-const char* game_path = "C:\\classic\\sierra\\kq3";
+const char* game_path = "C:\\classic\\sierra\\sq2";
 agi_file_t get_file(const char* filename) {
 	char path[256];
 	sprintf(path, "%s\\%s\0", game_path, filename);
@@ -77,6 +77,8 @@ const unsigned int palette[16] = {
 
 inline void screen_set_160(int x, int y, int color) {
 	int x2 = x << 1;
+	y += state.play_top * 8;
+
 	screen[y * 320 + x2 + 0] = color;
 	screen[y * 320 + x2 + 1] = color;
 
@@ -89,12 +91,12 @@ inline void screen_set_320(int x, int y, int color) {
 	framebuffer[y * 320 + x] = palette[color];
 }
 
-inline int screen_get(int x, int y) {
-	return screen[y * 320 + x];
-}
-
 inline void priority_set(int x, int y, int priority) {
 	screen_priority[y * 160 + x] = priority;
+
+	//int x2 = x << 1;
+	//framebuffer[y * 320 + x2 + 0] = palette[priority];
+	//framebuffer[y * 320 + x2 + 1] = palette[priority];
 }
 
 inline int priority_get(int x, int y) {
@@ -165,8 +167,33 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	}
 }
 
+GLFWwindow* window;
+
+void render() {
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 320, 200, GL_BGRA_EXT, GL_UNSIGNED_BYTE, framebuffer);
+
+	glBegin(GL_QUADS);
+	glTexCoord2f(0, 0); glVertex2f(0, 0);
+	glTexCoord2f(1, 0);	glVertex2f(320, 0);
+	glTexCoord2f(1, 1);	glVertex2f(320, 200);
+	glTexCoord2f(0, 1);	glVertex2f(0, 200);
+	glEnd();
+
+	/* Swap front and back buffers */
+	glfwSwapBuffers(window);
+}
+
+void wait_for_enter() {
+	render();
+
+	state.enter_pressed = false;
+	while (!state.enter_pressed) {
+		Sleep(10);
+		glfwPollEvents();
+	}
+}
+
 int main() {
-	GLFWwindow* window;
 
 	/* Initialize the library */
 	if (!glfwInit())
@@ -216,17 +243,7 @@ int main() {
 
 		state.enter_pressed = false;
 
-		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 320, 200, GL_BGRA_EXT, GL_UNSIGNED_BYTE, framebuffer);
-
-		glBegin(GL_QUADS);
-		glTexCoord2f(0, 0); glVertex2f(0, 0);
-		glTexCoord2f(1, 0);	glVertex2f(320, 0);
-		glTexCoord2f(1, 1);	glVertex2f(320, 200);
-		glTexCoord2f(0, 1);	glVertex2f(0, 200);
-		glEnd();
-
-		/* Swap front and back buffers */
-		glfwSwapBuffers(window);
+		render();
 
 		/* Poll for and process events */
 		glfwPollEvents();

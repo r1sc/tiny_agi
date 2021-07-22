@@ -4,8 +4,7 @@
 #include <stdio.h>
 
 #define OBJ state.objects[objNo]
-#define UNIMPLEMENTED printf("Unimplemented command: %s\n", __func__);
-#define NOTSUPPORTED panic("This command is not supported by this interpreter: %s", __func__);
+#define UNIMPLEMENTED printf("(Logic: %d, pc: %d) Unimplemented command: %s\n", state.current_logic, state.pc, __func__);
 #define WARNING(x) printf("Unimplemented command: %s - %s\n", __func__, x);
 
 typedef struct {
@@ -140,7 +139,7 @@ void set_dir(uint8_t obj, uint8_t var);
 void get_dir(uint8_t obj, uint8_t var);
 void ignore_blocks(uint8_t obj);
 void observe_blocks(uint8_t obj);
-void block(uint8_t num, uint8_t num2);
+void block(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2);
 void unblock();
 void get(uint8_t item);
 void get_v(uint8_t var);

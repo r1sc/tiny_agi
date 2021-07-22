@@ -19,7 +19,7 @@ void _draw_text(uint8_t row, uint8_t col, const char* text, uint8_t fg, uint8_t 
 }
 
 void _draw_text_len(uint8_t row, uint8_t col, const char* text, uint8_t fg, uint8_t bg, int start, int end) {
-	for (int i = start; i < end; i++)
+	for (int i = start; i <= end; i++)
 	{
 		char c = text[i];
 		if (c == '\0')

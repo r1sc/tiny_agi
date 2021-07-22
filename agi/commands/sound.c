@@ -1,4 +1,5 @@
 #include "../actions.h"
+#include "../state.h"
 
 void load_sound(uint8_t num) {
 	UNIMPLEMENTED

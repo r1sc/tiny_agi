@@ -96,9 +96,14 @@ typedef struct {
 	int move_distance_x, move_distance_y;
 	uint8_t move_step_size;
 	int move_done_flag;
-	int end_of_loop_flag;
+	uint8_t end_of_loop_flag;
 	uint8_t direction;
 } object_t;
+
+typedef struct {
+	int x1, y1;
+	int x2, y2;
+} rect_t;
 
 typedef struct {
 	/* Interpreter state */
@@ -129,6 +134,9 @@ typedef struct {
 	bool input_prompt_active;
 	char cursor_char;
 	char prompt_buffer[28];
+	
+	bool block_active;
+	rect_t block;
 
 	object_t objects[MAX_NUM_OBJECTS];
 

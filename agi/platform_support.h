@@ -16,7 +16,6 @@ extern void free_file(agi_file_t file);
 
 extern void screen_set_160(int x, int y, int color);
 extern void screen_set_320(int x, int y, int color);
-extern int screen_get(int x, int y);
 extern int priority_get(int x, int y);
 extern void priority_set(int x, int y, int priority);
 
@@ -27,3 +26,5 @@ extern int pic_vis_get(int x, int y);
 
 extern void pic_pri_set(int x, int y, int priority);
 extern int pic_pri_get(int x, int y);
+
+extern void wait_for_enter();
