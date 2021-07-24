@@ -360,16 +360,23 @@ void _update_object(uint8_t objNo) {
 			OBJ.cycles_to_next_update--;
 		}
 	}
-
-	uint8_t priority = _get_priority(objNo);
-	_draw_view(OBJ.view_no, OBJ.loop_no, OBJ.cel_no, OBJ.x, OBJ.y, priority, false, false); //draw
 }
 
-void _draw_all_active() {
+void _update_all_active() {
 	for (size_t i = 0; i < 16; i++)
 	{
 		if (state.objects[i].active && state.objects[i].drawn) {
 			_update_object(i);
+		}
+	}
+}
+
+void _draw_all_active() {
+	for (size_t objNo = 0; objNo < 16; objNo++)
+	{
+		if (state.objects[objNo].active && state.objects[objNo].drawn) {
+			uint8_t priority = _get_priority(objNo);
+			_draw_view(OBJ.view_no, OBJ.loop_no, OBJ.cel_no, OBJ.x, OBJ.y, priority, false, false); //draw
 		}
 	}
 }

@@ -158,7 +158,8 @@ void agi_reset();
 /* Steps the simulation */
 void agi_logic_run_cycle();
 
-/* Draws all active objects */
+/* Updates and draws all active objects */
+void _update_all_active();
 void _draw_all_active();
 
 /* Clears all objects from the screen */

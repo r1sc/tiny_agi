@@ -407,9 +407,12 @@ void agi_logic_run_cycle() {
 
 	state.cycle_complete = false;
 
+
 	while (!state.cycle_complete) {
 		step();
 	}
+
+	_update_all_active();
 
 	state.variables[VAR_5_OBJ_BORDER_CODE] = 0;
 	state.variables[VAR_4_OBJ_BORDER_OBJNO] = 0;

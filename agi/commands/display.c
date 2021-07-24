@@ -35,7 +35,6 @@ void display(uint8_t row, uint8_t col, uint8_t msg) {
 	//	// TODO: Replace with strings
 	//}
 	//draw_text(row, 0, "                                        ", 0, 0);
-
 	_draw_text(row, col, message, 15, 0);
 }
 
@@ -93,7 +92,8 @@ void _find_longest_line(const char* message, uint8_t max_cols, uint8_t* num_cols
 }
 
 void _print(const char* message, int col, int row, uint8_t max_width) {
-	
+	_draw_all_active();
+
 	uint8_t width, height;
 	_find_longest_line(message, max_width, &width, &height);
 
@@ -159,6 +159,7 @@ void _print(const char* message, int col, int row, uint8_t max_width) {
 	draw_char((start_col + width - 1) * 8, row * 8, 'Ù', 4, 15);
 
 	wait_for_enter();
+	_undraw_all();
 	show_pic();
 }
 
