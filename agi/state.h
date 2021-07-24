@@ -61,6 +61,11 @@
 #define DIR_LEFT 7
 #define DIR_UP_LEFT 8
 
+#define BORDER_NOTHING 0
+#define BORDER_TOP 1
+#define BORDER_RIGHT 2
+#define BORDER_BOTTOM 3
+#define BORDER_LEFT 4
 
 #define AGI_CALLSTACK_DEPTH 8
 #define MAX_NUM_OBJECTS 16

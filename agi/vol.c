@@ -31,7 +31,7 @@ resPos_t _find_res_offset(const char* dir_filename, const uint8_t res_no) {
 }
 
 // NOTE! CALLER IS RESPONSIBLE FOR FREEING BUFFER
-vol_data_t load_vol_data(const char* dir_filename, const uint8_t res_no) {
+vol_data_t load_vol_data(const char* dir_filename, const uint8_t res_no, bool is_logic) {
 	resPos_t res_pos = _find_res_offset(dir_filename, res_no);
 	
 	char path[8];
@@ -41,7 +41,7 @@ vol_data_t load_vol_data(const char* dir_filename, const uint8_t res_no) {
 	vol_data_t result;
 	result.size = (*(vol_file.data + res_pos.offset + 3 + 0)) | (*(vol_file.data + res_pos.offset + 3 + 1) << 8);
 
-	result.buffer = malloc(result.size);
+	result.buffer = malloc(result.size + (is_logic ? 1 : 0)); // Special case for logics - allocate 1 more byte to make room for last message trailing 0
 	if (result.buffer) {
 		memcpy(result.buffer, vol_file.data + res_pos.offset + 3 + 2, result.size);
 		free_file(vol_file);

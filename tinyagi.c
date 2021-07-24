@@ -11,7 +11,6 @@
 #include "agi/platform_support.h"
 #include "agi/state.h"
 
-char message_buffer[256];
 uint8_t screen[320 * 200];
 uint8_t screen_priority[160 * 168];
 uint8_t pic_vis[160 * 168];
@@ -200,7 +199,7 @@ int main() {
 		return -1;
 
 	/* Create a windowed mode window and its OpenGL context */
-	window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
+	window = glfwCreateWindow(640, 400, "Hello World", NULL, NULL);
 	if (!window)
 	{
 		glfwTerminate();
@@ -232,23 +231,27 @@ int main() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 320, 200, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, framebuffer);
 
+	int clock_counter = 0;
 	/* Loop until the user closes the window */
 	while (!glfwWindowShouldClose(window))
 	{
 		Sleep(50);
+
+		clock_counter++;
+		if (clock_counter > 20) {
+			state.variables[VAR_11_CLOCK_SECONDS]++;
+			clock_counter = 0;
+		}
 		
 		_undraw_all();
 		agi_logic_run_cycle();
 		_draw_all_active();
+		render();
 
 		state.enter_pressed = false;
 
-		render();
-
 		/* Poll for and process events */
-		glfwPollEvents();
-
-		
+		glfwPollEvents();		
 	}
 
 	glfwTerminate();

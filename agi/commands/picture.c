@@ -103,7 +103,23 @@ void _flood_fill(uint8_t startX, uint8_t startY)
 #define DRAW_PEN 0xFA
 #define END 0xFF
 
+void show_pic() {
+	for (size_t y = 0; y < 168; y++)
+	{
+		for (size_t x = 0; x < 160; x++)
+		{
+			screen_set_160(x, y, pic_vis_get(x, y));
+			priority_set(x, y, pic_pri_get(x, y));
+		}
+	}
+}
+
 void _pic_draw(uint8_t pic_no) {
+	vis_enabled = false;
+	pri_enabled = false;
+	vis_color = 0;
+	pri_color = 0;
+
 	uint8_t* buffer = state.loaded_pics[pic_no].buffer;
 	if (!buffer) {
 		panic("No picture loaded!");
@@ -260,20 +276,9 @@ void load_pic(uint8_t var) {
 	if (state.loaded_pics[pic_no].buffer)
 		return;
 
-	state.loaded_pics[pic_no] = load_vol_data("picdir", pic_no);
+	state.loaded_pics[pic_no] = load_vol_data("picdir", pic_no, false);
 }
 
 void overlay_pic(uint8_t var) {
 	_pic_draw(state.variables[var]);
-}
-
-void show_pic() {
-	for (size_t y = 0; y < 168; y++)
-	{
-		for (size_t x = 0; x < 160; x++)
-		{
-			screen_set_160(x, y, pic_vis_get(x, y));
-			priority_set(x, y, pic_pri_get(x, y));
-		}
-	}
 }

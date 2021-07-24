@@ -29,14 +29,14 @@ void configure_screen(uint8_t pPlaytop, uint8_t pInputLine, uint8_t pStatusLine)
 }
 
 void display(uint8_t row, uint8_t col, uint8_t msg) {
-	_read_message(msg);
+	char* message = _get_message(msg);
 	//if (messageBuffer[0] == '%')
 	//{
 	//	// TODO: Replace with strings
 	//}
 	//draw_text(row, 0, "                                        ", 0, 0);
 
-	_draw_text(row, col, message_buffer, 15, 0);
+	_draw_text(row, col, message, 15, 0);
 }
 
 void display_v(uint8_t vRow, uint8_t vCol, uint8_t vMsg) {
@@ -103,12 +103,10 @@ void _print(const char* message, int col, int row, uint8_t max_width) {
 		row = 10 - (height >> 1);
 
 	int start_col = col;
+	int start_row = row;
 	int written_line_chars = 0;
 	char* start = message;
 	char* end = start;
-
-	draw_char(col * 8, row * 8, '³', 4, 15);
-	col++;
 
 	while(*end != '\0') {
 		_next_word(start, &end);
@@ -121,8 +119,6 @@ void _print(const char* message, int col, int row, uint8_t max_width) {
 			}
 			col = start_col;
 			row++;
-			draw_char(col * 8, row * 8, '³', 4, 15);
-			col++;
 			written_line_chars = 0;
 		}
 
@@ -137,8 +133,6 @@ void _print(const char* message, int col, int row, uint8_t max_width) {
 		if (*end == '\n') {
 			col = start_col;
 			row++;
-			draw_char(col * 8, row * 8, '³', 4, 15);
-			col++;
 			written_line_chars = 0;
 		}
 	}
@@ -148,18 +142,34 @@ void _print(const char* message, int col, int row, uint8_t max_width) {
 		draw_char((start_col + i) * 8, row * 8, ' ', 4, 15);
 	}
 
+	row++;
+	for (size_t x = start_col; x < start_col + width - 1; x++)
+	{
+		draw_char(x * 8, (start_row - 1) * 8, 'Ä', 4, 15);
+		draw_char(x * 8, row * 8, 'Ä', 4, 15);
+	}
+	for (size_t y = start_row; y < row; y++)
+	{
+		draw_char((start_col -1) * 8, y * 8, '³', 4, 15);
+		draw_char((start_col + width - 1) * 8, y * 8, '³', 4, 15);
+	}
+	draw_char((start_col - 1) * 8, (start_row - 1) * 8, 'Ú', 4, 15);
+	draw_char((start_col + width - 1) * 8, (start_row - 1) * 8, '¿', 4, 15);
+	draw_char((start_col - 1) * 8, row * 8, 'À', 4, 15);
+	draw_char((start_col + width - 1) * 8, row * 8, 'Ù', 4, 15);
+
 	wait_for_enter();
 	show_pic();
 }
 
 void print(uint8_t msg) {
-	_read_message(msg);
-	_print(message_buffer, -1, -1, 32);
+	char* message = _get_message(msg);
+	_print(message, -1, -1, 32);
 }
 
 void print_at(uint8_t msg, uint8_t row, uint8_t col, uint8_t maxWidth) {
-	_read_message(msg);
-	_print(message_buffer, col, row, maxWidth);	
+	char* message = _get_message(msg);
+	_print(message, col, row, maxWidth);	
 }
 
 void print_at_v(uint8_t var, uint8_t row, uint8_t col, uint8_t maxWidth) {
@@ -171,8 +181,8 @@ void print_v(uint8_t var) {
 }
 
 void set_cursor_char(uint8_t msg) {
-	_read_message(msg);
-	state.cursor_char = message_buffer[0];
+	char* message = _get_message(msg);
+	state.cursor_char = message[0];
 }
 
 void set_text_attribute(uint8_t num, uint8_t num2) {

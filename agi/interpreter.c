@@ -205,30 +205,44 @@ action_t actions[] = {
 	ACTION("hold_key", hold_key, 0)
 };
 
-void _read_message(uint8_t messageNo) {
-	messageNo--;
+#pragma pack(push, 1)
+typedef struct {
+	uint8_t num_messages;
+	uint16_t messages_end;
+} agi_messages_header_t;
+#pragma pack(pop)
 
+char* _get_message(uint8_t message_no) {
+	message_no--;
 	uint8_t* buffer = state.loaded_logics[state.current_logic];
-	uint8_t* messageHeader = buffer + ((buffer[1] << 8) | buffer[0]) + 2;
+	agi_messages_header_t* message_section = buffer + ((buffer[1] << 8) | buffer[0]) + 2;
 
-	uint8_t numMessages = *messageHeader;
-	if (messageNo >= numMessages)
-		return;
+	uint16_t* message_offsets = (uint16_t*)(((uint8_t*)message_section) + 3);
+	uint16_t offset = message_offsets[message_no];
 
-	uint16_t* messageOffsets = ((uint16_t*)(messageHeader + 3));
-	uint8_t* messagePtr = (messageHeader + messageOffsets[messageNo] + 1);
-	unsigned int distanceToMessage0 = messageOffsets[messageNo] - messageOffsets[0];
+	char* message = ((char*)message_section) + offset + 1;
+
+	return message;
+}
+
+void _decrypt_messages(uint8_t logic_no) {
+	uint8_t* buffer = state.loaded_logics[logic_no];
+	agi_messages_header_t* message_section = buffer + ((buffer[1] << 8) | buffer[0]) + 2;
+
+	int ptr_table_len = message_section->num_messages * 2;
+	char* message_ptr = ((uint8_t*)message_section) + 3 + ptr_table_len;
+	char* messages_end = ((uint8_t*)message_section) + message_section->messages_end;
 
 	const char* decryptionKey = "Avis Durgan";
-	uint8_t decI = distanceToMessage0 % 11;
-	unsigned int i = 0;
-	while (1) {
-		const char c = *(messagePtr++) ^ decryptionKey[decI++ % 11];
-		message_buffer[i++] = c;
-		if (c == 0)
-			break;
+	uint8_t decI = 0;
+
+	while(message_ptr < messages_end)
+	{				
+		*(message_ptr++) ^= decryptionKey[decI++];
+		if (decI == 11)
+			decI = 0;
 	}
-	message_buffer[i] = '\0';
+	*message_ptr = '\0';
 }
 
 uint8_t next_data() {

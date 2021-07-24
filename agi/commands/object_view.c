@@ -92,14 +92,15 @@ void _draw_view(uint8_t viewNo, uint8_t loopNo, uint8_t cellNo, uint8_t x, uint8
 							uint8_t bgPri = _get_pri(screenX, screenY, addToPic);
 							bool doDraw = bgPri <= priority;
 							if (doDraw) {
-								screen_set_160(screenX, screenY, color);
-								priority_set(screenX, screenY, priority);
-
 								if (addToPic) {
 									pic_vis_set(screenX, screenY, color);
 									//if (bgPri > 3) {
 									pic_pri_set(screenX, screenY, priority);
 									//}
+								}
+								else {
+									screen_set_160(screenX, screenY, color);
+									priority_set(screenX, screenY, priority);
 								}
 							}
 						}
@@ -519,7 +520,7 @@ void load_view(uint8_t num) {
 	if (state.loaded_views[num].buffer)
 		return;
 
-	state.loaded_views[num] = load_vol_data("viewdir", num);
+	state.loaded_views[num] = load_vol_data("viewdir", num, false);
 }
 
 void load_view_v(uint8_t var) {

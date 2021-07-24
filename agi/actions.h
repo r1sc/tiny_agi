@@ -7,6 +7,8 @@
 #define UNIMPLEMENTED printf("(Logic: %d, pc: %d) Unimplemented command: %s\n", state.current_logic, state.pc, __func__);
 #define WARNING(x) printf("Unimplemented command: %s - %s\n", __func__, x);
 
+void _decrypt_messages(uint8_t logic_no);
+
 typedef struct {
 	uint8_t numArgs;
 	bool (*test)();

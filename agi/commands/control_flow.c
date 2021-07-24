@@ -22,7 +22,8 @@ void load_logics(uint8_t num) {
 	if (state.loaded_logics[num])
 		return;
 
-	state.loaded_logics[num] = load_vol_data("logdir", num).buffer;
+	state.loaded_logics[num] = load_vol_data("logdir", num, true).buffer;
+	_decrypt_messages(num);
 }
 
 void load_logics_v(uint8_t var) {
@@ -30,6 +31,7 @@ void load_logics_v(uint8_t var) {
 }
 
 void new_room(uint8_t room_no) {
+	stop_update(0);
 	unanimate_all();
 	player_control();
 	unblock();
@@ -37,9 +39,29 @@ void new_room(uint8_t room_no) {
 
 	state.variables[VAR_1_PREVIOUS_ROOM] = state.variables[VAR_0_CURRENT_ROOM];
 	state.variables[VAR_0_CURRENT_ROOM] = room_no;
+	state.variables[VAR_4_OBJ_BORDER_OBJNO] = 0;
+	state.variables[VAR_5_OBJ_BORDER_CODE] = 0;
+	state.variables[VAR_9_MISSING_WORD_NO] = 0;
 	state.variables[VAR_16_EGO_VIEW_NO] = state.objects[0].view_no;
-	// if ego touching edge place ego
 
+	// if ego touching edge place ego
+	switch (state.variables[VAR_2_EGO_BORDER_CODE]) {
+	case BORDER_TOP:
+		state.objects[0].y = 167;
+		break;
+	case BORDER_BOTTOM:
+		state.objects[0].y = state.horizon;
+		break;
+	case BORDER_LEFT:
+		state.objects[0].x = 159 - _view_width(state.objects[0].view_no, state.objects[0].loop_no, state.objects[0].cel_no);
+		break;
+	case BORDER_RIGHT:
+		state.objects[0].x = 0;
+		break;
+	}
+
+	state.variables[VAR_2_EGO_BORDER_CODE] = BORDER_NOTHING;
+	state.flags[FLAG_2_COMMAND_ENTERED] = false;
 	state.flags[FLAG_5_ROOM_EXECUTED_FIRST_TIME] = true;
 
 	state.current_logic = 0;

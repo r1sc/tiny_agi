@@ -9,7 +9,6 @@ typedef struct {
 	size_t size;
 } agi_file_t;
 
-extern char message_buffer[256];
 
 extern agi_file_t get_file(const char* filename);
 extern void free_file(agi_file_t file);
