@@ -8,6 +8,25 @@ bool pri_enabled = false;
 uint8_t vis_color = 0;
 uint8_t pri_color = 0;
 
+uint8_t pic_vispri[160 * 168];
+
+inline void pic_vis_set(int x, int y, int color) {
+	pic_vispri[y * 160 + x] = (pic_vispri[y * 160 + x] & 0x0F) | (color << 4);
+}
+
+inline int pic_vis_get(int x, int y) {
+	return pic_vispri[y * 160 + x] >> 4;
+}
+
+inline void pic_pri_set(int x, int y, int priority) {
+	pic_vispri[y * 160 + x] = (pic_vispri[y * 160 + x] & 0xF0) | priority;
+}
+
+inline int pic_pri_get(int x, int y) {
+	return pic_vispri[y * 160 + x] & 0x0F;
+}
+
+
 void discard_pic(uint8_t var) {
 	uint8_t pic_no = state.variables[var];
 	if (!state.loaded_pics[pic_no].buffer) {

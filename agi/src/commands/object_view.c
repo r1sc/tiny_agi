@@ -61,7 +61,7 @@ void _draw_view(uint8_t viewNo, uint8_t loopNo, uint8_t cellNo, uint8_t x, uint8
 	//y += state.play_top;
 
 	uint8_t* pixel_data = cell->pixel_data;
-	for (size_t sy = 0; sy < cell->height; sy++)
+	for (uint8_t sy = 0; sy < cell->height; sy++)
 	{
 		uint8_t sx = x;
 		while (1) {
@@ -363,7 +363,7 @@ void _update_object(uint8_t objNo) {
 }
 
 void _update_all_active() {
-	for (size_t i = 0; i < 16; i++)
+	for (uint8_t i = 0; i < 16; i++)
 	{
 		if (state.objects[i].active && state.objects[i].drawn) {
 			_update_object(i);
@@ -372,7 +372,7 @@ void _update_all_active() {
 }
 
 void _draw_all_active() {
-	for (size_t objNo = 0; objNo < 16; objNo++)
+	for (uint8_t objNo = 0; objNo < 16; objNo++)
 	{
 		if (state.objects[objNo].active && state.objects[objNo].drawn) {
 			uint8_t priority = _get_priority(objNo);
@@ -701,6 +701,7 @@ void stop_motion(uint8_t objNo) {
 	if (objNo == 0)
 		program_control();
 	OBJ.cycling_mode = NO_CYCLING;
+	OBJ.direction = DIR_STOPPED;
 }
 
 void stop_update(uint8_t objNo) {

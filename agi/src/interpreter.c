@@ -295,7 +295,6 @@ bool doTest(uint8_t opcode) {
 }
 
 void step() {
-	unsigned int old_pc = state.pc;
 	uint8_t opcode = next_data();
 
 	if (opcode == 0xFF) {

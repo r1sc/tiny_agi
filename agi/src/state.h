@@ -159,7 +159,6 @@ void agi_reset();
 void agi_logic_run_cycle();
 
 /* Updates and draws all active objects */
-void _update_all_active();
 void _draw_all_active();
 
 /* Clears all objects from the screen */

@@ -3,6 +3,7 @@
 #
 cmake_minimum_required (VERSION 3.8)
 
-project ("tinyagi_glfw")
-add_subdirectory(agi)
-add_subdirectory(tinyagi-glfw)
+project ("tinyagi")
+
+add_subdirectory(src)		
+# TODO: Add tests and install targets if needed.

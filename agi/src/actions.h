@@ -7,7 +7,14 @@
 #define UNIMPLEMENTED printf("(Logic: %d, pc: %d) Unimplemented command: %s\n", state.current_logic, state.pc, __func__);
 #define WARNING(x) printf("Unimplemented command: %s - %s\n", __func__, x);
 
+void pic_vis_set(int x, int y, int color);
+int pic_vis_get(int x, int y);
+
+void pic_pri_set(int x, int y, int priority);
+int pic_pri_get(int x, int y);
+
 void _decrypt_messages(uint8_t logic_no);
+uint8_t next_data();
 
 typedef struct {
 	uint8_t numArgs;
@@ -15,7 +22,6 @@ typedef struct {
 } test_t;
 
 #define TEST(t, n) {.numArgs = n, .test = t}
-
 
 extern test_t tests[];
 

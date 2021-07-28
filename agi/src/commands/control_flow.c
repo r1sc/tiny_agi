@@ -37,6 +37,7 @@ void new_room(uint8_t room_no) {
 	unblock();
 	set_horizon(36);
 
+	state.variables[VAR_8_NUM_PAGES_FREE] = 10;
 	state.variables[VAR_1_PREVIOUS_ROOM] = state.variables[VAR_0_CURRENT_ROOM];
 	state.variables[VAR_0_CURRENT_ROOM] = room_no;
 	state.variables[VAR_4_OBJ_BORDER_OBJNO] = 0;

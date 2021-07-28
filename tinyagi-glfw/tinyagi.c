@@ -8,14 +8,9 @@
 #include <GLFW/glfw3.h>
 #include <gl/GL.h>
 
-#include "agi/platform_support.h"
-#include "agi/state.h"
+#include "agi.h"
 
-uint8_t screen[320 * 200];
 uint8_t screen_priority[160 * 168];
-uint8_t pic_vis[160 * 168];
-uint8_t pic_pri[160 * 168];
-
 uint32_t framebuffer[320 * 200];
 
 void panic(const char* fmt, ...) {
@@ -27,7 +22,7 @@ void panic(const char* fmt, ...) {
 	exit(1);
 }
 
-const char* game_path = "C:\\classic\\sierra\\sq2";
+const char* game_path = "C:\\classic\\sierra\\kq3";
 agi_file_t get_file(const char* filename) {
 	char path[256];
 	sprintf(path, "%s\\%s\0", game_path, filename);
@@ -77,45 +72,20 @@ const unsigned int palette[16] = {
 inline void screen_set_160(int x, int y, int color) {
 	int x2 = x << 1;
 	y += state.play_top * 8;
-
-	screen[y * 320 + x2 + 0] = color;
-	screen[y * 320 + x2 + 1] = color;
-
 	framebuffer[y * 320 + x2 + 0] = palette[color];
 	framebuffer[y * 320 + x2 + 1] = palette[color];
 }
 
 inline void screen_set_320(int x, int y, int color) {
-	screen[y * 320 + x] = color;
 	framebuffer[y * 320 + x] = palette[color];
 }
 
 inline void priority_set(int x, int y, int priority) {
 	screen_priority[y * 160 + x] = priority;
-
-	//int x2 = x << 1;
-	//framebuffer[y * 320 + x2 + 0] = palette[priority];
-	//framebuffer[y * 320 + x2 + 1] = palette[priority];
 }
 
 inline int priority_get(int x, int y) {
 	return screen_priority[y * 160 + x];
-}
-
-inline void pic_vis_set(int x, int y, int color) {
-	pic_vis[y * 160 + x] = color;
-}
-
-inline int pic_vis_get(int x, int y) {
-	return pic_vis[y * 160 + x];
-}
-
-inline void pic_pri_set(int x, int y, int priority) {
-	pic_pri[y * 160 + x] = priority;
-}
-
-inline int pic_pri_get(int x, int y) {
-	return pic_pri[y * 160 + x];
 }
 
 const char font_data[] =
@@ -235,11 +205,23 @@ int main() {
 	/* Loop until the user closes the window */
 	while (!glfwWindowShouldClose(window))
 	{
-		Sleep(50);
+		Sleep(60);
 
 		clock_counter++;
 		if (clock_counter > 20) {
 			state.variables[VAR_11_CLOCK_SECONDS]++;
+			if (state.variables[VAR_11_CLOCK_SECONDS] == 60) {
+				state.variables[VAR_11_CLOCK_SECONDS] = 0;
+				state.variables[VAR_12_CLOCK_MINUTES]++;
+				if (state.variables[VAR_12_CLOCK_MINUTES] == 60) {
+					state.variables[VAR_12_CLOCK_MINUTES] = 0;
+					state.variables[VAR_13_CLOCK_HOURS]++;
+					if (state.variables[VAR_13_CLOCK_HOURS] == 24) {
+						state.variables[VAR_13_CLOCK_HOURS] = 0;
+						state.variables[VAR_14_CLOCK_DAYS]++;
+					}
+				}
+			}
 			clock_counter = 0;
 		}
 		
