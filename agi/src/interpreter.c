@@ -410,11 +410,11 @@ void agi_logic_run_cycle() {
 		step();
 	}
 
-	_update_all_active();
-
 	state.variables[VAR_5_OBJ_BORDER_CODE] = 0;
 	state.variables[VAR_4_OBJ_BORDER_OBJNO] = 0;
 	state.flags[FLAG_5_ROOM_EXECUTED_FIRST_TIME] = false;
 	state.flags[FLAG_6_RESTART_GAME_EXECUTED] = false;
 	state.flags[FLAG_12_GAME_RESTORED] = false;
+
+	_update_all_active();
 }

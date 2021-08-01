@@ -8,7 +8,6 @@
 #define WATER 1
 #define LAND 2
 
-//#define NO_CYCLING 0
 #define NORMAL_CYCLE 1
 #define REVERSE_CYCLE 2
 #define REVERSE_LOOP 3
@@ -90,7 +89,7 @@ void _draw_view(uint8_t viewNo, uint8_t loopNo, uint8_t cellNo, uint8_t x, uint8
 						}
 						else {
 							uint8_t bgPri = _get_pri(screenX, screenY, addToPic);
-							bool doDraw = bgPri <= priority;
+							bool doDraw = priority >= bgPri;
 							if (doDraw) {
 								screen_set_160(screenX, screenY, color);
 								priority_set(screenX, screenY, priority);
@@ -307,6 +306,16 @@ void _update_object(uint8_t objNo) {
 				if (OBJ.observe_horizon && newY < state.horizon)
 					newY = state.horizon;
 
+				if (newY >= 167) {
+					state.variables[VAR_2_EGO_BORDER_CODE] = BORDER_BOTTOM;
+				} else if (newY <= 0 || (OBJ.observe_horizon && newY <= state.horizon)) {
+					state.variables[VAR_2_EGO_BORDER_CODE] = BORDER_TOP;
+				} else if (newX <= 0) {
+					state.variables[VAR_2_EGO_BORDER_CODE] = BORDER_LEFT;
+				} else if (newX >= 160) {
+					state.variables[VAR_2_EGO_BORDER_CODE] = BORDER_RIGHT;
+				}
+
 				OBJ.x = newX;
 				OBJ.y = newY;
 			}
@@ -331,7 +340,6 @@ void _update_object(uint8_t objNo) {
 								state.flags[OBJ.end_of_loop_flag] = true;
 								OBJ.end_of_loop_flag = -1;
 							}
-							//OBJ.cycling_mode = NO_CYCLING;
 							OBJ.cel_no = 0;
 						}
 						else {
@@ -349,7 +357,6 @@ void _update_object(uint8_t objNo) {
 								state.flags[OBJ.end_of_loop_flag] = true;
 								OBJ.end_of_loop_flag = -1;
 							}
-							//OBJ.cycling_mode = NO_CYCLING;
 							OBJ.cel_no = numCels - 1;
 						}
 						else {
@@ -378,7 +385,7 @@ void _update_all_active() {
 }
 
 void _draw_all_active() {
-	for (uint8_t objNo = 0; objNo < 16; objNo++)
+	for (int objNo = 15; objNo >= 0; objNo--)
 	{
 		if (state.objects[objNo].active && state.objects[objNo].drawn) {
 			uint8_t priority = _get_priority(objNo);
@@ -684,9 +691,6 @@ void set_view_v(uint8_t objNo, uint8_t var) {
 
 void start_cycling(uint8_t objNo) {
 	OBJ.is_cycling = true;
-	/*if (OBJ.cycling_mode == NO_CYCLING) {
-		OBJ.cycling_mode = NORMAL_CYCLE;
-	}*/
 }
 
 void start_motion(uint8_t objNo) {
@@ -707,14 +711,12 @@ void step_time(uint8_t objNo, uint8_t var) {
 }
 
 void stop_cycling(uint8_t objNo) {
-	//OBJ.cycling_mode = NO_CYCLING;
 	OBJ.is_cycling = false;
 }
 
 void stop_motion(uint8_t objNo) {
 	if (objNo == 0)
 		program_control();
-	//OBJ.cycling_mode = NO_CYCLING;
 	OBJ.direction = DIR_STOPPED;
 }
 
@@ -734,6 +736,9 @@ void unblock() {
 }
 
 void wander(uint8_t objNo) {
+	if (objNo == 0) {
+		program_control();
+	}
 	OBJ.move_mode = OBJ_MOVEMODE_WANDER;
 	OBJ.move_distance_x = _random_between(6, 51);
 	OBJ.move_distance_y = _random_between(6, 51);

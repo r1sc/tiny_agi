@@ -114,6 +114,7 @@ void window_resize(GLFWwindow* window, int width, int height) {
 	glViewport(0, 0, width, height);
 }
 
+bool show_priority = false;
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
 	if (key == GLFW_KEY_ENTER && action == GLFW_PRESS)
@@ -137,11 +138,26 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 		else if (key == GLFW_KEY_KP_3 && action == GLFW_PRESS)
 			state.variables[VAR_6_EGO_DIRECTION] = DIR_DOWN_RIGHT;
 	}
+
+	if (key == GLFW_KEY_TAB && action == GLFW_PRESS) {
+		show_priority = !show_priority;
+	}
 }
 
 GLFWwindow* window;
 
 void render() {
+	if (show_priority) {
+		for (size_t y = 0; y < 168; y++)
+		{
+			for (size_t x = 0; x < 160; x++)
+			{				
+				unsigned int c = palette[priority_get(x, y)];
+				framebuffer[y * 320 + (x << 1) + 0] = c;
+				framebuffer[y * 320 + (x << 1) + 1] = c;
+			}
+		}
+	}
 	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 320, 200, GL_BGRA_EXT, GL_UNSIGNED_BYTE, framebuffer);
 
 	glBegin(GL_QUADS);
