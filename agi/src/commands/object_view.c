@@ -8,7 +8,7 @@
 #define WATER 1
 #define LAND 2
 
-#define NO_CYCLING 0
+//#define NO_CYCLING 0
 #define NORMAL_CYCLE 1
 #define REVERSE_CYCLE 2
 #define REVERSE_LOOP 3
@@ -320,15 +320,18 @@ void _update_object(uint8_t objNo) {
 			state.flags[FLAG_0_EGO_ON_WATER] = _obj_baseline_on_pri(OBJ.x, OBJ.y, width, 3);
 		}
 
-		if (OBJ.cycling_mode) {
+		if (OBJ.is_cycling) {
 			if (OBJ.cycles_to_next_update == 0) {
 				int numCels = _view_num_cels(OBJ.view_no, OBJ.loop_no);
 
 				if (OBJ.cycling_mode == REVERSE_CYCLE || OBJ.cycling_mode == REVERSE_LOOP) {
 					if (OBJ.cel_no <= 0) {
 						if (OBJ.cycling_mode == REVERSE_LOOP) {
-							state.flags[OBJ.end_of_loop_flag] = true;
-							OBJ.cycling_mode = NO_CYCLING;
+							if (OBJ.end_of_loop_flag > -1) {
+								state.flags[OBJ.end_of_loop_flag] = true;
+								OBJ.end_of_loop_flag = -1;
+							}
+							//OBJ.cycling_mode = NO_CYCLING;
 							OBJ.cel_no = 0;
 						}
 						else {
@@ -342,8 +345,11 @@ void _update_object(uint8_t objNo) {
 				else {
 					if (OBJ.cel_no >= numCels - 1) {
 						if (OBJ.cycling_mode == END_OF_LOOP) {
-							state.flags[OBJ.end_of_loop_flag] = true;
-							OBJ.cycling_mode = NO_CYCLING;
+							if (OBJ.end_of_loop_flag > -1) {
+								state.flags[OBJ.end_of_loop_flag] = true;
+								OBJ.end_of_loop_flag = -1;
+							}
+							//OBJ.cycling_mode = NO_CYCLING;
 							OBJ.cel_no = numCels - 1;
 						}
 						else {
@@ -413,6 +419,7 @@ void animate_obj(uint8_t objNo) {
 	OBJ.cycles_to_next_update = OBJ.cycle_time;
 	OBJ.step_time = 1;
 	OBJ.steps_to_next_update = OBJ.step_time;
+	OBJ.is_cycling = true;
 	OBJ.cycling_mode = NORMAL_CYCLE;
 	OBJ.collide_with_objects = true;
 	OBJ.step_size = 1;
@@ -473,6 +480,7 @@ void end_of_loop(uint8_t objNo, uint8_t flag) {
 	state.flags[flag] = false;
 	OBJ.end_of_loop_flag = flag;
 	OBJ.cycling_mode = END_OF_LOOP;
+	OBJ.is_cycling = true;
 }
 
 void erase(uint8_t objNo) {
@@ -547,6 +555,7 @@ void move_obj_v(uint8_t objNo, uint8_t vx, uint8_t vy, uint8_t stepSize, uint8_t
 
 void normal_cycle(uint8_t objNo) {
 	OBJ.cycling_mode = NORMAL_CYCLE;
+	OBJ.is_cycling = true;
 }
 
 void normal_motion(uint8_t objNo) {
@@ -617,6 +626,7 @@ void reposition_to_v(uint8_t objNo, uint8_t vx, uint8_t vy) {
 
 void reverse_cycle(uint8_t objNo) {
 	OBJ.cycling_mode = REVERSE_CYCLE;
+	OBJ.is_cycling = true;
 }
 
 void reverse_loop(uint8_t objNo, uint8_t flag) {
@@ -673,7 +683,10 @@ void set_view_v(uint8_t objNo, uint8_t var) {
 }
 
 void start_cycling(uint8_t objNo) {
-	OBJ.cycling_mode = NORMAL_CYCLE;
+	OBJ.is_cycling = true;
+	/*if (OBJ.cycling_mode == NO_CYCLING) {
+		OBJ.cycling_mode = NORMAL_CYCLE;
+	}*/
 }
 
 void start_motion(uint8_t objNo) {
@@ -694,13 +707,14 @@ void step_time(uint8_t objNo, uint8_t var) {
 }
 
 void stop_cycling(uint8_t objNo) {
-	OBJ.cycling_mode = NO_CYCLING;
+	//OBJ.cycling_mode = NO_CYCLING;
+	OBJ.is_cycling = false;
 }
 
 void stop_motion(uint8_t objNo) {
 	if (objNo == 0)
 		program_control();
-	OBJ.cycling_mode = NO_CYCLING;
+	//OBJ.cycling_mode = NO_CYCLING;
 	OBJ.direction = DIR_STOPPED;
 }
 

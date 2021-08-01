@@ -4,11 +4,14 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <Windows.h>
+#include <math.h>
 
 #include <GLFW/glfw3.h>
 #include <gl/GL.h>
 
 #include "agi.h"
+#include "winmm_audio.h"
+#include "synth.h"
 
 uint8_t screen_priority[160 * 168];
 uint32_t framebuffer[320 * 200];
@@ -162,7 +165,27 @@ void wait_for_enter() {
 	}
 }
 
+void agi_ext_sound_update(uint16_t channel_hz[4]) {
+	/*for (size_t i = 0; i < 4; i++)
+	{
+		synth_set_frequency(i, channel_hz[i]);
+	}
+	synth_get_sample_points()*/
+}
+
+#define PI 3.14159265358979323846
 int main() {
+
+	// Init audio
+	/*winmm_audio_init();
+	
+	uint8_t sample[64];
+	for (size_t i = 0; i < 64; i++)
+	{
+		sample[i] = (uint8_t)(sin((i / 64.0f) * PI * 2) * 255);
+	}
+	synth_set_sample(sample, 64);*/
+
 
 	/* Initialize the library */
 	if (!glfwInit())
@@ -183,8 +206,8 @@ int main() {
 	glfwSetKeyCallback(window, key_callback);
 
 	glEnable(GL_TEXTURE_2D);
-	
-	agi_reset();	
+
+	agi_reset();
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -224,7 +247,7 @@ int main() {
 			}
 			clock_counter = 0;
 		}
-		
+
 		_undraw_all();
 		agi_logic_run_cycle();
 		_draw_all_active();
@@ -233,7 +256,7 @@ int main() {
 		state.enter_pressed = false;
 
 		/* Poll for and process events */
-		glfwPollEvents();		
+		glfwPollEvents();
 	}
 
 	glfwTerminate();

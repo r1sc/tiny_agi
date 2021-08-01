@@ -406,7 +406,6 @@ void agi_logic_run_cycle() {
 
 	state.cycle_complete = false;
 
-
 	while (!state.cycle_complete) {
 		step();
 	}

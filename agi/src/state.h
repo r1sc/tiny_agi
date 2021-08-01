@@ -94,7 +94,10 @@ typedef struct {
 	uint8_t cycles_to_next_update;
 	uint8_t step_time;
 	uint8_t steps_to_next_update;
+
+	bool is_cycling;
 	uint8_t cycling_mode;
+
 	bool collide_with_objects;
 	uint8_t step_size;
 	bool collide_with_blocks;
