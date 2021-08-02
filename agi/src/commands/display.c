@@ -4,9 +4,10 @@
 #include "../text_display.h"
 
 void clear_lines(uint8_t top, uint8_t bottom, uint8_t color) {
+	uint8_t col = 0;
 	for (int row = top; row <= bottom; row++)
 	{
-		_draw_text(row, 0, "                                        ", 0, color);
+		_draw_text(&row, &col, "                                        ", 0, color);
 	}
 }
 
@@ -35,7 +36,7 @@ void display(uint8_t row, uint8_t col, uint8_t msg) {
 	//	// TODO: Replace with strings
 	//}
 	//draw_text(row, 0, "                                        ", 0, 0);
-	_draw_text(row, col, message, 15, 0);
+	_draw_text(&row, &col, message, 15, 0);
 }
 
 void display_v(uint8_t vRow, uint8_t vCol, uint8_t vMsg) {
@@ -202,7 +203,8 @@ void status_line_on() {
 	clear_lines(state.status_line, state.status_line, 15);
 	char line[41];
 	sprintf(line, " Score: %d", state.variables[VAR_3_SCORE]);
-	_draw_text(state.status_line, 0, line, 0, 15);
+	uint8_t col = 0;
+	_draw_text(&state.status_line, &col, line, 0, 15);
 }
 
 void text_screen() {

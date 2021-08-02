@@ -114,6 +114,10 @@ typedef struct {
 } rect_t;
 
 typedef struct {
+	uint8_t room_no;
+} item_t;
+
+typedef struct {
 	/* Interpreter state */
 	unsigned int pc;
 	bool test;

@@ -307,13 +307,25 @@ void _update_object(uint8_t objNo) {
 					newY = state.horizon;
 
 				if (newY >= 167) {
-					state.variables[VAR_2_EGO_BORDER_CODE] = BORDER_BOTTOM;
+					state.variables[objNo == 0 ? VAR_2_EGO_BORDER_CODE : VAR_5_OBJ_BORDER_CODE] = BORDER_BOTTOM;
+					if (objNo != 0) {
+						state.variables[VAR_4_OBJ_BORDER_OBJNO] = objNo;
+					}
 				} else if (newY <= 0 || (OBJ.observe_horizon && newY <= state.horizon)) {
-					state.variables[VAR_2_EGO_BORDER_CODE] = BORDER_TOP;
+					state.variables[objNo == 0 ? VAR_2_EGO_BORDER_CODE : VAR_5_OBJ_BORDER_CODE] = BORDER_TOP;
+					if (objNo != 0) {
+						state.variables[VAR_4_OBJ_BORDER_OBJNO] = objNo;
+					}
 				} else if (newX <= 0) {
-					state.variables[VAR_2_EGO_BORDER_CODE] = BORDER_LEFT;
+					state.variables[objNo == 0 ? VAR_2_EGO_BORDER_CODE : VAR_5_OBJ_BORDER_CODE] = BORDER_LEFT;
+					if (objNo != 0) {
+						state.variables[VAR_4_OBJ_BORDER_OBJNO] = objNo;
+					}
 				} else if (newX >= 160) {
-					state.variables[VAR_2_EGO_BORDER_CODE] = BORDER_RIGHT;
+					state.variables[objNo == 0 ? VAR_2_EGO_BORDER_CODE : VAR_5_OBJ_BORDER_CODE] = BORDER_RIGHT;
+					if (objNo != 0) {
+						state.variables[VAR_4_OBJ_BORDER_OBJNO] = objNo;
+					}
 				}
 
 				OBJ.x = newX;
@@ -341,6 +353,7 @@ void _update_object(uint8_t objNo) {
 								OBJ.end_of_loop_flag = -1;
 							}
 							OBJ.cel_no = 0;
+							OBJ.is_cycling = false;
 						}
 						else {
 							OBJ.cel_no = numCels - 1;
@@ -358,6 +371,7 @@ void _update_object(uint8_t objNo) {
 								OBJ.end_of_loop_flag = -1;
 							}
 							OBJ.cel_no = numCels - 1;
+							OBJ.is_cycling = false;
 						}
 						else {
 							OBJ.cel_no = 0;
@@ -640,6 +654,7 @@ void reverse_loop(uint8_t objNo, uint8_t flag) {
 	OBJ.end_of_loop_flag = flag;
 	state.flags[flag] = false;
 	OBJ.cycling_mode = REVERSE_LOOP;
+	OBJ.is_cycling = true;
 }
 
 void set_cel(uint8_t objNo, uint8_t num) {
@@ -683,6 +698,7 @@ void set_view(uint8_t objNo, uint8_t viewNo) {
 	OBJ.view_no = viewNo;
 	OBJ.cel_no = 0;
 	OBJ.loop_no = 0;
+	OBJ.cycling_mode = NORMAL_CYCLE;
 }
 
 void set_view_v(uint8_t objNo, uint8_t var) {
