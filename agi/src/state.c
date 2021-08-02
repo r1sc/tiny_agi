@@ -1,5 +1,7 @@
 #include "actions.h"
 #include "state.h"
+#include "platform_support.h"
+
 #include <stdlib.h>
 
 agi_state_t state;
@@ -54,6 +56,12 @@ void agi_reset() {
 	}
 
 	state.program_control = false;
+	state.variables[VAR_26_MONITOR_TYPE] = 3; // EGA
+
+
+	agi_file_t item_file = get_file("OBJECT");
+	state.item_file = (item_file_t*)item_file.data;
+	_decrypt_item_file((uint8_t*)state.item_file, item_file.size);
 
 	new_room(0);
 }

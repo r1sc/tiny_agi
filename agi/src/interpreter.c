@@ -225,6 +225,8 @@ char* _get_message(uint8_t message_no) {
 	return message;
 }
 
+const char* decryptionKey = "Avis Durgan";
+
 void _decrypt_messages(uint8_t logic_no) {
 	uint8_t* buffer = state.loaded_logics[logic_no];
 	agi_messages_header_t* message_section = buffer + ((buffer[1] << 8) | buffer[0]) + 2;
@@ -233,7 +235,6 @@ void _decrypt_messages(uint8_t logic_no) {
 	char* message_ptr = ((uint8_t*)message_section) + 3 + ptr_table_len;
 	char* messages_end = ((uint8_t*)message_section) + message_section->messages_end;
 
-	const char* decryptionKey = "Avis Durgan";
 	uint8_t decI = 0;
 
 	while(message_ptr < messages_end)
@@ -243,6 +244,13 @@ void _decrypt_messages(uint8_t logic_no) {
 			decI = 0;
 	}
 	*message_ptr = '\0';
+}
+
+void _decrypt_item_file(uint8_t* item_file, size_t size) {
+	for (size_t i = 0; i < size; i++)
+	{
+		item_file[i] ^= decryptionKey[i % 11];
+	}
 }
 
 uint8_t next_data() {

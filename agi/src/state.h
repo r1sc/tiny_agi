@@ -108,14 +108,23 @@ typedef struct {
 	uint8_t direction;
 } object_t;
 
+#pragma pack(push,1)
 typedef struct {
 	int x1, y1;
 	int x2, y2;
 } rect_t;
 
 typedef struct {
+	uint16_t name_offset;
 	uint8_t room_no;
 } item_t;
+#pragma pack(pop)
+
+typedef struct {
+	uint16_t item_names_offset;
+	uint8_t num_objects;
+	item_t items[];
+} item_file_t;
 
 typedef struct {
 	/* Interpreter state */
@@ -154,6 +163,8 @@ typedef struct {
 
 	vol_data_t loaded_pics[256];
 	vol_data_t loaded_views[256];
+
+	item_file_t* item_file;
 
 } agi_state_t;
 

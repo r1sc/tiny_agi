@@ -4,9 +4,9 @@
 #include "../text_display.h"
 
 void clear_lines(uint8_t top, uint8_t bottom, uint8_t color) {
-	uint8_t col = 0;
 	for (int row = top; row <= bottom; row++)
 	{
+		uint8_t col = 0;
 		_draw_text(&row, &col, "                                        ", 0, color);
 	}
 }

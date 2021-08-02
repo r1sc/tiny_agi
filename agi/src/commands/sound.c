@@ -6,6 +6,7 @@ void load_sound(uint8_t num) {
 }
 
 void sound(uint8_t num, uint8_t flag) {
+	state.flags[flag] = true;
 	UNIMPLEMENTED
 }
 

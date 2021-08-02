@@ -38,9 +38,8 @@ bool has(uint8_t item) {
 	return false;
 }
 
-bool obj_in_room(uint8_t item, uint8_t var) {
-	// TODO
-	return false;
+bool obj_in_room(uint8_t item, uint8_t var) {	
+	return state.variables[var] == state.item_file->items[item].room_no;
 }
 
 bool posn(uint8_t objNo, uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2) {

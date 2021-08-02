@@ -14,6 +14,7 @@ void pic_pri_set(int x, int y, int priority);
 int pic_pri_get(int x, int y);
 
 void _decrypt_messages(uint8_t logic_no);
+void _decrypt_item_file(uint8_t* item_file, size_t size);
 uint8_t next_data();
 
 typedef struct {
@@ -152,7 +153,7 @@ void unblock();
 void get(uint8_t item);
 void get_v(uint8_t var);
 void drop(uint8_t item);
-void put(uint8_t item);
+void put(uint8_t item, uint8_t room);
 void put_v(uint8_t var, uint8_t var2);
 void get_room_v(uint8_t var, uint8_t var2);
 void load_sound(uint8_t num);
