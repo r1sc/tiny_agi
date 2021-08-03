@@ -64,3 +64,16 @@ void _draw_text(uint8_t* row, uint8_t* col, const char* text, uint8_t fg, uint8_
 		}
 	}
 }
+
+void _redraw_prompt() {	
+	uint8_t row = state.input_line_row;
+	uint8_t col = 2;
+	_draw_text(&row, &col, "                                        ", 0, 0);
+	
+	draw_char(0, state.input_line_row * 8, state.strings[0][0], 15, 0);
+	draw_char((1 + state.input_pos) * 8, state.input_line_row * 8, state.cursor_char, 15, 0);
+
+	row = state.input_line_row;
+	col = 1;
+	_draw_text(&row, &col, state.input_buffer, 15, 0);
+}

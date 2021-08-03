@@ -1,3 +1,5 @@
+#include <string.h>
+
 #include "../actions.h"
 #include "../state.h"
 
@@ -34,8 +36,7 @@ bool issetv(uint8_t var) {
 }
 
 bool has(uint8_t item) {
-	// TODO
-	return false;
+	return state.item_file->items[item].room_no == 255;
 }
 
 bool obj_in_room(uint8_t item, uint8_t var) {	
@@ -52,7 +53,6 @@ bool controller(uint8_t ctr) {
 }
 
 bool have_key() {
-	// TODO
 	return state.enter_pressed;
 }
 
@@ -67,21 +67,22 @@ bool said() {
 }
 
 bool compare_strings(uint8_t str, uint8_t str2) {
-	// TODO
-	return false;
+	return strcmp(state.strings[str], state.strings[str2]) == 0;
 }
 
-bool obj_in_box(uint8_t obj, uint8_t num, uint8_t num2, uint8_t num3, uint8_t num4) {
-	// TODO
-	return false;
+bool obj_in_box(uint8_t objNo, uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2) {
+	int width = _view_width(OBJ.view_no, OBJ.loop_no, OBJ.cel_no);
+	return (OBJ.x + width) > x1 && OBJ.x <= x2 && OBJ.y >= y1 && OBJ.y <= y2;
 }
 
-bool center_posn(uint8_t obj, uint8_t num, uint8_t num2, uint8_t num3, uint8_t num4) {
-	// TODO
-	return false;
+bool center_posn(uint8_t objNo, uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2) {
+	int width = _view_width(OBJ.view_no, OBJ.loop_no, OBJ.cel_no);
+	int midX = OBJ.x + (width / 2);
+	return midX >= x1 && midX <= x2 && OBJ.y >= y1 && OBJ.y <= y2;
 }
 
-bool right_posn(uint8_t obj, uint8_t num, uint8_t num2, uint8_t num3, uint8_t num4) {
-	// TODO
-	return false;
+bool right_posn(uint8_t objNo, uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2) {
+	int width = _view_width(OBJ.view_no, OBJ.loop_no, OBJ.cel_no);
+	int right_x = OBJ.x + width;
+	return right_x >= x1 && right_x <= x2 && OBJ.y >= y1 && OBJ.y <= y2;
 }

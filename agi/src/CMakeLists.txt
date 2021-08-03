@@ -21,4 +21,4 @@ add_library (tinyagi OBJECT
 	"commands/string.c"
 	"commands/system.c"
 	"commands/test.c"
-	)
+	"support.c")

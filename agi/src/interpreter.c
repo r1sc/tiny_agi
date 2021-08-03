@@ -1,6 +1,7 @@
 #include "state.h"
 #include "actions.h"
 #include "platform_support.h"
+#include "text_display.h"
 
 /* Test definitions */
 
@@ -412,6 +413,13 @@ void agi_logic_run_cycle() {
 	state.flags[FLAG_2_COMMAND_ENTERED] = 0;
 	state.flags[FLAG_4_SAID_ACCEPTED_INPUT] = 0;
 
+
+	if (state.enter_pressed) {
+		if (state.input_pos > 0) {
+			state.flags[FLAG_2_COMMAND_ENTERED] = true;
+		}
+	}
+
 	state.cycle_complete = false;
 
 	while (!state.cycle_complete) {
@@ -425,4 +433,10 @@ void agi_logic_run_cycle() {
 	state.flags[FLAG_12_GAME_RESTORED] = false;
 
 	_update_all_active();
+
+	if (state.flags[FLAG_2_COMMAND_ENTERED]) {
+		state.input_pos = 0;
+		state.input_buffer[0] = '\0';
+		_redraw_prompt();
+	}
 }

@@ -142,6 +142,16 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	if (key == GLFW_KEY_TAB && action == GLFW_PRESS) {
 		show_priority = !show_priority;
 	}
+
+	if (key == GLFW_KEY_BACKSPACE && action == GLFW_PRESS) {
+		agi_push_char('\b');
+	}
+}
+
+void character_callback(GLFWwindow* window, unsigned int codepoint)
+{
+	char c = (char)codepoint;
+	agi_push_char(c);
 }
 
 GLFWwindow* window;
@@ -220,6 +230,7 @@ int main() {
 
 	glfwSetWindowSizeCallback(window, window_resize);
 	glfwSetKeyCallback(window, key_callback);
+	glfwSetCharCallback(window, character_callback);
 
 	glEnable(GL_TEXTURE_2D);
 

@@ -17,6 +17,44 @@ void _decrypt_messages(uint8_t logic_no);
 void _decrypt_item_file(uint8_t* item_file, size_t size);
 uint8_t next_data();
 
+#define ANYTHING 0
+#define WATER 1
+#define LAND 2
+
+#define NORMAL_CYCLE 1
+#define REVERSE_CYCLE 2
+#define REVERSE_LOOP 3
+#define END_OF_LOOP 4
+
+#define OBJ_MOVEMODE_NORMAL 0
+#define OBJ_MOVEMODE_MOVE_TO 1
+#define OBJ_MOVEMODE_WANDER 2
+
+#pragma pack(push,1)
+typedef struct {
+	uint8_t width;
+	uint8_t height;
+	uint8_t transparent_color_and_mirroring;
+	uint8_t pixel_data[];
+} cell_t;
+
+typedef struct {
+	uint8_t num_cells;
+	uint16_t cell_offsets[];
+} loop_t;
+
+typedef struct {
+	uint16_t unk;
+	uint8_t num_loops;
+	uint16_t description_offset;
+	int16_t loop_offsets[];
+} view_t;
+#pragma pack(pop)
+
+uint8_t _view_num_loops(uint8_t viewNo);
+uint8_t _view_num_cels(uint8_t viewNo, uint8_t loopNo);
+int _view_width(uint8_t viewNo, uint8_t loopNo, uint8_t cellNo);
+
 typedef struct {
 	uint8_t numArgs;
 	bool (*test)();

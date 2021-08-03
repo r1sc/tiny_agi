@@ -1,10 +1,26 @@
 #include "actions.h"
 #include "state.h"
 #include "platform_support.h"
+#include "text_display.h"
 
 #include <stdlib.h>
 
 agi_state_t state;
+
+void agi_push_char(char c) {
+	if (!state.input_prompt_active) {
+		return;
+	}
+
+	if (c == '\b' && state.input_pos > 0) {
+		state.input_buffer[--state.input_pos] = '\0';
+	}
+	else if (state.input_pos < 39) {
+		state.input_buffer[state.input_pos++] = c;
+		state.input_buffer[state.input_pos] = '\0';
+	}
+	_redraw_prompt();
+}
 
 void agi_reset() {
 	state.pc = 0;
@@ -48,7 +64,8 @@ void agi_reset() {
 	state.horizon = 36;
 	state.input_prompt_active = true;
 	state.cursor_char = '_';
-	state.prompt_buffer[0] = '\0';
+	state.input_buffer[0] = '\0';
+	state.input_pos = 0;
 
 	for (size_t i = 0; i < MAX_NUM_OBJECTS; i++)
 	{
@@ -57,7 +74,8 @@ void agi_reset() {
 
 	state.program_control = false;
 	state.variables[VAR_26_MONITOR_TYPE] = 3; // EGA
-
+	state.display_fg = 15;
+	state.display_bg = 0;
 
 	agi_file_t item_file = get_file("OBJECT");
 	state.item_file = (item_file_t*)item_file.data;

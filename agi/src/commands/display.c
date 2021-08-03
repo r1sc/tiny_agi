@@ -4,15 +4,22 @@
 #include "../text_display.h"
 
 void clear_lines(uint8_t top, uint8_t bottom, uint8_t color) {
-	for (int row = top; row <= bottom; row++)
+	for (uint8_t row = top; row <= bottom; row++)
 	{
 		uint8_t col = 0;
 		_draw_text(&row, &col, "                                        ", 0, color);
 	}
 }
 
-void clear_text_rect(uint8_t num, uint8_t num2, uint8_t num3, uint8_t num4, uint8_t num5) {
-	UNIMPLEMENTED
+void clear_text_rect(uint8_t row1, uint8_t col1, uint8_t row2, uint8_t col2, uint8_t color) {
+	color = color > 0 ? 15 : 0;
+	for (uint8_t row = row1; row <= row2; row++)
+	{
+		for (uint8_t col = col1; col <= col2; col++)
+		{
+			draw_char(col * 8, row * 8, ' ', 0, color);
+		}
+	}
 }
 
 void close_dialogue() {
@@ -36,7 +43,7 @@ void display(uint8_t row, uint8_t col, uint8_t msg) {
 	//	// TODO: Replace with strings
 	//}
 	//draw_text(row, 0, "                                        ", 0, 0);
-	_draw_text(&row, &col, message, 15, 0);
+	_draw_text(&row, &col, message, state.display_fg, state.display_bg);
 }
 
 void display_v(uint8_t vRow, uint8_t vCol, uint8_t vMsg) {
@@ -52,7 +59,7 @@ void open_dialogue() {
 }
 
 void _next_word(const char* str, char** end_i) {
-	for (char* c = str;; c++) {
+	for (char* c = (char*)str;; c++) {
 		if (*c == '\0' || *c == ' ' || *c == '\n') {
 			*end_i = c;
 			return;
@@ -63,7 +70,7 @@ void _next_word(const char* str, char** end_i) {
 void _find_longest_line(const char* message, uint8_t max_cols, uint8_t* num_cols, uint8_t* num_lines) {
 	int col = 0;
 	int row = 0;
-	char* start = message;
+	char* start = (char*)message;
 	char* end = start;
 	*num_cols = 0;
 
@@ -106,7 +113,7 @@ void _print(const char* message, int col, int row, uint8_t max_width) {
 	int start_col = col;
 	int start_row = row;
 	int written_line_chars = 0;
-	char* start = message;
+	char* start = (char*)message;
 	char* end = start;
 
 	while(*end != '\0') {
@@ -187,8 +194,9 @@ void set_cursor_char(uint8_t msg) {
 	state.cursor_char = message[0];
 }
 
-void set_text_attribute(uint8_t num, uint8_t num2) {
-	UNIMPLEMENTED
+void set_text_attribute(uint8_t fg, uint8_t bg) {
+	state.display_bg = bg > 0 ? 15 : 0;
+	state.display_fg = state.display_bg == 15 ? 0 : fg;
 }
 
 void shake_screen(uint8_t num) {
@@ -196,7 +204,7 @@ void shake_screen(uint8_t num) {
 }
 
 void status_line_off() {
-	UNIMPLEMENTED
+	clear_lines(state.status_line, state.status_line, 0);
 }
 
 void status_line_on() {

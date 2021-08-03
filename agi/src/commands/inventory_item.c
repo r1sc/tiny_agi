@@ -32,7 +32,7 @@ void show_obj(uint8_t num) {
 }
 
 void show_obj_v(uint8_t var) {
-	UNIMPLEMENTED
+	show_obj(state.variables[var]);
 }
 
 void status() {

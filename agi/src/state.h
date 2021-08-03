@@ -154,7 +154,8 @@ typedef struct {
 	uint8_t horizon;
 	bool input_prompt_active;
 	char cursor_char;
-	char prompt_buffer[28];
+	char input_buffer[40];
+	uint8_t input_pos;
 	
 	bool block_active;
 	rect_t block;
@@ -165,6 +166,9 @@ typedef struct {
 	vol_data_t loaded_views[256];
 
 	item_file_t* item_file;
+
+	uint8_t display_fg;
+	uint8_t display_bg;
 
 } agi_state_t;
 
@@ -181,3 +185,6 @@ void _draw_all_active();
 
 /* Clears all objects from the screen */
 void _undraw_all();
+
+/* Pushes a character to the input line (if enabled by the game) */
+void agi_push_char(char c);
