@@ -56,14 +56,40 @@ bool have_key() {
 	return state.enter_pressed;
 }
 
+#define MIN(x, y) (x < y ? x : y)
 bool said() {
 	uint8_t numparams = next_data();
+	bool match = true;
+	bool rol = false;
 	for (size_t i = 0; i < numparams; i++)
 	{
-		uint16_t wordNo = next_data() | (next_data() << 8);
+		uint16_t logic_word_no = (uint16_t)(next_data() | (next_data() << 8));
+		if (match && i < num_parsed_word_groups) {
+			if (parsed_word_groups[i] != logic_word_no) {
+				match = false;
+			}
+		}
+		else if (logic_word_no == 9999) {
+			rol = true;
+			continue;
+		}
+		else {
+			match = false;
+		}
 	}
-	// TODO
-	return false;
+	if (state.flags[FLAG_4_SAID_ACCEPTED_INPUT]) {
+		match = false;
+	}
+	else if (state.variables[VAR_9_MISSING_WORD_NO] > 0) {
+		match = false;
+	}
+	else if (!rol && num_parsed_word_groups > numparams) {
+		match = false;
+	}
+	else if (match) {
+		state.flags[FLAG_4_SAID_ACCEPTED_INPUT] = true;
+	}
+	return match;
 }
 
 bool compare_strings(uint8_t str, uint8_t str2) {

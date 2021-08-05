@@ -7,6 +7,9 @@
 #define UNIMPLEMENTED printf("(Logic: %d, pc: %d) Unimplemented command: %s\n", state.current_logic, state.pc, __func__);
 #define WARNING(x) printf("Unimplemented command: %s - %s\n", __func__, x);
 
+extern uint16_t parsed_word_groups[20];
+extern uint16_t num_parsed_word_groups;
+
 void pic_vis_set(int x, int y, int color);
 int pic_vis_get(int x, int y);
 

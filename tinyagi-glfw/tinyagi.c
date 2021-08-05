@@ -36,16 +36,15 @@ agi_file_t get_file(const char* filename) {
 	fseek(f, 0, SEEK_END);
 	result.size = ftell(f);
 	result.data = (uint8_t*)malloc(result.size);
-	if (!result.data) {
-		fclose(f);
+	if (result.data) {
+		fseek(f, 0, SEEK_SET);
+		fread(result.data, 1, result.size, f);
+	}
+	else {
 		panic("Failed to allocate memory for file %s, of size %d", path, result.size);
-		return;
 	}
 
-	fseek(f, 0, SEEK_SET);
-	fread(result.data, 1, result.size, f);
 	fclose(f);
-
 	return result;
 }
 
@@ -117,26 +116,28 @@ void window_resize(GLFWwindow* window, int width, int height) {
 bool show_priority = false;
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-	if (key == GLFW_KEY_ENTER && action == GLFW_PRESS)
+	if ((key == GLFW_KEY_ENTER || key == GLFW_KEY_KP_ENTER) && action == GLFW_PRESS)
 		state.enter_pressed = true;
 
 	if (!state.program_control) {
-		if (key == GLFW_KEY_UP && action == GLFW_PRESS)
-			state.variables[VAR_6_EGO_DIRECTION] = DIR_UP;
-		else if (key == GLFW_KEY_DOWN && action == GLFW_PRESS)
-			state.variables[VAR_6_EGO_DIRECTION] = DIR_DOWN;
-		else if (key == GLFW_KEY_LEFT && action == GLFW_PRESS)
-			state.variables[VAR_6_EGO_DIRECTION] = DIR_LEFT;
-		else if (key == GLFW_KEY_RIGHT && action == GLFW_PRESS)
-			state.variables[VAR_6_EGO_DIRECTION] = DIR_RIGHT;
+		if ((key == GLFW_KEY_UP || key == GLFW_KEY_KP_8) && action == GLFW_PRESS)
+			state.variables[VAR_6_EGO_DIRECTION] = state.variables[VAR_6_EGO_DIRECTION] == DIR_UP ? DIR_STOPPED : DIR_UP;
+		else if ((key == GLFW_KEY_DOWN || key == GLFW_KEY_KP_2) && action == GLFW_PRESS)
+			state.variables[VAR_6_EGO_DIRECTION] = state.variables[VAR_6_EGO_DIRECTION] == DIR_DOWN ? DIR_STOPPED : DIR_DOWN;
+		else if ((key == GLFW_KEY_LEFT || key == GLFW_KEY_KP_4) && action == GLFW_PRESS)
+			state.variables[VAR_6_EGO_DIRECTION] = state.variables[VAR_6_EGO_DIRECTION] == DIR_LEFT ? DIR_STOPPED : DIR_LEFT;
+		else if ((key == GLFW_KEY_RIGHT || key == GLFW_KEY_KP_6) && action == GLFW_PRESS)
+			state.variables[VAR_6_EGO_DIRECTION] = state.variables[VAR_6_EGO_DIRECTION] == DIR_RIGHT ? DIR_STOPPED : DIR_RIGHT;
 		else if (key == GLFW_KEY_KP_7 && action == GLFW_PRESS)
-			state.variables[VAR_6_EGO_DIRECTION] = DIR_UP_LEFT;
+			state.variables[VAR_6_EGO_DIRECTION] = state.variables[VAR_6_EGO_DIRECTION] == DIR_UP_LEFT ? DIR_STOPPED : DIR_UP_LEFT;
 		else if (key == GLFW_KEY_KP_9 && action == GLFW_PRESS)
-			state.variables[VAR_6_EGO_DIRECTION] = DIR_UP_RIGHT;
+			state.variables[VAR_6_EGO_DIRECTION] = state.variables[VAR_6_EGO_DIRECTION] == DIR_UP_RIGHT ? DIR_STOPPED : DIR_UP_RIGHT;
 		else if (key == GLFW_KEY_KP_1 && action == GLFW_PRESS)
-			state.variables[VAR_6_EGO_DIRECTION] = DIR_DOWN_LEFT;
+			state.variables[VAR_6_EGO_DIRECTION] = state.variables[VAR_6_EGO_DIRECTION] == DIR_DOWN_LEFT ? DIR_STOPPED : DIR_DOWN_LEFT;
 		else if (key == GLFW_KEY_KP_3 && action == GLFW_PRESS)
-			state.variables[VAR_6_EGO_DIRECTION] = DIR_DOWN_RIGHT;
+			state.variables[VAR_6_EGO_DIRECTION] = state.variables[VAR_6_EGO_DIRECTION] == DIR_DOWN_RIGHT ? DIR_STOPPED : DIR_DOWN_RIGHT;
+		else if (key == GLFW_KEY_KP_5 && action == GLFW_PRESS)
+			state.variables[VAR_6_EGO_DIRECTION] = DIR_STOPPED;
 	}
 
 	if (key == GLFW_KEY_TAB && action == GLFW_PRESS) {

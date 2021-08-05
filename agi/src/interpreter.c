@@ -1,3 +1,5 @@
+#include <string.h>
+
 #include "state.h"
 #include "actions.h"
 #include "platform_support.h"
@@ -238,8 +240,8 @@ void _decrypt_messages(uint8_t logic_no) {
 
 	uint8_t decI = 0;
 
-	while(message_ptr < messages_end)
-	{				
+	while (message_ptr < messages_end)
+	{
 		*(message_ptr++) ^= decryptionKey[decI++];
 		if (decI == 11)
 			decI = 0;
@@ -329,8 +331,8 @@ void step() {
 		state.negate = true;
 	}
 	else if (opcode == 0xFC) {
-		state.or = !state.or ;
-		if (state.or)
+		state. or = !state. or ;
+		if (state. or )
 			state.or_result = false;
 	}
 	else {
@@ -341,7 +343,7 @@ void step() {
 
 			state.negate = false;
 
-			if (state.or)
+			if (state. or )
 				state.or_result = state.or_result || pass;
 			else
 				state.and_result = state.and_result && pass;
@@ -404,6 +406,81 @@ void step() {
 	}
 }
 
+uint16_t parsed_word_groups[20];
+uint16_t num_parsed_word_groups = 0;
+
+bool _find_word_group_of_word(char* word, size_t len) {
+	char first_letter = *word;
+	int first_letter_index = *word - 'a';
+	uint16_be_t first_word_index = state.words_file->word_indices[first_letter_index];
+	uint16_be_t next_word_index = state.words_file->word_indices[first_letter_index + 1];
+	uint16_t first_word_offset = (uint16_t)(first_word_index.hi_byte << 8) | (uint16_t)first_word_index.lo_byte;
+	uint16_t next_word_offset = (uint16_t)(next_word_index.hi_byte << 8) | (uint16_t)next_word_index.lo_byte;
+
+	uint8_t* word_entry = ((uint8_t*)state.words_file) + first_word_offset;
+	uint8_t* next_word_entry = ((uint8_t*)state.words_file) + next_word_offset;
+	
+	char prev_word[40];
+	int prev_word_len = 0;
+
+	while (1) {
+		prev_word_len = *(word_entry++);
+		while (1) {
+			char c = *(word_entry++) ^ 0x7F;
+			prev_word[prev_word_len++] = c & 0x7F;
+			if (c >> 7) {
+				break;
+			}
+		}
+		uint16_t word_num_hi = *(word_entry++);
+		uint16_t word_num_lo = *(word_entry++);
+		uint16_t word_num = (word_num_hi << 8) | word_num_lo;
+		// end of word -- check match
+		if (prev_word_len == len && strncmp(word, prev_word, len) == 0) {
+			// Found match
+			//if (word_num > 0) { // Skip anyword
+				parsed_word_groups[num_parsed_word_groups++] = word_num;
+			//}
+			return true;
+		}
+
+		if (word_entry >= next_word_entry) {
+			return false;
+		}
+	}
+	return false;
+}
+
+void _parse_word_groups() {
+	num_parsed_word_groups = 0;
+
+	char* c = state.input_buffer;
+	char* word_start = c;
+	size_t word_len = 0;
+	int word_i = 0;
+
+	while (c < state.input_buffer + state.input_pos) {
+		if (*c == ' ' || *c == '.') {
+			// Find out word group to parsed word
+			if (!_find_word_group_of_word(word_start, word_len)) {
+				state.variables[VAR_9_MISSING_WORD_NO] = word_i;
+				return;
+			}
+			c++;
+			word_start = c;
+			word_len = 0;
+			word_i++;
+		}
+		else {
+			word_len++;
+			c++;
+		}
+	}
+	if (!_find_word_group_of_word(word_start, word_len) && state.variables[VAR_9_MISSING_WORD_NO] == 0) {
+		state.variables[VAR_9_MISSING_WORD_NO] = word_i;
+	}
+}
+
 void agi_logic_run_cycle() {
 	load_logics(0);
 	state.current_logic = 0;
@@ -412,11 +489,14 @@ void agi_logic_run_cycle() {
 
 	state.flags[FLAG_2_COMMAND_ENTERED] = 0;
 	state.flags[FLAG_4_SAID_ACCEPTED_INPUT] = 0;
+	state.variables[VAR_9_MISSING_WORD_NO] = 0;
 
+	num_parsed_word_groups = 0;
 
 	if (state.enter_pressed) {
 		if (state.input_pos > 0) {
 			state.flags[FLAG_2_COMMAND_ENTERED] = true;
+			_parse_word_groups();
 		}
 	}
 

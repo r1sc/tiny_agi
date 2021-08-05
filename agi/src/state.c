@@ -77,9 +77,12 @@ void agi_reset() {
 	state.display_fg = 15;
 	state.display_bg = 0;
 
-	agi_file_t item_file = get_file("OBJECT");
+	agi_file_t item_file = get_file("object");
 	state.item_file = (item_file_t*)item_file.data;
 	_decrypt_item_file((uint8_t*)state.item_file, item_file.size);
+
+	agi_file_t words_file = get_file("words.tok");
+	state.words_file = (words_file_t*)words_file.data;
 
 	new_room(0);
 }
