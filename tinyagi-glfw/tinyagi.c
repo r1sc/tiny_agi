@@ -253,38 +253,45 @@ int main() {
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 320, 200, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, framebuffer);
 
 	int clock_counter = 0;
+	double last_s = 0;
 	/* Loop until the user closes the window */
 	while (!glfwWindowShouldClose(window))
 	{
-		Sleep(60);
+		double now = glfwGetTime();
+		double delta = now - last_s;
 
-		clock_counter++;
-		if (clock_counter > 20) {
-			state.variables[VAR_11_CLOCK_SECONDS]++;
-			if (state.variables[VAR_11_CLOCK_SECONDS] == 60) {
-				state.variables[VAR_11_CLOCK_SECONDS] = 0;
-				state.variables[VAR_12_CLOCK_MINUTES]++;
-				if (state.variables[VAR_12_CLOCK_MINUTES] == 60) {
-					state.variables[VAR_12_CLOCK_MINUTES] = 0;
-					state.variables[VAR_13_CLOCK_HOURS]++;
-					if (state.variables[VAR_13_CLOCK_HOURS] == 24) {
-						state.variables[VAR_13_CLOCK_HOURS] = 0;
-						state.variables[VAR_14_CLOCK_DAYS]++;
+		if (delta >= 0.06) {
+			last_s = now;
+
+			clock_counter++;
+			if (clock_counter > 20) {
+				state.variables[VAR_11_CLOCK_SECONDS]++;
+				if (state.variables[VAR_11_CLOCK_SECONDS] == 60) {
+					state.variables[VAR_11_CLOCK_SECONDS] = 0;
+					state.variables[VAR_12_CLOCK_MINUTES]++;
+					if (state.variables[VAR_12_CLOCK_MINUTES] == 60) {
+						state.variables[VAR_12_CLOCK_MINUTES] = 0;
+						state.variables[VAR_13_CLOCK_HOURS]++;
+						if (state.variables[VAR_13_CLOCK_HOURS] == 24) {
+							state.variables[VAR_13_CLOCK_HOURS] = 0;
+							state.variables[VAR_14_CLOCK_DAYS]++;
+						}
 					}
 				}
+				clock_counter = 0;
 			}
-			clock_counter = 0;
+
+			_undraw_all();
+			agi_logic_run_cycle();
+			_draw_all_active();
+			render();
+			state.enter_pressed = false;
 		}
-
-		_undraw_all();
-		agi_logic_run_cycle();
-		_draw_all_active();
-		render();
-
-		state.enter_pressed = false;
 
 		/* Poll for and process events */
 		glfwPollEvents();
+
+		Sleep(1);
 	}
 
 	glfwTerminate();

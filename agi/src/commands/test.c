@@ -64,14 +64,14 @@ bool said() {
 	for (size_t i = 0; i < numparams; i++)
 	{
 		uint16_t logic_word_no = (uint16_t)(next_data() | (next_data() << 8));
-		if (match && i < num_parsed_word_groups) {
+		if (logic_word_no == 9999) {
+			rol = true;
+			continue;
+		}
+		else if (match && i < num_parsed_word_groups) {
 			if (parsed_word_groups[i] != logic_word_no) {
 				match = false;
 			}
-		}
-		else if (logic_word_no == 9999) {
-			rol = true;
-			continue;
 		}
 		else {
 			match = false;

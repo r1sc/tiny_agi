@@ -197,7 +197,7 @@ void _update_object(uint8_t objNo) {
 
 		if (OBJ.steps_to_next_update == 0) {
 
-			if (OBJ.direction != DIR_STOPPED) {
+			//if (OBJ.direction != DIR_STOPPED) {
 				int newX = OBJ.x;
 				int newY = OBJ.y;
 
@@ -278,7 +278,7 @@ void _update_object(uint8_t objNo) {
 
 				OBJ.x = newX;
 				OBJ.y = newY;
-			}
+			//}
 
 			OBJ.steps_to_next_update = OBJ.step_time;
 		}
