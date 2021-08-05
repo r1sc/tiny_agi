@@ -17,7 +17,7 @@ void clear_text_rect(uint8_t row1, uint8_t col1, uint8_t row2, uint8_t col2, uin
 	{
 		for (uint8_t col = col1; col <= col2; col++)
 		{
-			draw_char(col * 8, row * 8, ' ', 0, color);
+			_draw_char(col * 8, row * 8, ' ', 0, color);
 		}
 	}
 }
@@ -38,11 +38,6 @@ void configure_screen(uint8_t pPlaytop, uint8_t pInputLine, uint8_t pStatusLine)
 
 void display(uint8_t row, uint8_t col, uint8_t msg) {
 	char* message = _get_message(msg);
-	//if (messageBuffer[0] == '%')
-	//{
-	//	// TODO: Replace with strings
-	//}
-	//draw_text(row, 0, "                                        ", 0, 0);
 	_draw_text(&row, &col, message, state.display_fg, state.display_bg);
 }
 
@@ -123,7 +118,7 @@ void _print(const char* message, int col, int row, uint8_t max_width) {
 		if (written_line_chars + word_len >= max_width) {
 			for (size_t i = written_line_chars; i < width; i++)
 			{
-				draw_char((start_col + i) * 8, row * 8, ' ', 0, 15);
+				_draw_char((start_col + i) * 8, row * 8, ' ', 0, 15);
 			}
 			col = start_col;
 			row++;
@@ -133,7 +128,7 @@ void _print(const char* message, int col, int row, uint8_t max_width) {
 		for (; start <= end; start++) {
 			if (*start == '\0')
 				break;
-			draw_char(col * 8, row * 8, *start, 0, 15);
+			_draw_char(col * 8, row * 8, *start, 0, 15);
 			col++;
 			written_line_chars++;
 		}
@@ -147,24 +142,24 @@ void _print(const char* message, int col, int row, uint8_t max_width) {
 
 	for (size_t i = written_line_chars; i < width; i++)
 	{
-		draw_char((start_col + i) * 8, row * 8, ' ', 4, 15);
+		_draw_char((start_col + i) * 8, row * 8, ' ', 4, 15);
 	}
 
 	row++;
 	for (size_t x = start_col; x < start_col + width - 1; x++)
 	{
-		draw_char(x * 8, (start_row - 1) * 8, 'Ä', 4, 15);
-		draw_char(x * 8, row * 8, 'Ä', 4, 15);
+		_draw_char(x * 8, (start_row - 1) * 8, 'Ä', 4, 15);
+		_draw_char(x * 8, row * 8, 'Ä', 4, 15);
 	}
 	for (size_t y = start_row; y < row; y++)
 	{
-		draw_char((start_col -1) * 8, y * 8, '³', 4, 15);
-		draw_char((start_col + width - 1) * 8, y * 8, '³', 4, 15);
+		_draw_char((start_col -1) * 8, y * 8, '³', 4, 15);
+		_draw_char((start_col + width - 1) * 8, y * 8, '³', 4, 15);
 	}
-	draw_char((start_col - 1) * 8, (start_row - 1) * 8, 'Ú', 4, 15);
-	draw_char((start_col + width - 1) * 8, (start_row - 1) * 8, '¿', 4, 15);
-	draw_char((start_col - 1) * 8, row * 8, 'À', 4, 15);
-	draw_char((start_col + width - 1) * 8, row * 8, 'Ù', 4, 15);
+	_draw_char((start_col - 1) * 8, (start_row - 1) * 8, 'Ú', 4, 15);
+	_draw_char((start_col + width - 1) * 8, (start_row - 1) * 8, '¿', 4, 15);
+	_draw_char((start_col - 1) * 8, row * 8, 'À', 4, 15);
+	_draw_char((start_col + width - 1) * 8, row * 8, 'Ù', 4, 15);
 
 	wait_for_enter();
 	_undraw_all();

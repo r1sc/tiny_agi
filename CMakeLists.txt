@@ -3,6 +3,7 @@
 #
 cmake_minimum_required (VERSION 3.8)
 
-project ("tinyagi_glfw")
+project(tinyagi_global)
+
 add_subdirectory(agi)
 add_subdirectory(tinyagi-glfw)

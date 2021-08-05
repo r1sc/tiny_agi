@@ -18,7 +18,6 @@ extern void screen_set_320(int x, int y, int color);
 extern int priority_get(int x, int y);
 extern void priority_set(int x, int y, int priority);
 
-extern void draw_char(unsigned int x, unsigned int y, unsigned char c, uint8_t fg, uint8_t bg);
 
 extern void wait_for_enter();
 

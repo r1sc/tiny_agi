@@ -1,5 +1,7 @@
-﻿include_directories(${tinyagi_glfw_SOURCE_DIR}/agi/include)
-link_directories(${tinyagi_glfw_SOURCE_DIR}/agi/src)
+﻿project(tinyagi_glfw)
+
+include_directories(${tinyagi_global_SOURCE_DIR}/agi/include)
+link_directories(${tinyagi_global_SOURCE_DIR}/agi/src)
 add_subdirectory(deps/glfw-3.3.4)
 
 # Add source to this project's executable.

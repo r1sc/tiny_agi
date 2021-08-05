@@ -8,6 +8,8 @@ add_library (tinyagi OBJECT
 	"text_display.h" 
 	"vol.c"
 	"vol.h"
+	"view.c" 
+	"view.h"
 	"commands/control_flow.c"
 	"commands/debugging.c"
 	"commands/display.c"
@@ -20,5 +22,4 @@ add_library (tinyagi OBJECT
 	"commands/sound.c"
 	"commands/string.c"
 	"commands/system.c"
-	"commands/test.c"
-	"support.c")
+	"commands/test.c")
