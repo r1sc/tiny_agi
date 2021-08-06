@@ -7,7 +7,6 @@ bool vis_enabled = false;
 bool pri_enabled = false;
 uint8_t vis_color = 0;
 uint8_t pri_color = 0;
-
 uint8_t pic_vispri[160 * 168];
 
 inline void pic_vis_set(int x, int y, int color) {
@@ -24,16 +23,6 @@ inline void pic_pri_set(int x, int y, int priority) {
 
 inline int pic_pri_get(int x, int y) {
 	return pic_vispri[y * 160 + x] & 0x0F;
-}
-
-
-void discard_pic(uint8_t var) {
-	uint8_t pic_no = state.variables[var];
-	if (!state.loaded_pics[pic_no].buffer) {
-		panic("discard_pic: Pic %d not loaded!", pic_no);
-	}
-	free(state.loaded_pics[pic_no].buffer);
-	state.loaded_pics[pic_no].buffer = NULL;
 }
 
 void _clear_screen() {
@@ -121,17 +110,6 @@ void _flood_fill(uint8_t startX, uint8_t startY)
 #define SET_PEN 0xF9
 #define DRAW_PEN 0xFA
 #define END 0xFF
-
-void show_pic() {
-	for (size_t y = 0; y < 168; y++)
-	{
-		for (size_t x = 0; x < 160; x++)
-		{
-			screen_set_160(x, y, pic_vis_get(x, y));
-			priority_set(x, y, pic_pri_get(x, y));
-		}
-	}
-}
 
 void _pic_draw(uint8_t pic_no) {
 	vis_enabled = false;
@@ -283,6 +261,29 @@ void _pic_draw(uint8_t pic_no) {
 	}
 	panic("No end of picture marker found!");
 }
+
+/* COMMANDS */
+
+void show_pic() {
+	for (size_t y = 0; y < 168; y++)
+	{
+		for (size_t x = 0; x < 160; x++)
+		{
+			screen_set_160(x, y, pic_vis_get(x, y));
+			priority_set(x, y, pic_pri_get(x, y));
+		}
+	}
+}
+
+void discard_pic(uint8_t var) {
+	uint8_t pic_no = state.variables[var];
+	if (!state.loaded_pics[pic_no].buffer) {
+		panic("discard_pic: Pic %d not loaded!", pic_no);
+	}
+	free(state.loaded_pics[pic_no].buffer);
+	state.loaded_pics[pic_no].buffer = NULL;
+}
+
 
 void draw_pic(uint8_t var) {
 	_clear_screen();

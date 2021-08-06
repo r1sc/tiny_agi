@@ -1,5 +1,7 @@
 #include "view.h"
 #include "state.h"
+#include "platform_support.h"
+#include "actions.h"
 
 uint8_t _view_num_loops(uint8_t viewNo) {
 	view_t* view = state.loaded_views[viewNo].buffer;
@@ -17,6 +19,16 @@ int _view_width(uint8_t viewNo, uint8_t loopNo, uint8_t cellNo) {
 	loop_t* loop = (loop_t*)((uint8_t*)(view)+view->loop_offsets[loopNo]);
 	cell_t* cell = (cell_t*)((uint8_t*)(loop)+loop->cell_offsets[cellNo]);
 	return cell->width;
+}
+
+uint8_t _get_pri(int x, int y, bool addToPic) {
+	uint8_t pri;
+	while ((pri = addToPic ? pic_pri_get(x, y) : priority_get(x, y)) < 3) {
+		y++;
+		if (y > 167)
+			return 0;
+	}
+	return pri;
 }
 
 void _draw_view(uint8_t viewNo, uint8_t loopNo, uint8_t cellNo, uint8_t x, uint8_t y, uint8_t priority, bool erase, bool addToPic) {

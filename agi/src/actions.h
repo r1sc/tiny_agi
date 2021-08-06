@@ -12,7 +12,6 @@ extern uint16_t num_parsed_word_groups;
 
 void pic_vis_set(int x, int y, int color);
 int pic_vis_get(int x, int y);
-
 void pic_pri_set(int x, int y, int priority);
 int pic_pri_get(int x, int y);
 
@@ -20,18 +19,6 @@ void _decrypt_messages(uint8_t logic_no);
 void _decrypt_item_file(uint8_t* item_file, size_t size);
 uint8_t next_data();
 
-#define ANYTHING 0
-#define WATER 1
-#define LAND 2
-
-#define NORMAL_CYCLE 1
-#define REVERSE_CYCLE 2
-#define REVERSE_LOOP 3
-#define END_OF_LOOP 4
-
-#define OBJ_MOVEMODE_NORMAL 0
-#define OBJ_MOVEMODE_MOVE_TO 1
-#define OBJ_MOVEMODE_WANDER 2
 
 typedef struct {
 	uint8_t numArgs;

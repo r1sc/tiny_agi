@@ -1,6 +1,8 @@
 #include "../actions.h"
 #include "../state.h"
 #include "../vol.h"
+#include "../view.h"
+#include "../constants.h"
 
 void call(uint8_t logicNo) {
 	load_logics(logicNo);
@@ -54,7 +56,7 @@ void new_room(uint8_t room_no) {
 		state.objects[0].y = state.horizon;
 		break;
 	case BORDER_LEFT:
-		state.objects[0].x = 159 - _view_width(state.objects[0].view_no, state.objects[0].loop_no, state.objects[0].cel_no);
+		state.objects[0].x = 159;
 		break;
 	case BORDER_RIGHT:
 		state.objects[0].x = 0;

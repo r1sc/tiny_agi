@@ -4,16 +4,8 @@
 #include "../actions.h"
 #include "../platform_support.h"
 #include "../view.h"
+#include "../constants.h"
 
-uint8_t _get_pri(int x, int y, bool addToPic) {
-	uint8_t pri;
-	while ((pri = addToPic ? pic_pri_get(x, y) : priority_get(x, y)) < 3) {
-		y++;
-		if (y > 167)
-			return 0;
-	}
-	return pri;
-}
 
 int _random_between(int min, int maxExclusive) {
 	return (rand() % (maxExclusive - min)) + min;
@@ -121,10 +113,13 @@ void _update_object(uint8_t objNo) {
 	}
 
 	if (OBJ.update) {
-		int stepSize = OBJ.step_size;
+		int stepSize_x = OBJ.step_size;
+		int stepSize_y = OBJ.step_size;
+
 		if (OBJ.move_mode == OBJ_MOVEMODE_MOVE_TO) {
 			_set_dir_from_moveDistance(objNo);
-			stepSize = OBJ.move_step_size;
+			stepSize_x = min(abs(OBJ.move_distance_x), OBJ.move_step_size);
+			stepSize_y = min(abs(OBJ.move_distance_y), OBJ.move_step_size);
 		}
 
 		_set_loop_from_dir(objNo, OBJ.direction);
@@ -138,34 +133,34 @@ void _update_object(uint8_t objNo) {
 				int newY = OBJ.y;
 
 				if (OBJ.direction == DIR_UP || OBJ.direction == DIR_UP_LEFT || OBJ.direction == DIR_UP_RIGHT) {
-					newY -= stepSize;
-					OBJ.move_distance_y += stepSize;
+					newY -= stepSize_y;
+					OBJ.move_distance_y += stepSize_y;
 					if (OBJ.move_distance_y > 0)
 						OBJ.move_distance_y = 0;
 				}
 				else if (OBJ.direction == DIR_DOWN || OBJ.direction == DIR_DOWN_LEFT || OBJ.direction == DIR_DOWN_RIGHT) {
-					newY += stepSize;
-					OBJ.move_distance_y -= stepSize;
+					newY += stepSize_y;
+					OBJ.move_distance_y -= stepSize_y;
 					if (OBJ.move_distance_y < 0)
 						OBJ.move_distance_y = 0;
 				}
 				if (OBJ.direction == DIR_LEFT || OBJ.direction == DIR_DOWN_LEFT || OBJ.direction == DIR_UP_LEFT) {
-					newX -= stepSize;
-					OBJ.move_distance_x += stepSize;
+					newX -= stepSize_x;
+					OBJ.move_distance_x += stepSize_x;
 					if (OBJ.move_distance_x > 0)
 						OBJ.move_distance_x = 0;
 				}
 				else if (OBJ.direction == DIR_RIGHT || OBJ.direction == DIR_DOWN_RIGHT || OBJ.direction == DIR_UP_RIGHT) {
-					newX += stepSize;
-					OBJ.move_distance_x -= stepSize;
+					newX += stepSize_x;
+					OBJ.move_distance_x -= stepSize_x;
 					if (OBJ.move_distance_x < 0)
 						OBJ.move_distance_x = 0;
 				}
 
 				bool unconditionalStop = _obj_baseline_on_pri(newX, newY, width, 0);
 				bool conditionalStop = OBJ.collide_with_blocks && (_obj_baseline_on_pri(newX, newY, width, 1) || (state.block_active && point_in_rect(newX, newY, state.block)));
-				bool confinedOnWater = (OBJ.allowed_on == WATER) && _obj_baseline_on_pri(newX, newY, width, 3);
-				bool confinedOnLand = (OBJ.allowed_on == LAND) && _obj_baseline_on_pri(newX, newY, width, 3);
+				bool confinedOnWater = (OBJ.allowed_on == OBJ_ON_WATER) && _obj_baseline_on_pri(newX, newY, width, 3);
+				bool confinedOnLand = (OBJ.allowed_on == OBJ_ON_LAND) && _obj_baseline_on_pri(newX, newY, width, 3);
 				bool stop = unconditionalStop || conditionalStop || confinedOnWater || confinedOnLand;
 
 				if (stop) {
@@ -229,9 +224,9 @@ void _update_object(uint8_t objNo) {
 			if (OBJ.cycles_to_next_update == 0) {
 				int numCels = _view_num_cels(OBJ.view_no, OBJ.loop_no);
 
-				if (OBJ.cycling_mode == REVERSE_CYCLE || OBJ.cycling_mode == REVERSE_LOOP) {
+				if (OBJ.cycling_mode == CYCLE_MODE_REVERSE_CYCLE || OBJ.cycling_mode == CYCLE_MODE_REVERSE_LOOP) {
 					if (OBJ.cel_no <= 0) {
-						if (OBJ.cycling_mode == REVERSE_LOOP) {
+						if (OBJ.cycling_mode == CYCLE_MODE_REVERSE_LOOP) {
 							if (OBJ.end_of_loop_flag > -1) {
 								state.flags[OBJ.end_of_loop_flag] = true;
 								OBJ.end_of_loop_flag = -1;
@@ -249,7 +244,7 @@ void _update_object(uint8_t objNo) {
 				}
 				else {
 					if (OBJ.cel_no >= numCels - 1) {
-						if (OBJ.cycling_mode == END_OF_LOOP) {
+						if (OBJ.cycling_mode == CYCLE_MODE_END_OF_LOOP) {
 							if (OBJ.end_of_loop_flag > -1) {
 								state.flags[OBJ.end_of_loop_flag] = true;
 								OBJ.end_of_loop_flag = -1;
@@ -309,6 +304,9 @@ void add_to_pic_v(uint8_t vviewNo, uint8_t vloopNo, uint8_t vcelNo, uint8_t vx, 
 }
 
 void animate_obj(uint8_t objNo) {
+	if (OBJ.active)
+		return;
+
 	OBJ.move_mode = OBJ_MOVEMODE_NORMAL;
 	OBJ.active = true;
 	OBJ.drawn = false;
@@ -319,13 +317,13 @@ void animate_obj(uint8_t objNo) {
 	OBJ.fixed_priority = -1;
 	OBJ.update = true;
 	OBJ.observe_horizon = false;
-	OBJ.allowed_on = ANYTHING;
+	OBJ.allowed_on = OBJ_ON_ANYTHING;
 	OBJ.cycle_time = 1;
 	OBJ.cycles_to_next_update = OBJ.cycle_time;
 	OBJ.step_time = 1;
 	OBJ.steps_to_next_update = OBJ.step_time;
 	OBJ.is_cycling = true;
-	OBJ.cycling_mode = NORMAL_CYCLE;
+	OBJ.cycling_mode = CYCLE_MODE_NORMAL;
 	OBJ.collide_with_objects = true;
 	OBJ.step_size = 1;
 	OBJ.collide_with_blocks = true;
@@ -334,7 +332,7 @@ void animate_obj(uint8_t objNo) {
 	OBJ.move_step_size = 0;
 	OBJ.move_done_flag = -1;
 	OBJ.end_of_loop_flag = -1;
-	OBJ.direction = 0;
+	//OBJ.direction = 0;
 }
 
 void block(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2) {
@@ -384,7 +382,7 @@ void draw(uint8_t objNo) {
 void end_of_loop(uint8_t objNo, uint8_t flag) {
 	state.flags[flag] = false;
 	OBJ.end_of_loop_flag = flag;
-	OBJ.cycling_mode = END_OF_LOOP;
+	OBJ.cycling_mode = CYCLE_MODE_END_OF_LOOP;
 	OBJ.is_cycling = true;
 }
 
@@ -447,19 +445,23 @@ void load_view_v(uint8_t var) {
 }
 
 void move_obj(uint8_t objNo, uint8_t x, uint8_t y, uint8_t stepSize, uint8_t fDoneFlag) {
+	reset(fDoneFlag);
 	OBJ.move_mode = OBJ_MOVEMODE_MOVE_TO;
 	OBJ.move_distance_x = x - OBJ.x;
 	OBJ.move_distance_y = y - OBJ.y;
 	OBJ.move_step_size = (stepSize == 0) ? OBJ.step_size : stepSize;
 	OBJ.move_done_flag = fDoneFlag;
+	if (objNo == 0) {
+		program_control();
+	}
 }
 
 void move_obj_v(uint8_t objNo, uint8_t vx, uint8_t vy, uint8_t stepSize, uint8_t fDoneFlag) {
-	move_obj(objNo, state.variables[vx], state.variables[vy], state.variables[stepSize], fDoneFlag);
+	move_obj(objNo, state.variables[vx], state.variables[vy], stepSize, fDoneFlag);
 }
 
 void normal_cycle(uint8_t objNo) {
-	OBJ.cycling_mode = NORMAL_CYCLE;
+	OBJ.cycling_mode = CYCLE_MODE_NORMAL;
 	OBJ.is_cycling = true;
 }
 
@@ -472,15 +474,15 @@ void number_of_loops(uint8_t objNo, uint8_t var) {
 }
 
 void object_on_anything(uint8_t objNo) {
-	OBJ.allowed_on = ANYTHING;
+	OBJ.allowed_on = OBJ_ON_ANYTHING;
 }
 
 void object_on_land(uint8_t objNo) {
-	OBJ.allowed_on = LAND;
+	OBJ.allowed_on = OBJ_ON_LAND;
 }
 
 void object_on_water(uint8_t objNo) {
-	OBJ.allowed_on = WATER;
+	OBJ.allowed_on = OBJ_ON_WATER;
 }
 
 void observe_blocks(uint8_t objNo) {
@@ -530,14 +532,14 @@ void reposition_to_v(uint8_t objNo, uint8_t vx, uint8_t vy) {
 }
 
 void reverse_cycle(uint8_t objNo) {
-	OBJ.cycling_mode = REVERSE_CYCLE;
+	OBJ.cycling_mode = CYCLE_MODE_REVERSE_CYCLE;
 	OBJ.is_cycling = true;
 }
 
 void reverse_loop(uint8_t objNo, uint8_t flag) {
 	OBJ.end_of_loop_flag = flag;
 	state.flags[flag] = false;
-	OBJ.cycling_mode = REVERSE_LOOP;
+	OBJ.cycling_mode = CYCLE_MODE_REVERSE_LOOP;
 	OBJ.is_cycling = true;
 }
 
@@ -580,9 +582,9 @@ void set_upper_left(uint8_t num, uint8_t num2) {
 
 void set_view(uint8_t objNo, uint8_t viewNo) {
 	OBJ.view_no = viewNo;
-	OBJ.cel_no = 0;
-	OBJ.loop_no = 0;
-	OBJ.cycling_mode = NORMAL_CYCLE;
+	OBJ.cel_no = OBJ.cel_no % _view_num_cels(viewNo, OBJ.loop_no);
+	OBJ.loop_no = OBJ.loop_no % _view_num_loops(viewNo);
+	OBJ.cycling_mode = CYCLE_MODE_NORMAL;
 }
 
 void set_view_v(uint8_t objNo, uint8_t var) {

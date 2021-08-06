@@ -1,7 +1,7 @@
 ﻿{
   "configurations": [
     {
-      "name": "TinyAGI-GLFW",
+      "name": "TinyAGI",
       "generator": "Ninja",
       "configurationType": "Debug",
       "inheritEnvironments": [ "msvc_x86" ],
@@ -12,7 +12,7 @@
       "ctestCommandArgs": ""
     },
     {
-      "name": "TinyAGI-GLFW Release",
+      "name": "TinyAGI Release",
       "generator": "Ninja",
       "configurationType": "Release",
       "buildRoot": "${projectDir}\\out\\build\\${name}",

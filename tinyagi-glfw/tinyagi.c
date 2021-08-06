@@ -25,7 +25,7 @@ void panic(const char* fmt, ...) {
 	exit(1);
 }
 
-const char* game_path = "C:\\classic\\sierra\\kq3";
+const char* game_path = "C:\\classic\\sierra\\sq1";
 agi_file_t get_file(const char* filename) {
 	char path[256];
 	sprintf(path, "%s\\%s\0", game_path, filename);
@@ -201,7 +201,7 @@ int main() {
 		return -1;
 
 	/* Create a windowed mode window and its OpenGL context */
-	window = glfwCreateWindow(640, 400, "Hello World", NULL, NULL);
+	window = glfwCreateWindow(960, 600, "TinyAGI", NULL, NULL);
 	if (!window)
 	{
 		glfwTerminate();

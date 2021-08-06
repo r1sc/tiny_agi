@@ -2,6 +2,7 @@
 
 #include "../actions.h"
 #include "../state.h"
+#include "../view.h"
 
 bool equaln(uint8_t var, uint8_t num) {
 	return state.variables[var] == num;
