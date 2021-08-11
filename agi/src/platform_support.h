@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <stddef.h>
 
 extern void panic(const char* fmt, ...);
 
@@ -18,7 +19,11 @@ extern void screen_set_320(int x, int y, int color);
 extern int priority_get(int x, int y);
 extern void priority_set(int x, int y, int priority);
 
-
 extern void wait_for_enter();
 
 extern void agi_ext_sound_update(uint16_t channel_hz[4]);
+
+extern void _draw_char(unsigned int start_x, unsigned int start_y, unsigned char c, uint8_t fg, uint8_t bg);
+
+extern void agi_play_sound(uint8_t* sound_data);
+extern void agi_stop_sound();

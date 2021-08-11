@@ -13,13 +13,20 @@ typedef struct {
 
 typedef struct {
 	int x, y;
+	uint8_t view_no;
+	uint8_t loop_no;
+	uint8_t cel_no;
+
+	int old_x, old_y;
+	int old_view_no;
+	uint8_t old_loop_no;
+	uint8_t old_cel_no;
+	
 	int move_mode;
 
 	bool active;
 	bool drawn;
-	uint8_t view_no;
-	uint8_t loop_no;
-	uint8_t cel_no;
+	
 	bool fix_loop;
 	int8_t fixed_priority;
 	bool update;
@@ -121,6 +128,13 @@ typedef struct {
 	uint8_t display_fg;
 	uint8_t display_bg;
 
+	int sound_flag;
+	uint8_t* loaded_sounds[256];
+
+	uint8_t old_score;
+	bool sound_on;
+	bool status_line_on;
+
 } agi_state_t;
 
 extern agi_state_t state;
@@ -133,9 +147,6 @@ void agi_logic_run_cycle();
 
 /* Updates and draws all active objects */
 void _draw_all_active();
-
-/* Clears all objects from the screen */
-void _undraw_all();
 
 /* Pushes a character to the input line (if enabled by the game) */
 void agi_push_char(char c);

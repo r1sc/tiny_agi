@@ -162,7 +162,7 @@ action_t actions[] = {
 	ACTION("init_disk", init_disk, 0),
 	ACTION("restart_game", restart_game, 0),
 	ACTION("show_obj", show_obj, 1),
-	ACTION("random", random, 3),
+	ACTION("random", _random, 3),
 	ACTION("program_control", program_control, 0),
 	ACTION("player_control", player_control, 0),
 	ACTION("obj_status_v", obj_status_v, 1),
@@ -215,13 +215,13 @@ typedef struct {
 } agi_messages_header_t;
 #pragma pack(pop)
 
-char* _get_message(uint8_t message_no) {
+char* _get_message(uint8_t message_no) {	
 	message_no--;
 	uint8_t* buffer = state.loaded_logics[state.current_logic];
-	agi_messages_header_t* message_section = buffer + ((buffer[1] << 8) | buffer[0]) + 2;
+	uint8_t* message_section = buffer + ((buffer[1] << 8) | buffer[0]) + 2;
 
-	uint16_t* message_offsets = (uint16_t*)(((uint8_t*)message_section) + 3);
-	uint16_t offset = message_offsets[message_no];
+	uint8_t* message_offset = (message_section + 3 + 2 * message_no);
+	uint16_t offset = *(message_offset) | (*(message_offset + 1) << 8);
 
 	char* message = ((char*)message_section) + offset + 1;
 
@@ -232,7 +232,7 @@ const char* decryptionKey = "Avis Durgan";
 
 void _decrypt_messages(uint8_t logic_no) {
 	uint8_t* buffer = state.loaded_logics[logic_no];
-	agi_messages_header_t* message_section = buffer + ((buffer[1] << 8) | buffer[0]) + 2;
+	agi_messages_header_t* message_section = (agi_messages_header_t*)(buffer + ((buffer[1] << 8) | buffer[0]) + 2);
 
 	int ptr_table_len = message_section->num_messages * 2;
 	char* message_ptr = ((uint8_t*)message_section) + 3 + ptr_table_len;
@@ -481,6 +481,42 @@ void _parse_word_groups() {
 	}
 }
 
+void _set_dir_from_moveDistance(uint8_t objNo)
+{
+	if (OBJ.move_distance_x < 0 && OBJ.move_distance_y < 0)
+	{
+		OBJ.direction = DIR_UP_LEFT;
+	}
+	else if (OBJ.move_distance_x < 0 && OBJ.move_distance_y > 0)
+	{
+		OBJ.direction = DIR_DOWN_LEFT;
+	}
+	else if (OBJ.move_distance_x > 0 && OBJ.move_distance_y < 0)
+	{
+		OBJ.direction = DIR_UP_RIGHT;
+	}
+	else if (OBJ.move_distance_x > 0 && OBJ.move_distance_y > 0)
+	{
+		OBJ.direction = DIR_DOWN_RIGHT;
+	}
+	else if (OBJ.move_distance_x < 0)
+	{
+		OBJ.direction = DIR_LEFT;
+	}
+	else if (OBJ.move_distance_x > 0)
+	{
+		OBJ.direction = DIR_RIGHT;
+	}
+	else if (OBJ.move_distance_y < 0)
+	{
+		OBJ.direction = DIR_UP;
+	}
+	else if (OBJ.move_distance_y > 0)
+	{
+		OBJ.direction = DIR_DOWN;
+	}
+}
+
 void agi_logic_run_cycle() {
 	load_logics(0);
 	state.current_logic = 0;
@@ -500,11 +536,43 @@ void agi_logic_run_cycle() {
 		}
 	}
 
-	state.cycle_complete = false;
+	for (size_t objNo = 0; objNo < MAX_NUM_OBJECTS; objNo++)
+	{
+		if (OBJ.active && OBJ.update && OBJ.drawn) {
 
+			if (OBJ.move_mode == OBJ_MOVEMODE_MOVE_TO)
+			{
+				_set_dir_from_moveDistance(objNo);				
+			}
+		}
+	}
+	if (state.program_control)
+	{
+		state.variables[VAR_6_EGO_DIRECTION] = state.objects[0].direction;
+	}
+	else
+	{
+		state.objects[0].direction = state.variables[VAR_6_EGO_DIRECTION];
+	}
+
+	state.cycle_complete = false;
 	while (!state.cycle_complete) {
 		step();
 	}
+
+	state.objects[0].direction = state.variables[VAR_6_EGO_DIRECTION];
+
+	bool update_status = false;
+	if(state.variables[VAR_3_SCORE] != state.old_score) {
+		state.old_score = state.variables[VAR_3_SCORE];		
+		update_status = true;
+	}
+	if(state.flags[FLAG_9_SOUND_ENABLED] != state.sound_on) {
+		state.sound_on = state.flags[FLAG_9_SOUND_ENABLED];
+		update_status = true;
+	}
+
+	_update_all_active();
 
 	state.variables[VAR_5_OBJ_BORDER_CODE] = 0;
 	state.variables[VAR_4_OBJ_BORDER_OBJNO] = 0;
@@ -512,11 +580,14 @@ void agi_logic_run_cycle() {
 	state.flags[FLAG_6_RESTART_GAME_EXECUTED] = false;
 	state.flags[FLAG_12_GAME_RESTORED] = false;
 
-	_update_all_active();
 
 	if (state.flags[FLAG_2_COMMAND_ENTERED]) {
 		state.input_pos = 0;
 		state.input_buffer[0] = '\0';
 		_redraw_prompt();
+	}
+
+	if(update_status){
+		_redraw_status_line();
 	}
 }

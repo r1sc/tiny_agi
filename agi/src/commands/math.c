@@ -59,7 +59,7 @@ void mul_v(uint8_t var, uint8_t var2) {
 	state.variables[var] *= state.variables[var2];
 }
 
-void random(uint8_t num, uint8_t num2, uint8_t var) {
+void _random(uint8_t num, uint8_t num2, uint8_t var) {
 	state.variables[var] = rand() % (num2 - num) + num;
 }
 

@@ -3,6 +3,9 @@
 #include "../vol.h"
 #include "../view.h"
 #include "../constants.h"
+#include "../platform_support.h"
+
+#include <stdlib.h>
 
 void call(uint8_t logicNo) {
 	load_logics(logicNo);
@@ -50,13 +53,13 @@ void new_room(uint8_t room_no) {
 	// if ego touching edge place ego
 	switch (state.variables[VAR_2_EGO_BORDER_CODE]) {
 	case BORDER_TOP:
-		state.objects[0].y = 167;
+		state.objects[0].y = 166;
 		break;
 	case BORDER_BOTTOM:
-		state.objects[0].y = state.horizon;
+		state.objects[0].y = state.horizon + 1;
 		break;
 	case BORDER_LEFT:
-		state.objects[0].x = 159;
+		state.objects[0].x = 160 - _view_width(state.objects[0].view_no, state.objects[0].loop_no, state.objects[0].cel_no);
 		break;
 	case BORDER_RIGHT:
 		state.objects[0].x = 0;
@@ -70,6 +73,32 @@ void new_room(uint8_t room_no) {
 	state.current_logic = 0;
 	state.pc = state.scan_start[0];
 	state.stack_ptr = 0;
+
+	stop_sound();
+
+	for (size_t i = 1; i < 256; i++)
+	{
+		state.scan_start[i] = 0;
+		if (state.loaded_logics[i]) {
+			free(state.loaded_logics[i]);
+			state.loaded_logics[i] = NULL;
+		}
+	}
+	for (size_t i = 0; i < 256; i++)
+	{
+		if(state.loaded_sounds[i]){
+			free(state.loaded_sounds[i]);
+			state.loaded_sounds[i] = NULL;
+		}
+		if (state.loaded_pics[i].buffer) {
+			free(state.loaded_pics[i].buffer);
+			state.loaded_pics[i].buffer = NULL;
+		}
+		if (state.loaded_views[i].buffer) {
+			free(state.loaded_views[i].buffer);
+			state.loaded_views[i].buffer = NULL;
+		}
+	}
 }
 
 void new_room_v(uint8_t var) {

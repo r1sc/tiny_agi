@@ -18,6 +18,8 @@ int pic_pri_get(int x, int y);
 void _decrypt_messages(uint8_t logic_no);
 void _decrypt_item_file(uint8_t* item_file, size_t size);
 uint8_t next_data();
+void _update_all_active();
+void _redraw_status_line();
 
 
 typedef struct {
@@ -25,7 +27,7 @@ typedef struct {
 	bool (*test)();
 } test_t;
 
-#define TEST(t, n) {.numArgs = n, .test = t}
+#define TEST(t, n) {.numArgs = n, .test = (bool (*)())t}
 
 extern test_t tests[];
 
@@ -191,7 +193,7 @@ void restore_game();
 void init_disk();
 void restart_game();
 void show_obj(uint8_t num);
-void random(uint8_t num, uint8_t num2, uint8_t var);
+void _random(uint8_t num, uint8_t num2, uint8_t var);
 void program_control();
 void player_control();
 void obj_status_v(uint8_t var);

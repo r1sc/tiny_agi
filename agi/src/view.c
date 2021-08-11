@@ -45,7 +45,7 @@ void _draw_view(uint8_t viewNo, uint8_t loopNo, uint8_t cellNo, uint8_t x, uint8
 	uint8_t* pixel_data = cell->pixel_data;
 	for (uint8_t sy = 0; sy < cell->height; sy++)
 	{
-		uint8_t sx = x;
+		uint8_t sx = mirrored ? x + cell->width - 1 : x;
 		while (1) {
 			uint8_t chunk = *(pixel_data++);
 			if (chunk == 0)
@@ -63,8 +63,8 @@ void _draw_view(uint8_t viewNo, uint8_t loopNo, uint8_t cellNo, uint8_t x, uint8
 			else {
 				for (size_t i = 0; i < repeat; i++)
 				{
-					uint8_t screenY = y - cell->height + sy + 1;
-					uint8_t screenX = sx + (mirrored ? cell->width - 1 : 0);
+					uint8_t screenY = y - (cell->height - 1) + sy;
+					uint8_t screenX = sx; // + (mirrored ? cell->width - 1 : 0);
 					if (screenX < 160 && screenY < 168 && screenX >= 0 && screenY >= 0) {
 						if (erase) {
 							screen_set_160(screenX, screenY, pic_vis_get(screenX, screenY));
@@ -76,12 +76,10 @@ void _draw_view(uint8_t viewNo, uint8_t loopNo, uint8_t cellNo, uint8_t x, uint8
 							if (doDraw) {
 								screen_set_160(screenX, screenY, color);
 								priority_set(screenX, screenY, priority);
-
+								
 								if (addToPic) {
 									pic_vis_set(screenX, screenY, color);
-									//if (bgPri > 3) {
 									pic_pri_set(screenX, screenY, priority);
-									//}
 								}
 							}
 						}
