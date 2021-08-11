@@ -74,13 +74,11 @@ void _update_object(uint8_t objNo)
 {
 	if (OBJ.update)
 	{
-		int stepSize_x = OBJ.step_size;
-		int stepSize_y = OBJ.step_size;
+		int stepSize = OBJ.step_size;
 
 		if (OBJ.move_mode == OBJ_MOVEMODE_MOVE_TO)
 		{
-			stepSize_x = OBJ.move_step_size;
-			stepSize_y = OBJ.move_step_size;
+			stepSize = OBJ.move_step_size;
 		}
 
 		_set_loop_from_dir(objNo, OBJ.direction);
@@ -97,69 +95,64 @@ void _update_object(uint8_t objNo)
 			int newX = OBJ.x;
 			int newY = OBJ.y;
 
-			for (size_t xx = 0; xx < stepSize_x; xx++)
+			if (OBJ.direction == DIR_UP || OBJ.direction == DIR_UP_LEFT || OBJ.direction == DIR_UP_RIGHT)
 			{
+				newY -= stepSize;
+				OBJ.move_distance_y += stepSize;
+				if (OBJ.move_distance_y > 0)
+					OBJ.move_distance_y = 0;
+			}
+			else if (OBJ.direction == DIR_DOWN || OBJ.direction == DIR_DOWN_LEFT || OBJ.direction == DIR_DOWN_RIGHT)
+			{
+				newY += stepSize;
+				OBJ.move_distance_y -= stepSize;
+				if (OBJ.move_distance_y < 0)
+					OBJ.move_distance_y = 0;
+			}
+			if (OBJ.direction == DIR_LEFT || OBJ.direction == DIR_DOWN_LEFT || OBJ.direction == DIR_UP_LEFT)
+			{
+				newX -= stepSize;
+				OBJ.move_distance_x += stepSize;
+				if (OBJ.move_distance_x > 0)
+					OBJ.move_distance_x = 0;
+			}
+			else if (OBJ.direction == DIR_RIGHT || OBJ.direction == DIR_DOWN_RIGHT || OBJ.direction == DIR_UP_RIGHT)
+			{
+				newX += stepSize;
+				OBJ.move_distance_x -= stepSize;
+				if (OBJ.move_distance_x < 0)
+					OBJ.move_distance_x = 0;
+			}
 
-				if (OBJ.direction == DIR_UP || OBJ.direction == DIR_UP_LEFT || OBJ.direction == DIR_UP_RIGHT)
-				{
-					newY -= 1;
-					OBJ.move_distance_y += 1;
-					if (OBJ.move_distance_y > 0)
-						OBJ.move_distance_y = 0;
-				}
-				else if (OBJ.direction == DIR_DOWN || OBJ.direction == DIR_DOWN_LEFT || OBJ.direction == DIR_DOWN_RIGHT)
-				{
-					newY += 1;
-					OBJ.move_distance_y -= 1;
-					if (OBJ.move_distance_y < 0)
-						OBJ.move_distance_y = 0;
-				}
-				if (OBJ.direction == DIR_LEFT || OBJ.direction == DIR_DOWN_LEFT || OBJ.direction == DIR_UP_LEFT)
-				{
-					newX -= 1;
-					OBJ.move_distance_x += 1;
-					if (OBJ.move_distance_x > 0)
-						OBJ.move_distance_x = 0;
-				}
-				else if (OBJ.direction == DIR_RIGHT || OBJ.direction == DIR_DOWN_RIGHT || OBJ.direction == DIR_UP_RIGHT)
-				{
-					newX += 1;
-					OBJ.move_distance_x -= 1;
-					if (OBJ.move_distance_x < 0)
-						OBJ.move_distance_x = 0;
-				}
+			bool unconditionalStop = _obj_baseline_on_pri(newX, newY, width, 0);
+			bool conditionalStop = OBJ.collide_with_blocks && (_obj_baseline_on_pri(newX, newY, width, 1) || (state.block_active && point_in_rect(newX, newY, state.block)));
+			bool confinedOnWater = (OBJ.allowed_on == OBJ_ON_WATER) && _obj_baseline_on_pri(newX, newY, width, 3);
+			bool confinedOnLand = (OBJ.allowed_on == OBJ_ON_LAND) && _obj_baseline_on_pri(newX, newY, width, 3);
+			bool stop = unconditionalStop || conditionalStop || confinedOnWater || confinedOnLand;
 
-				bool unconditionalStop = _obj_baseline_on_pri(newX, newY, width, 0);
-				bool conditionalStop = OBJ.collide_with_blocks && (_obj_baseline_on_pri(newX, newY, width, 1) || (state.block_active && point_in_rect(newX, newY, state.block)));
-				bool confinedOnWater = (OBJ.allowed_on == OBJ_ON_WATER) && _obj_baseline_on_pri(newX, newY, width, 3);
-				bool confinedOnLand = (OBJ.allowed_on == OBJ_ON_LAND) && _obj_baseline_on_pri(newX, newY, width, 3);
-				bool stop = unconditionalStop || conditionalStop || confinedOnWater || confinedOnLand;
-
-				if (OBJ.collide_with_objects) {
-					for (size_t i = 0; i < MAX_NUM_OBJECTS; i++)
-					{
-						if (i != objNo && state.objects[i].active && state.objects[i].drawn && state.objects[i].collide_with_objects) {
-							if (newY == state.objects[i].y
-								&& newX >= state.objects[i].x
-								&& newX < state.objects[i].x + _view_width(state.objects[i].view_no, state.objects[i].loop_no, state.objects[i].cel_no)
-								)
-							{
-								stop = true;
-							}
+			if (OBJ.collide_with_objects) {
+				for (size_t i = 0; i < MAX_NUM_OBJECTS; i++)
+				{
+					if (i != objNo && state.objects[i].active && state.objects[i].drawn && state.objects[i].collide_with_objects) {
+						if (newY == state.objects[i].y
+							&& newX + width > state.objects[i].x
+							&& newX < state.objects[i].x + _view_width(state.objects[i].view_no, state.objects[i].loop_no, state.objects[i].cel_no)
+							)
+						{
+							stop = true;
 						}
 					}
 				}
+			}
 
-				if (stop)
+			if (stop)
+			{
+				newX = OBJ.x;
+				newY = OBJ.y;
+
+				if (OBJ.move_mode == OBJ_MOVEMODE_WANDER)
 				{
-					newX = OBJ.x;
-					newY = OBJ.y;
-
-					if (OBJ.move_mode == OBJ_MOVEMODE_WANDER)
-					{
-						OBJ.direction = _random_between(1, 9);
-					}
-					break;
+					OBJ.direction = _random_between(1, 9);
 				}
 			}
 
@@ -309,15 +302,13 @@ void _draw_all_active()
 
 	for (int objNo = 15; objNo >= 0; objNo--)
 	{
-		if (OBJ.active)
+		if (OBJ.active && OBJ.drawn)
 		{
 			if (OBJ.old_view_no > -1) {
 				_draw_view(OBJ.old_view_no, OBJ.old_loop_no, OBJ.old_cel_no, OBJ.old_x, OBJ.old_y, 0, true, false); //erase
 				OBJ.old_view_no = -1;
 			}
-			if (OBJ.drawn) {
-				objs_sorted[num_sorted++] = objNo;
-			}
+			objs_sorted[num_sorted++] = objNo;
 		}
 	}
 
@@ -465,8 +456,9 @@ void end_of_loop(uint8_t objNo, uint8_t flag)
 
 void erase(uint8_t objNo)
 {
-	//_draw_view(OBJ.view_no, OBJ.loop_no, OBJ.cel_no, OBJ.x, OBJ.y, 0, true, false);
+	_draw_view(OBJ.view_no, OBJ.loop_no, OBJ.cel_no, OBJ.x, OBJ.y, 0, true, false);
 	OBJ.drawn = false;
+	OBJ.old_view_no = -1;
 }
 
 void fix_loop(uint8_t objNo)

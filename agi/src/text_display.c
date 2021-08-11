@@ -51,9 +51,12 @@ void _draw_text(uint8_t* row, uint8_t* col, const char* text, uint8_t fg, uint8_
 			}
 			}
 		}
-		
+
 		if (c == '\0') {
 			break;
+		}
+		else if (c == '\\') {
+			continue;
 		}
 		else if (c == '\n') {
 			(*row)++;
