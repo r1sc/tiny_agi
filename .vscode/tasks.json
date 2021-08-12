@@ -1,0 +1,22 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Configure for Pico",
+            "type": "shell",
+            "command": "cmake -B build -DBUILD_FOR_PICO=ON",
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "Configure for Win32",
+            "type": "shell",
+            "command": "cmake -B build -DBUILD_FOR_PICO=OFF"
+        }
+    ]
+}
