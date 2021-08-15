@@ -1,0 +1,47 @@
+{
+	"folders": [
+		{
+			"path": "tinyagi-glfw"
+		},
+		{
+			"path": "tinyagi-pico"
+		},
+		{
+			"path": "agi"
+		}
+	],
+	"launch": {
+		"version": "0.2.0",
+		"configurations": [
+			{
+				"name": "(Windows) Launch",
+				"type": "cppvsdbg",
+				"request": "launch",
+				"program": "${command:cmake.launchTargetPath}",
+				"args": [],
+				"stopAtEntry": false,
+				"cwd": "${workspaceFolder:tinyagi-glfw}",
+				"environment": [],
+				"console": "internalConsole"
+			},
+			{
+				"name": "Pico Debug",
+				"cwd": "${workspaceFolder:tinyagi-pico}",
+				"executable": "${command:cmake.launchTargetPath}",
+				"request": "launch",
+				"type": "cortex-debug",
+				"servertype": "openocd",
+				"gdbPath": "arm-none-eabi-gdb",
+				"device": "RP2040",
+				"runToMain": true,
+				"configFiles": ["interface/picoprobe.cfg", "target/rp2040.cfg"],
+				"searchDir": ["e:/apps/openocd/tcl"],
+				"svdFile": "c:/tools/pico-sdk/src/rp2040/hardware_regs/rp2040.svd",
+				"postRestartCommands": [
+					"break main",
+					"continue"
+				],
+			}
+		]
+	}
+}

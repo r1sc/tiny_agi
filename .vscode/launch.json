@@ -14,6 +14,24 @@
             "cwd": "${workspaceFolder}",
             "environment": [],
             "console": "externalTerminal"
+        },
+        {
+            "name": "Pico Debug",
+            "cwd": "${workspaceRoot}",
+            "executable": "${command:cmake.launchTargetPath}",
+            "request": "launch",
+            "type": "cortex-debug",
+            "servertype": "openocd",
+            "gdbPath": "arm-none-eabi-gdb",
+            "device": "RP2040",
+            "runToMain": true,
+            "configFiles": ["interface/picoprobe.cfg", "target/rp2040.cfg"],
+            "searchDir": ["e:/apps/openocd/tcl"],
+            "svdFile": "c:/tools/pico-sdk/src/rp2040/hardware_regs/rp2040.svd",
+            "postRestartCommands": [
+                "break main",
+                "continue"
+            ],
         }
     ]
 }

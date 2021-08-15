@@ -20,6 +20,7 @@ void _decrypt_item_file(uint8_t* item_file, size_t size);
 uint8_t next_data();
 void _update_all_active();
 void _redraw_status_line();
+void _set_dir_from_moveDistance(uint8_t objNo);
 
 
 typedef struct {

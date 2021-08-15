@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include "state.h"
 
 #pragma pack(push,1)
 typedef struct {
@@ -26,5 +27,6 @@ typedef struct {
 
 uint8_t _view_num_loops(uint8_t viewNo);
 uint8_t _view_num_cels(uint8_t viewNo, uint8_t loopNo);
-int _view_width(uint8_t viewNo, uint8_t loopNo, uint8_t cellNo);
+cell_t* _get_cell(uint8_t viewNo, uint8_t loopNo, uint8_t cellNo);
+cell_t* _object_cell(const object_t* obj);
 void _draw_view(uint8_t viewNo, uint8_t loopNo, uint8_t cellNo, uint8_t x, uint8_t y, uint8_t priority, bool erase, bool addToPic);

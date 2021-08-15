@@ -138,6 +138,7 @@ typedef struct {
 } agi_state_t;
 
 extern agi_state_t state;
+#define EGO state.objects[0]
 
 /* Initializes the agi state */
 void agi_reset();

@@ -78,10 +78,15 @@ bool said() {
 			match = false;
 		}
 	}
-	if (state.flags[FLAG_4_SAID_ACCEPTED_INPUT]) {
-		match = false;
+	
+	if(!state.flags[FLAG_2_COMMAND_ENTERED]) {
+		return false; // No command entered
 	}
-	else if (state.variables[VAR_9_MISSING_WORD_NO] > 0) {
+	if(state.flags[FLAG_4_SAID_ACCEPTED_INPUT]) {
+		return false; // Already accepted earlier
+	}
+
+	if (state.variables[VAR_9_MISSING_WORD_NO] > 0) {
 		match = false;
 	}
 	else if (!rol && num_parsed_word_groups > numparams) {
@@ -93,23 +98,51 @@ bool said() {
 	return match;
 }
 
+void _trim_string(char* destination, const char* original) {
+	while (1)
+	{
+		char c = *(original++);
+		if(c == ' ' || 
+			c == '\t' ||
+			c == '.' ||
+			c == ',' ||
+			c == ';' ||
+			c == ':' ||
+			c == '\'' ||
+			c == '!' ||
+			c == '-'
+		) {
+			continue;
+		}
+		if(c >= 'a' && c <= 'z') {
+			c -= ('a' - 'A'); // To lower case
+		}
+		*(destination++) = c;
+		if(c == '\0')
+			return;		
+	}	
+}
+
 bool compare_strings(uint8_t str, uint8_t str2) {
-	return strcmp(state.strings[str], state.strings[str2]) == 0;
+	char temp1[40], temp2[40];
+	_trim_string(temp1, state.strings[str]);
+	_trim_string(temp2, state.strings[str2]);
+	return strcmp(temp1, temp2) == 0;
 }
 
 bool obj_in_box(uint8_t objNo, uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2) {
-	int width = _view_width(OBJ.view_no, OBJ.loop_no, OBJ.cel_no);
-	return (OBJ.x + width) > x1 && OBJ.x <= x2 && OBJ.y >= y1 && OBJ.y <= y2;
+	cell_t* cell = _object_cell(&OBJ);
+	return (OBJ.x + cell->width) > x1 && OBJ.x <= x2 && OBJ.y >= y1 && OBJ.y <= y2;
 }
 
 bool center_posn(uint8_t objNo, uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2) {
-	int width = _view_width(OBJ.view_no, OBJ.loop_no, OBJ.cel_no);
-	int midX = OBJ.x + (width / 2);
+	cell_t* cell = _object_cell(&OBJ);
+	int midX = OBJ.x + (cell->width >> 1);
 	return midX >= x1 && midX <= x2 && OBJ.y >= y1 && OBJ.y <= y2;
 }
 
 bool right_posn(uint8_t objNo, uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2) {
-	int width = _view_width(OBJ.view_no, OBJ.loop_no, OBJ.cel_no);
-	int right_x = OBJ.x + width;
+	cell_t* cell = _object_cell(&OBJ);
+	int right_x = OBJ.x + cell->width;
 	return right_x >= x1 && right_x <= x2 && OBJ.y >= y1 && OBJ.y <= y2;
 }

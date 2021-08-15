@@ -3,6 +3,8 @@
 #
 cmake_minimum_required (VERSION 3.8)
 
+project(tinyagi)
+
 add_library (tinyagi STATIC
 	"src/actions.h"
 	"src/interpreter.c"

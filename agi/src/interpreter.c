@@ -536,23 +536,22 @@ void agi_logic_run_cycle() {
 		}
 	}
 
-	for (size_t objNo = 0; objNo < MAX_NUM_OBJECTS; objNo++)
-	{
-		if (OBJ.active && OBJ.update && OBJ.drawn) {
+	// for (uint8_t objNo = 0; objNo < MAX_NUM_OBJECTS; objNo++)
+	// {
+	// 	if (OBJ.active && OBJ.update && OBJ.drawn) {
 
-			if (OBJ.move_mode == OBJ_MOVEMODE_MOVE_TO)
-			{
-				_set_dir_from_moveDistance(objNo);				
-			}
-		}
-	}
+	// 		if (OBJ.move_mode == OBJ_MOVEMODE_MOVE_TO)
+	// 		{				
+	// 		}
+	// 	}
+	// }
 	if (state.program_control)
 	{
-		state.variables[VAR_6_EGO_DIRECTION] = state.objects[0].direction;
+		state.variables[VAR_6_EGO_DIRECTION] = EGO.direction;
 	}
 	else
 	{
-		state.objects[0].direction = state.variables[VAR_6_EGO_DIRECTION];
+		EGO.direction = state.variables[VAR_6_EGO_DIRECTION];
 	}
 
 	state.cycle_complete = false;
@@ -560,7 +559,7 @@ void agi_logic_run_cycle() {
 		step();
 	}
 
-	state.objects[0].direction = state.variables[VAR_6_EGO_DIRECTION];
+	EGO.direction = state.variables[VAR_6_EGO_DIRECTION];
 
 	bool update_status = false;
 	if(state.variables[VAR_3_SCORE] != state.old_score) {

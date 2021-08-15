@@ -18,7 +18,6 @@ resPos_t _find_res_offset(const char* dir_filename, const uint8_t res_no) {
 	if (offset >= dir_file.size) {
 		free_file(dir_file);
 		panic("Directory file offset out of bounds for file '%s', resource no %d", dir_filename, res_no);
-		//return (resPos_t) { .vol_number = 15, .offset = 0 };
 	}
 
 	uint8_t a = *(dir_file.data + offset + 0);

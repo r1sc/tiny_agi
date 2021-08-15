@@ -78,12 +78,13 @@ void _update_object(uint8_t objNo)
 
 		if (OBJ.move_mode == OBJ_MOVEMODE_MOVE_TO)
 		{
+			_set_dir_from_moveDistance(objNo);
 			stepSize = OBJ.move_step_size;
 		}
 
 		_set_loop_from_dir(objNo, OBJ.direction);
 
-		int width = _view_width(OBJ.view_no, OBJ.loop_no, OBJ.cel_no);
+		cell_t* cell = _object_cell(&OBJ);
 
 		if (OBJ.observe_horizon && state.flags[FLAG_5_ROOM_EXECUTED_FIRST_TIME] && OBJ.y <= state.horizon)
 			OBJ.y = state.horizon + 1;
@@ -124,10 +125,10 @@ void _update_object(uint8_t objNo)
 					OBJ.move_distance_x = 0;
 			}
 
-			bool unconditionalStop = _obj_baseline_on_pri(newX, newY, width, 0);
-			bool conditionalStop = OBJ.collide_with_blocks && (_obj_baseline_on_pri(newX, newY, width, 1) || (state.block_active && point_in_rect(newX, newY, state.block)));
-			bool confinedOnWater = (OBJ.allowed_on == OBJ_ON_WATER) && _obj_baseline_on_pri(newX, newY, width, 3);
-			bool confinedOnLand = (OBJ.allowed_on == OBJ_ON_LAND) && _obj_baseline_on_pri(newX, newY, width, 3);
+			bool unconditionalStop = _obj_baseline_on_pri(newX, newY, cell->width, 0);
+			bool conditionalStop = OBJ.collide_with_blocks && (_obj_baseline_on_pri(newX, newY, cell->width, 1) || (state.block_active && point_in_rect(newX, newY, state.block)));
+			bool confinedOnWater = (OBJ.allowed_on == OBJ_ON_WATER) && _obj_baseline_on_pri(newX, newY, cell->width, 3);
+			bool confinedOnLand = (OBJ.allowed_on == OBJ_ON_LAND) && _obj_baseline_on_pri(newX, newY, cell->width, 3);
 			bool stop = unconditionalStop || conditionalStop || confinedOnWater || confinedOnLand;
 
 			if (OBJ.collide_with_objects) {
@@ -135,8 +136,8 @@ void _update_object(uint8_t objNo)
 				{
 					if (i != objNo && state.objects[i].active && state.objects[i].drawn && state.objects[i].collide_with_objects) {
 						if (newY == state.objects[i].y
-							&& newX + width > state.objects[i].x
-							&& newX < state.objects[i].x + _view_width(state.objects[i].view_no, state.objects[i].loop_no, state.objects[i].cel_no)
+							&& newX + cell->width > state.objects[i].x
+							&& newX < state.objects[i].x + _object_cell(&state.objects[i])->width
 							)
 						{
 							stop = true;
@@ -212,8 +213,8 @@ void _update_object(uint8_t objNo)
 
 		if (objNo == 0)
 		{
-			state.flags[FLAG_3_EGO_TOUCHED_TRIGGER] = _obj_baseline_on_pri(OBJ.x, OBJ.y, width, 2);
-			state.flags[FLAG_0_EGO_ON_WATER] = _obj_baseline_on_pri(OBJ.x, OBJ.y, width, 3);
+			state.flags[FLAG_3_EGO_TOUCHED_TRIGGER] = _obj_baseline_on_pri(OBJ.x, OBJ.y, cell->width, 2);
+			state.flags[FLAG_0_EGO_ON_WATER] = _obj_baseline_on_pri(OBJ.x, OBJ.y, cell->width, 3);
 		}
 
 		if (OBJ.is_cycling)
@@ -331,8 +332,8 @@ void add_to_pic(uint8_t viewNo, uint8_t loopNo, uint8_t celNo, uint8_t x, uint8_
 {
 	_draw_view(viewNo, loopNo, celNo, x, y, pri, false, true);
 	if (margin < 4) {
-		int width = _view_width(viewNo, loopNo, celNo);
-		for (size_t xm = 0; xm < width; xm++)
+		int width = _get_cell(viewNo, loopNo, celNo)->width;
+		for (int xm = 0; xm < width; xm++)
 		{
 			pic_pri_set(x + xm, y, margin);
 			pic_pri_set(x + xm, y - 2, margin);
@@ -528,12 +529,18 @@ void load_view_v(uint8_t var)
 
 void move_obj(uint8_t objNo, uint8_t x, uint8_t y, uint8_t stepSize, uint8_t fDoneFlag)
 {
+	if(OBJ.x == x && OBJ.y == y) {
+		set(fDoneFlag);
+		return;
+	}
+
 	reset(fDoneFlag);
 	OBJ.move_mode = OBJ_MOVEMODE_MOVE_TO;
 	OBJ.move_distance_x = x - OBJ.x;
 	OBJ.move_distance_y = y - OBJ.y;
 	OBJ.move_step_size = (stepSize == 0) ? OBJ.step_size : stepSize;
 	OBJ.move_done_flag = fDoneFlag;
+
 	if (objNo == 0)
 	{
 		program_control();
@@ -716,7 +723,7 @@ void start_motion(uint8_t objNo)
 		player_control();
 		state.variables[VAR_6_EGO_DIRECTION] = DIR_STOPPED;
 	}
-	OBJ.move_mode = OBJ_MOVEMODE_NORMAL;
+	normal_motion(objNo);
 }
 
 void start_update(uint8_t objNo)
@@ -741,8 +748,9 @@ void stop_cycling(uint8_t objNo)
 
 void stop_motion(uint8_t objNo)
 {
-	if (objNo == 0)
+	if (objNo == 0) {
 		program_control();
+	}
 	OBJ.direction = DIR_STOPPED;
 }
 

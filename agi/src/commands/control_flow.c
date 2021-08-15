@@ -35,46 +35,53 @@ void load_logics_v(uint8_t var) {
 	load_logics(state.variables[var]);
 }
 
-void new_room(uint8_t room_no) {
+void new_room(uint8_t room_no) {	
+	stop_sound();
+
 	stop_update(0);
-	unanimate_all();
+	for (uint8_t objNo = 0; objNo < MAX_NUM_OBJECTS; objNo++)
+	{
+		OBJ.drawn = false;
+		OBJ.active = false;
+		OBJ.update = true;
+		OBJ.step_size = OBJ.step_time = OBJ.steps_to_next_update = OBJ.cycle_time = OBJ.cycles_to_next_update = 1;		
+	}
+	
 	player_control();
+
 	unblock();
+
 	set_horizon(36);
 
-	state.variables[VAR_8_NUM_PAGES_FREE] = 10;
 	state.variables[VAR_1_PREVIOUS_ROOM] = state.variables[VAR_0_CURRENT_ROOM];
 	state.variables[VAR_0_CURRENT_ROOM] = room_no;
 	state.variables[VAR_4_OBJ_BORDER_OBJNO] = 0;
 	state.variables[VAR_5_OBJ_BORDER_CODE] = 0;
-	state.variables[VAR_9_MISSING_WORD_NO] = 0;
-	state.variables[VAR_16_EGO_VIEW_NO] = state.objects[0].view_no;
+	state.variables[VAR_16_EGO_VIEW_NO] = EGO.view_no;
+
+	state.variables[VAR_8_NUM_PAGES_FREE] = 10;
 
 	// if ego touching edge place ego
 	switch (state.variables[VAR_2_EGO_BORDER_CODE]) {
 	case BORDER_TOP:
-		state.objects[0].y = 166;
+		EGO.y = 166;
 		break;
 	case BORDER_BOTTOM:
-		state.objects[0].y = state.horizon + 1;
+		EGO.y = state.horizon + 1;
 		break;
 	case BORDER_LEFT:
-		state.objects[0].x = 160 - _view_width(state.objects[0].view_no, state.objects[0].loop_no, state.objects[0].cel_no);
+		EGO.x = 160 - _object_cell(&EGO)->width;
 		break;
 	case BORDER_RIGHT:
-		state.objects[0].x = 0;
+		EGO.x = 0;
 		break;
 	}
 
 	state.variables[VAR_2_EGO_BORDER_CODE] = BORDER_NOTHING;
-	state.flags[FLAG_2_COMMAND_ENTERED] = false;
 	state.flags[FLAG_5_ROOM_EXECUTED_FIRST_TIME] = true;
+	state.variables[VAR_9_MISSING_WORD_NO] = 0;
+	state.flags[FLAG_2_COMMAND_ENTERED] = false;
 
-	state.current_logic = 0;
-	state.pc = state.scan_start[0];
-	state.stack_ptr = 0;
-
-	stop_sound();
 
 	for (size_t i = 1; i < 256; i++)
 	{
@@ -99,6 +106,10 @@ void new_room(uint8_t room_no) {
 			state.loaded_views[i].buffer = NULL;
 		}
 	}
+
+	state.current_logic = 0;
+	state.pc = state.scan_start[0];
+	state.stack_ptr = 0;
 }
 
 void new_room_v(uint8_t var) {

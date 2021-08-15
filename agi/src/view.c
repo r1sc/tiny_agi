@@ -3,27 +3,31 @@
 #include "platform_support.h"
 #include "actions.h"
 
-uint8_t _view_num_loops(uint8_t viewNo) {
-	view_t* view = state.loaded_views[viewNo].buffer;
+uint8_t _view_num_loops(uint8_t view_no) {
+	view_t* view = state.loaded_views[view_no].buffer;
 	return view->num_loops;
 }
 
-uint8_t _view_num_cels(uint8_t viewNo, uint8_t loopNo) {
-	view_t* view = state.loaded_views[viewNo].buffer;
-	loop_t* loop = (loop_t*)((uint8_t*)(view)+view->loop_offsets[loopNo]);
+uint8_t _view_num_cels(uint8_t view_no, uint8_t loop_no) {
+	view_t* view = state.loaded_views[view_no].buffer;
+	loop_t* loop = (loop_t*)((uint8_t*)(view)+view->loop_offsets[loop_no]);
 	return loop->num_cells;
 }
 
-int _view_width(uint8_t viewNo, uint8_t loopNo, uint8_t cellNo) {
-	view_t* view = (view_t*)state.loaded_views[viewNo].buffer;
-	loop_t* loop = (loop_t*)((uint8_t*)(view)+view->loop_offsets[loopNo]);
-	cell_t* cell = (cell_t*)((uint8_t*)(loop)+loop->cell_offsets[cellNo]);
-	return cell->width;
+cell_t* _get_cell(uint8_t view_no, uint8_t loop_no, uint8_t cel_no) {
+	view_t* view = (view_t*)state.loaded_views[view_no].buffer;
+	loop_t* loop = (loop_t*)((uint8_t*)(view)+view->loop_offsets[loop_no]);
+	cell_t* cell = (cell_t*)((uint8_t*)(loop)+loop->cell_offsets[cel_no]);
+	return cell;
 }
 
-uint8_t _get_pri(int x, int y, bool addToPic) {
+cell_t* _object_cell(const object_t* obj) {
+	return _get_cell(obj->view_no, obj->loop_no, obj->cel_no);
+}
+
+uint8_t _get_pri(int x, int y, bool add_to_pic) {
 	uint8_t pri;
-	while ((pri = addToPic ? pic_pri_get(x, y) : priority_get(x, y)) < 3) {
+	while ((pri = add_to_pic ? pic_pri_get(x, y) : priority_get(x, y)) < 3) {
 		y++;
 		if (y > 167)
 			return 0;
@@ -31,14 +35,14 @@ uint8_t _get_pri(int x, int y, bool addToPic) {
 	return pri;
 }
 
-void _draw_view(uint8_t viewNo, uint8_t loopNo, uint8_t cellNo, uint8_t x, uint8_t y, uint8_t priority, bool erase, bool addToPic) {
-	view_t* view = state.loaded_views[viewNo].buffer;
-	loop_t* loop = (loop_t*)((uint8_t*)(view)+view->loop_offsets[loopNo]);
-	cell_t* cell = (cell_t*)((uint8_t*)(loop)+loop->cell_offsets[cellNo]);
+void _draw_view(uint8_t view_no, uint8_t loop_no, uint8_t cel_no, uint8_t x, uint8_t y, uint8_t priority, bool erase, bool add_to_pic) {
+	view_t* view = state.loaded_views[view_no].buffer;
+	loop_t* loop = (loop_t*)((uint8_t*)(view)+view->loop_offsets[loop_no]);
+	cell_t* cell = (cell_t*)((uint8_t*)(loop)+loop->cell_offsets[cel_no]);
 	uint8_t transparentColor = cell->transparent_color_and_mirroring & 0x0F;
 
 	uint8_t mirroring = cell->transparent_color_and_mirroring >> 4;
-	bool mirrored = (mirroring & 0x0F) && (loopNo != (mirroring & 7));
+	bool mirrored = (mirroring & 0x0F) && (loop_no != (mirroring & 7));
 
 	//y += state.play_top;
 
@@ -71,13 +75,13 @@ void _draw_view(uint8_t viewNo, uint8_t loopNo, uint8_t cellNo, uint8_t x, uint8
 							priority_set(screenX, screenY, pic_pri_get(screenX, screenY));
 						}
 						else {
-							uint8_t bgPri = _get_pri(screenX, screenY, addToPic);
+							uint8_t bgPri = _get_pri(screenX, screenY, add_to_pic);
 							bool doDraw = priority >= bgPri;
 							if (doDraw) {
 								screen_set_160(screenX, screenY, color);
 								priority_set(screenX, screenY, priority);
 								
-								if (addToPic) {
+								if (add_to_pic) {
 									pic_vis_set(screenX, screenY, color);
 									pic_pri_set(screenX, screenY, priority);
 								}

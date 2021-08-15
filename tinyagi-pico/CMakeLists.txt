@@ -1,10 +1,13 @@
 cmake_minimum_required(VERSION 3.13)
 
+include(pico_sdk_import.cmake)
+
 project(tinyagi_pico)
 
 # initialize the Raspberry Pi Pico SDK
 pico_sdk_init()
 
+add_subdirectory(../agi ${CMAKE_CURRENT_BINARY_DIR}/tinyagi)
 
 add_executable(tinyagi_pico
     vga/vga.c

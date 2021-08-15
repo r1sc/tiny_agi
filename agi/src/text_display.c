@@ -56,6 +56,7 @@ void _draw_text(uint8_t* row, uint8_t* col, const char* text, uint8_t fg, uint8_
 			break;
 		}
 		else if (c == '\\') {
+			// TODO: Parse actual token here
 			continue;
 		}
 		else if (c == '\n') {
