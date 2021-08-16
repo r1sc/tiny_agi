@@ -8,20 +8,6 @@
 
 agi_state_t state;
 
-void agi_push_char(char c) {
-	if (!state.input_prompt_active) {
-		return;
-	}
-
-	if (c == '\b' && state.input_pos > 0) {
-		state.input_buffer[--state.input_pos] = '\0';
-	}
-	else if (state.input_pos < 39) {
-		state.input_buffer[state.input_pos++] = c;
-		state.input_buffer[state.input_pos] = '\0';
-	}
-	_redraw_prompt();
-}
 
 void agi_reset() {
 	state.pc = 0;

@@ -64,6 +64,7 @@
 
 #define AGI_CALLSTACK_DEPTH 8
 #define MAX_NUM_OBJECTS 16
+#define MAX_NUM_CONTROLLERS 50
 
 #define OBJ_ON_ANYTHING 0
 #define OBJ_ON_WATER 1
@@ -77,3 +78,27 @@
 #define OBJ_MOVEMODE_NORMAL 0
 #define OBJ_MOVEMODE_MOVE_TO 1
 #define OBJ_MOVEMODE_WANDER 2
+
+
+
+#define AGI_KEY_INS 82
+#define AGI_KEY_DEL 83
+#define AGI_KEY_F1 59
+#define AGI_KEY_F2 60
+#define AGI_KEY_F3 61
+#define AGI_KEY_F4 62
+#define AGI_KEY_F5 63
+#define AGI_KEY_F6 64
+#define AGI_KEY_F7 65
+#define AGI_KEY_F8 66
+#define AGI_KEY_F9 67
+#define AGI_KEY_F10 6
+
+#define AGI_KEY_PGUP 0x49
+#define AGI_KEY_PGDN 0x51
+#define AGI_KEY_HOME 0x47
+#define AGI_KEY_END 0x4f
+#define AGI_KEY_UP 0x48
+#define AGI_KEY_DOWN 0x50
+#define AGI_KEY_LEFT 0x4b
+#define AGI_KEY_RIGHT 0x4d

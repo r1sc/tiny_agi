@@ -65,7 +65,7 @@ bool said() {
 	for (size_t i = 0; i < numparams; i++)
 	{
 		uint16_t logic_word_no = (uint16_t)(next_data() | (next_data() << 8));
-		if (logic_word_no == 9999) {
+		if (rol || logic_word_no == 9999) {
 			rol = true;
 			continue;
 		}
@@ -77,6 +77,10 @@ bool said() {
 		else {
 			match = false;
 		}
+	}
+
+	if(!state.or && state.and_result == false) { // Skip checking if in AND-testing mode and the previous result was false
+		return false;
 	}
 	
 	if(!state.flags[FLAG_2_COMMAND_ENTERED]) {

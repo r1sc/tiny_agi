@@ -92,7 +92,6 @@ void _update_object(uint8_t objNo)
 		if (OBJ.steps_to_next_update == 0)
 		{
 
-			//if (OBJ.direction != DIR_STOPPED) {
 			int newX = OBJ.x;
 			int newY = OBJ.y;
 
@@ -205,7 +204,6 @@ void _update_object(uint8_t objNo)
 
 			OBJ.x = newX;
 			OBJ.y = newY;
-			//}
 
 			OBJ.steps_to_next_update = OBJ.step_time;
 		}
@@ -383,7 +381,6 @@ void animate_obj(uint8_t objNo)
 	// OBJ.view_no = 0;
 	// OBJ.loop_no = 0;
 	// OBJ.cel_no = 0;
-	// OBJ.fix_loop = false;
 	OBJ.observe_horizon = true;
 	OBJ.allowed_on = OBJ_ON_ANYTHING;
 	OBJ.collide_with_objects = true;

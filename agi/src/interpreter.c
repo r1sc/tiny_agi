@@ -4,6 +4,7 @@
 #include "actions.h"
 #include "platform_support.h"
 #include "text_display.h"
+#include "input_queue.h"
 
 /* Test definitions */
 
@@ -26,8 +27,7 @@ test_t tests[] = {
 	TEST(compare_strings, 2),
 	TEST(obj_in_box, 5),
 	TEST(center_posn, 5),
-	TEST(right_posn, 5)
-};
+	TEST(right_posn, 5)};
 
 /* Action definitions */
 
@@ -205,38 +205,40 @@ action_t actions[] = {
 	ACTION("set_simple", set_simple, 1),
 	ACTION("push_script", push_script, 0),
 	ACTION("pop_script", pop_script, 0),
-	ACTION("hold_key", hold_key, 0)
-};
+	ACTION("hold_key", hold_key, 0)};
 
 #pragma pack(push, 1)
-typedef struct {
+typedef struct
+{
 	uint8_t num_messages;
 	uint16_t messages_end;
 } agi_messages_header_t;
 #pragma pack(pop)
 
-char* _get_message(uint8_t message_no) {	
+char *_get_message(uint8_t message_no)
+{
 	message_no--;
-	uint8_t* buffer = state.loaded_logics[state.current_logic];
-	uint8_t* message_section = buffer + ((buffer[1] << 8) | buffer[0]) + 2;
+	uint8_t *buffer = state.loaded_logics[state.current_logic];
+	uint8_t *message_section = buffer + ((buffer[1] << 8) | buffer[0]) + 2;
 
-	uint8_t* message_offset = (message_section + 3 + 2 * message_no);
+	uint8_t *message_offset = (message_section + 3 + 2 * message_no);
 	uint16_t offset = *(message_offset) | (*(message_offset + 1) << 8);
 
-	char* message = ((char*)message_section) + offset + 1;
+	char *message = ((char *)message_section) + offset + 1;
 
 	return message;
 }
 
-const char* decryptionKey = "Avis Durgan";
+const char *decryptionKey = "Avis Durgan";
 
-void _decrypt_messages(uint8_t logic_no) {
-	uint8_t* buffer = state.loaded_logics[logic_no];
-	agi_messages_header_t* message_section = (agi_messages_header_t*)(buffer + ((buffer[1] << 8) | buffer[0]) + 2);
+void _decrypt_messages(uint8_t logic_no)
+{
+	uint8_t *buffer = state.loaded_logics[logic_no];
+	agi_messages_header_t *message_section = (agi_messages_header_t *)(buffer + ((buffer[1] << 8) | buffer[0]) + 2);
 
 	int ptr_table_len = message_section->num_messages * 2;
-	char* message_ptr = ((uint8_t*)message_section) + 3 + ptr_table_len;
-	char* messages_end = ((uint8_t*)message_section) + message_section->messages_end;
+	char *message_ptr = ((uint8_t *)message_section) + 3 + ptr_table_len;
+	char *messages_end = ((uint8_t *)message_section) + message_section->messages_end;
 
 	uint8_t decI = 0;
 
@@ -249,26 +251,33 @@ void _decrypt_messages(uint8_t logic_no) {
 	*message_ptr = '\0';
 }
 
-void _decrypt_item_file(uint8_t* item_file, size_t size) {
+void _decrypt_item_file(uint8_t *item_file, size_t size)
+{
 	for (size_t i = 0; i < size; i++)
 	{
 		item_file[i] ^= decryptionKey[i % 11];
 	}
 }
 
-uint8_t next_data() {
+uint8_t next_data()
+{
 	return *(state.loaded_logics[state.current_logic] + 2 + (state.pc++));
 }
 
-void jump() {
+void jump()
+{
 	int16_t jump = next_data() | (next_data() << 8);
 	state.pc += jump;
 }
 
-bool doTest(uint8_t opcode) {
-	switch (tests[opcode].numArgs) {
-	case 0:	return tests[opcode].test();
-	case 1:	return tests[opcode].test(next_data());
+bool doTest(uint8_t opcode)
+{
+	switch (tests[opcode].numArgs)
+	{
+	case 0:
+		return tests[opcode].test();
+	case 1:
+		return tests[opcode].test(next_data());
 	case 2:
 	{
 		uint8_t d1 = next_data();
@@ -305,54 +314,71 @@ bool doTest(uint8_t opcode) {
 	}
 }
 
-void step() {
+void step()
+{
 	uint8_t opcode = next_data();
 
-	if (opcode == 0xFF) {
-		if (state.test) {
+	if (opcode == 0xFF)
+	{
+		if (state.test)
+		{
 			bool testResult = state.and_result && state.or_result;
-			if (!testResult) {
+			if (!testResult)
+			{
 				jump();
 			}
-			else {
+			else
+			{
 				state.pc += 2;
 			}
 		}
-		else {
+		else
+		{
 			state.and_result = true;
 			state.or_result = true;
 		}
 		state.test = !state.test;
 	}
-	else if (opcode == 0xFE) {
+	else if (opcode == 0xFE)
+	{
 		jump();
 	}
-	else if (opcode == 0xFD) {
+	else if (opcode == 0xFD)
+	{
 		state.negate = true;
 	}
-	else if (opcode == 0xFC) {
-		state. or = !state. or ;
-		if (state. or )
+	else if (opcode == 0xFC)
+	{
+		state.or = !state.or ;
+		if (state.or)
 			state.or_result = false;
 	}
-	else {
-		if (state.test) {
+	else
+	{
+		if (state.test)
+		{
 			bool pass = doTest(opcode);
 			if (state.negate)
 				pass = !pass;
 
 			state.negate = false;
 
-			if (state. or )
+			if (state.or)
 				state.or_result = state.or_result || pass;
 			else
 				state.and_result = state.and_result && pass;
 		}
-		else {
+		else
+		{
 			//printf("Logic %d: %s\n", state.current_logic, actions[opcode].name);
-			switch (actions[opcode].numArgs) {
-			case 0:	actions[opcode].action(); break;
-			case 1:	actions[opcode].action(next_data()); break;
+			switch (actions[opcode].numArgs)
+			{
+			case 0:
+				actions[opcode].action();
+				break;
+			case 1:
+				actions[opcode].action(next_data());
+				break;
 			case 2:
 			{
 				uint8_t a = next_data();
@@ -406,10 +432,12 @@ void step() {
 	}
 }
 
+
 uint16_t parsed_word_groups[20];
 uint16_t num_parsed_word_groups = 0;
 
-bool _find_word_group_of_word(char* word, size_t len) {
+bool _find_word_group_of_word(char *word, size_t len)
+{
 	char first_letter = *word;
 	int first_letter_index = *word - 'a';
 	uint16_be_t first_word_index = state.words_file->word_indices[first_letter_index];
@@ -417,18 +445,21 @@ bool _find_word_group_of_word(char* word, size_t len) {
 	uint16_t first_word_offset = (uint16_t)(first_word_index.hi_byte << 8) | (uint16_t)first_word_index.lo_byte;
 	uint16_t next_word_offset = (uint16_t)(next_word_index.hi_byte << 8) | (uint16_t)next_word_index.lo_byte;
 
-	uint8_t* word_entry = ((uint8_t*)state.words_file) + first_word_offset;
-	uint8_t* next_word_entry = ((uint8_t*)state.words_file) + next_word_offset;
-	
+	uint8_t *word_entry = ((uint8_t *)state.words_file) + first_word_offset;
+	uint8_t *next_word_entry = ((uint8_t *)state.words_file) + next_word_offset;
+
 	char prev_word[40];
 	int prev_word_len = 0;
 
-	while (1) {
+	while (1)
+	{
 		prev_word_len = *(word_entry++);
-		while (1) {
+		while (1)
+		{
 			char c = *(word_entry++) ^ 0x7F;
 			prev_word[prev_word_len++] = c & 0x7F;
-			if (c >> 7) {
+			if (c >> 7)
+			{
 				break;
 			}
 		}
@@ -436,17 +467,22 @@ bool _find_word_group_of_word(char* word, size_t len) {
 		uint16_t word_num_lo = *(word_entry++);
 		uint16_t word_num = (word_num_hi << 8) | word_num_lo;
 		// end of word -- check match
-		if (prev_word_len == len && strncmp(word, prev_word, len) == 0) {
+		if (prev_word_len == len && strncmp(word, prev_word, len) == 0)
+		{
 			// Found match
-			if (word_num > 0) { // Skip anyword
+			if (word_num > 0)
+			{ // Skip anyword
 				parsed_word_groups[num_parsed_word_groups++] = word_num;
 			}
 			return true;
 		}
 
-		if (word_entry >= next_word_entry) {
-			if(len == 1) {
-				if(*word == 'a' || *word == 'i') {
+		if (word_entry >= next_word_entry)
+		{
+			if (len == 1)
+			{
+				if (*word == 'a' || *word == 'i')
+				{
 					return true;
 				}
 			}
@@ -456,18 +492,22 @@ bool _find_word_group_of_word(char* word, size_t len) {
 	return false;
 }
 
-void _parse_word_groups() {
+void _parse_word_groups()
+{
 	num_parsed_word_groups = 0;
 
-	char* c = state.input_buffer;
-	char* word_start = c;
+	char *c = state.input_buffer;
+	char *word_start = c;
 	size_t word_len = 0;
 	int word_i = 0;
 
-	while (c < state.input_buffer + state.input_pos) {
-		if (*c == ' ' || *c == '.') {
+	while (c < state.input_buffer + state.input_pos)
+	{
+		if (*c == ' ' || *c == '.')
+		{
 			// Find out word group to parsed word
-			if (!_find_word_group_of_word(word_start, word_len)) {				
+			if (!_find_word_group_of_word(word_start, word_len))
+			{
 				state.variables[VAR_9_MISSING_WORD_NO] = word_i;
 			}
 			c++;
@@ -475,12 +515,14 @@ void _parse_word_groups() {
 			word_len = 0;
 			word_i++;
 		}
-		else {
+		else
+		{
 			word_len++;
 			c++;
 		}
 	}
-	if (!_find_word_group_of_word(word_start, word_len) && state.variables[VAR_9_MISSING_WORD_NO] == 0) {
+	if (!_find_word_group_of_word(word_start, word_len) && state.variables[VAR_9_MISSING_WORD_NO] == 0)
+	{
 		state.variables[VAR_9_MISSING_WORD_NO] = word_i;
 	}
 }
@@ -521,71 +563,163 @@ void _set_dir_from_moveDistance(uint8_t objNo)
 	}
 }
 
-void execute_logic_cycle() {
+void execute_logic_cycle()
+{
 	load_logics(0);
 	state.current_logic = 0;
 	state.pc = state.scan_start[0];
 	state.stack_ptr = 0;
-	
+
 	state.cycle_complete = false;
-	while (!state.cycle_complete) {
+	while (!state.cycle_complete)
+	{
 		step();
 	}
 }
 
-void agi_logic_run_cycle() {
-	state.flags[FLAG_2_COMMAND_ENTERED] = 0;
-	state.flags[FLAG_4_SAID_ACCEPTED_INPUT] = 0;
+typedef struct
+{
+	uint8_t scancode;
+	char ascii;
+	uint8_t controller_no;
+} controller_assignment_t;
+
+controller_assignment_t controller_assignments[50];
+bool escape_pressed = false;
+
+void process_input_queue()
+{
+	for (int i = 0; i < queue_pos; i++)
+	{
+		input_queue_entry_t entry = queue[i];
+
+		if (entry.scancode == AGI_KEY_HOME)
+		{
+			EGO.direction = EGO.direction == DIR_UP_LEFT ? DIR_STOPPED : DIR_UP_LEFT;
+		}
+		else if (entry.scancode == AGI_KEY_UP)
+		{
+			EGO.direction = EGO.direction == DIR_UP ? DIR_STOPPED : DIR_UP;
+		}
+		else if (entry.scancode == AGI_KEY_PGUP)
+		{
+			EGO.direction = EGO.direction == DIR_UP_RIGHT ? DIR_STOPPED : DIR_UP_RIGHT;
+		}
+		else if (entry.scancode == AGI_KEY_RIGHT)
+		{
+			EGO.direction = EGO.direction == DIR_RIGHT ? DIR_STOPPED : DIR_RIGHT;
+		}
+		else if (entry.scancode == AGI_KEY_PGDN)
+		{
+			EGO.direction = EGO.direction == DIR_DOWN_RIGHT ? DIR_STOPPED : DIR_DOWN_RIGHT;
+		}
+		else if (entry.scancode == AGI_KEY_DOWN)
+		{
+			EGO.direction = EGO.direction == DIR_DOWN ? DIR_STOPPED : DIR_DOWN;
+		}
+		else if (entry.scancode == AGI_KEY_END)
+		{
+			EGO.direction = EGO.direction == DIR_DOWN_LEFT ? DIR_STOPPED : DIR_DOWN_LEFT;
+		}
+		else if (entry.scancode == AGI_KEY_LEFT)
+		{
+			EGO.direction = EGO.direction == DIR_LEFT ? DIR_STOPPED : DIR_LEFT;
+		}
+		else
+		{
+			bool found_controller = false;
+			for (size_t i = 0; i < 50; i++)
+			{
+				if ((controller_assignments[i].ascii > 0 && controller_assignments[i].ascii == entry.ascii) || (controller_assignments[i].scancode > 0 && controller_assignments[i].scancode == entry.scancode))
+				{
+					state.controllers[controller_assignments[i].controller_no] = true;
+					found_controller = true;
+				}
+			}
+
+			if (!found_controller)
+			{
+				if (entry.ascii)
+				{
+					if (entry.ascii == '\b')
+					{
+						if(state.input_pos > 0) {
+							state.input_pos--;
+						}
+					}
+					else
+					{
+						state.input_buffer[state.input_pos++] = entry.ascii;
+					}
+					state.input_buffer[state.input_pos] = '\0';
+					_redraw_prompt();
+				}
+			}
+		}
+	}
+
+	queue_pos = 0;
+}
+
+void agi_logic_run_cycle()
+{
+
+	for (size_t i = 0; i < MAX_NUM_CONTROLLERS; i++)
+	{
+		state.controllers[i] = false;
+	}
+
+	state.flags[FLAG_2_COMMAND_ENTERED] = false;
+	state.flags[FLAG_4_SAID_ACCEPTED_INPUT] = false;
+	state.variables[VAR_19_KEYBOARD_KEY_PRESSED] = 0;
 	state.variables[VAR_9_MISSING_WORD_NO] = 0;
 
-	num_parsed_word_groups = 0;
+	process_input_queue();
 
 	if (state.enter_pressed) {
-		if (state.input_pos > 0) {
-			_parse_word_groups();	
-			if(num_parsed_word_groups > 0) {				
+		num_parsed_word_groups = 0;
+		if (state.input_pos > 0) {							
+			_parse_word_groups();
+			if(num_parsed_word_groups > 0) {
 				state.flags[FLAG_2_COMMAND_ENTERED] = true;
 			}
 		}
-		
 		state.input_pos = 0;
-		state.input_buffer[0] = '\0';
+		state.input_buffer[state.input_pos] = '\0';
 		_redraw_prompt();
 	}
 
-	if (state.program_control)
-	{
+	if(state.program_control) {
+		EGO.direction = state.variables[VAR_6_EGO_DIRECTION];
+	} else {
 		state.variables[VAR_6_EGO_DIRECTION] = EGO.direction;
 	}
-	else
+
+	// recalculate direction of motion
+	for (uint8_t objNo = 0; objNo < MAX_NUM_OBJECTS; objNo++)
 	{
-		EGO.direction = state.variables[VAR_6_EGO_DIRECTION];
+		if(OBJ.active && OBJ.drawn && OBJ.update && OBJ.move_mode == OBJ_MOVEMODE_MOVE_TO) {
+			_set_dir_from_moveDistance(objNo);
+		}
 	}
+
+	uint8_t current_score = state.variables[VAR_3_SCORE];
+	bool sound_on = state.sound_on;
 
 	execute_logic_cycle();
-
+	
 	EGO.direction = state.variables[VAR_6_EGO_DIRECTION];
 
-	bool update_status = false;
-	if(state.variables[VAR_3_SCORE] != state.old_score) {
-		state.old_score = state.variables[VAR_3_SCORE];		
-		update_status = true;
-	}
-	if(state.flags[FLAG_9_SOUND_ENABLED] != state.sound_on) {
-		state.sound_on = state.flags[FLAG_9_SOUND_ENABLED];
-		update_status = true;
+	if(current_score != state.variables[VAR_3_SCORE] || sound_on != state.flags[FLAG_9_SOUND_ENABLED]) {
+		_redraw_status_line();
 	}
 
-	_update_all_active();
-
-	state.variables[VAR_5_OBJ_BORDER_CODE] = 0;
 	state.variables[VAR_4_OBJ_BORDER_OBJNO] = 0;
+	state.variables[VAR_5_OBJ_BORDER_CODE] = 0;
+
 	state.flags[FLAG_5_ROOM_EXECUTED_FIRST_TIME] = false;
 	state.flags[FLAG_6_RESTART_GAME_EXECUTED] = false;
 	state.flags[FLAG_12_GAME_RESTORED] = false;
 
-
-	if(update_status){
-		_redraw_status_line();
-	}
+	_update_all_active();	
 }

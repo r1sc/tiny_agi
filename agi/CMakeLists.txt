@@ -30,6 +30,8 @@ add_library (tinyagi STATIC
 	"src/commands/system.c"
 	"src/commands/test.c" 
 	"src/view.c" 
-	"src/view.h" )
+	"src/view.h"
+	"src/input_queue.h"
+	"src/input_queue.c" )
 
 target_include_directories(tinyagi PUBLIC include)

@@ -44,6 +44,7 @@ void new_room(uint8_t room_no) {
 		OBJ.drawn = false;
 		OBJ.active = false;
 		OBJ.update = true;
+		OBJ.fix_loop = false;
 		OBJ.step_size = OBJ.step_time = OBJ.steps_to_next_update = OBJ.cycle_time = OBJ.cycles_to_next_update = 1;		
 	}
 	

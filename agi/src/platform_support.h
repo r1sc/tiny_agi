@@ -27,3 +27,5 @@ extern void _draw_char(unsigned int start_x, unsigned int start_y, unsigned char
 
 extern void agi_play_sound(uint8_t* sound_data);
 extern void agi_stop_sound();
+
+extern void agi_input_queue_push_keypress(char ascii, uint8_t scancode);
