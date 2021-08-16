@@ -438,13 +438,18 @@ bool _find_word_group_of_word(char* word, size_t len) {
 		// end of word -- check match
 		if (prev_word_len == len && strncmp(word, prev_word, len) == 0) {
 			// Found match
-			//if (word_num > 0) { // Skip anyword
+			if (word_num > 0) { // Skip anyword
 				parsed_word_groups[num_parsed_word_groups++] = word_num;
-			//}
+			}
 			return true;
 		}
 
 		if (word_entry >= next_word_entry) {
+			if(len == 1) {
+				if(*word == 'a' || *word == 'i') {
+					return true;
+				}
+			}
 			return false;
 		}
 	}
@@ -462,9 +467,8 @@ void _parse_word_groups() {
 	while (c < state.input_buffer + state.input_pos) {
 		if (*c == ' ' || *c == '.') {
 			// Find out word group to parsed word
-			if (!_find_word_group_of_word(word_start, word_len)) {
+			if (!_find_word_group_of_word(word_start, word_len)) {				
 				state.variables[VAR_9_MISSING_WORD_NO] = word_i;
-				return;
 			}
 			c++;
 			word_start = c;
@@ -531,20 +535,17 @@ void agi_logic_run_cycle() {
 
 	if (state.enter_pressed) {
 		if (state.input_pos > 0) {
-			state.flags[FLAG_2_COMMAND_ENTERED] = true;
-			_parse_word_groups();
+			_parse_word_groups();	
+			if(num_parsed_word_groups > 0) {				
+				state.flags[FLAG_2_COMMAND_ENTERED] = true;
+			}
 		}
+		
+		state.input_pos = 0;
+		state.input_buffer[0] = '\0';
+		_redraw_prompt();
 	}
 
-	// for (uint8_t objNo = 0; objNo < MAX_NUM_OBJECTS; objNo++)
-	// {
-	// 	if (OBJ.active && OBJ.update && OBJ.drawn) {
-
-	// 		if (OBJ.move_mode == OBJ_MOVEMODE_MOVE_TO)
-	// 		{				
-	// 		}
-	// 	}
-	// }
 	if (state.program_control)
 	{
 		state.variables[VAR_6_EGO_DIRECTION] = EGO.direction;
@@ -579,12 +580,6 @@ void agi_logic_run_cycle() {
 	state.flags[FLAG_6_RESTART_GAME_EXECUTED] = false;
 	state.flags[FLAG_12_GAME_RESTORED] = false;
 
-
-	if (state.flags[FLAG_2_COMMAND_ENTERED]) {
-		state.input_pos = 0;
-		state.input_buffer[0] = '\0';
-		_redraw_prompt();
-	}
 
 	if(update_status){
 		_redraw_status_line();
