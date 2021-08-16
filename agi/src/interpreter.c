@@ -521,12 +521,19 @@ void _set_dir_from_moveDistance(uint8_t objNo)
 	}
 }
 
-void agi_logic_run_cycle() {
+void execute_logic_cycle() {
 	load_logics(0);
 	state.current_logic = 0;
 	state.pc = state.scan_start[0];
 	state.stack_ptr = 0;
+	
+	state.cycle_complete = false;
+	while (!state.cycle_complete) {
+		step();
+	}
+}
 
+void agi_logic_run_cycle() {
 	state.flags[FLAG_2_COMMAND_ENTERED] = 0;
 	state.flags[FLAG_4_SAID_ACCEPTED_INPUT] = 0;
 	state.variables[VAR_9_MISSING_WORD_NO] = 0;
@@ -555,10 +562,7 @@ void agi_logic_run_cycle() {
 		EGO.direction = state.variables[VAR_6_EGO_DIRECTION];
 	}
 
-	state.cycle_complete = false;
-	while (!state.cycle_complete) {
-		step();
-	}
+	execute_logic_cycle();
 
 	EGO.direction = state.variables[VAR_6_EGO_DIRECTION];
 
