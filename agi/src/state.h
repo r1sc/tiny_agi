@@ -130,7 +130,6 @@ typedef struct {
 	int sound_flag;
 	uint8_t* loaded_sounds[256];
 
-	bool sound_on;
 	bool status_line_on;
 
 	bool controllers[MAX_NUM_CONTROLLERS];

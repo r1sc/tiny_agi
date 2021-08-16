@@ -65,9 +65,11 @@ void _set_loop_from_dir(uint8_t objNo, int dir)
 }
 
 
-inline bool point_in_rect(const int x_obj, const int y_obj, const rect_t rect)
+inline bool point_on_block(const int x_obj, const int y_obj, const rect_t rect)
 {
-	return x_obj >= rect.x1 && y_obj >= rect.y1 && x_obj <= rect.x2 && y_obj <= rect.y2;
+	return 
+		((y_obj >= rect.y1 && y_obj <= rect.y2) && (x_obj == rect.x1 || x_obj == rect.x2)) ||
+		((x_obj >= rect.x1 && x_obj <= rect.x2) && (y_obj == rect.y1 || y_obj == rect.y2));
 }
 
 void _update_object(uint8_t objNo)
@@ -76,9 +78,11 @@ void _update_object(uint8_t objNo)
 	{
 		int stepSize = OBJ.step_size;
 
-		if (OBJ.move_mode == OBJ_MOVEMODE_MOVE_TO)
+		if (OBJ.move_mode == OBJ_MOVEMODE_MOVE_TO || OBJ.move_mode == OBJ_MOVEMODE_WANDER)
 		{
 			_set_dir_from_moveDistance(objNo);
+		}
+		if(OBJ.move_mode == OBJ_MOVEMODE_MOVE_TO) {
 			stepSize = OBJ.move_step_size;
 		}
 
@@ -125,7 +129,7 @@ void _update_object(uint8_t objNo)
 			}
 
 			bool unconditionalStop = _obj_baseline_on_pri(newX, newY, cell->width, 0);
-			bool conditionalStop = OBJ.collide_with_blocks && (_obj_baseline_on_pri(newX, newY, cell->width, 1) || (state.block_active && point_in_rect(newX, newY, state.block)));
+			bool conditionalStop = OBJ.collide_with_blocks && (_obj_baseline_on_pri(newX, newY, cell->width, 1) || (state.block_active && point_on_block(newX, newY, state.block)));
 			bool confinedOnWater = (OBJ.allowed_on == OBJ_ON_WATER) && _obj_baseline_on_pri(newX, newY, cell->width, 3);
 			bool confinedOnLand = (OBJ.allowed_on == OBJ_ON_LAND) && _obj_baseline_on_pri(newX, newY, cell->width, 3);
 			bool stop = unconditionalStop || conditionalStop || confinedOnWater || confinedOnLand;

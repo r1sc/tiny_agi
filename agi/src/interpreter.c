@@ -704,7 +704,7 @@ void agi_logic_run_cycle()
 	}
 
 	uint8_t current_score = state.variables[VAR_3_SCORE];
-	bool sound_on = state.sound_on;
+	bool sound_on = state.flags[FLAG_9_SOUND_ENABLED];
 
 	execute_logic_cycle();
 	
