@@ -397,6 +397,11 @@ void step()
 
 bool _find_word_group_of_word(char *word, size_t len)
 {
+	if (len == 0)
+		return true;
+	if (*word < 'a' || *word > 'z')
+		return true;
+
 	int first_letter_index = *word - 'a';
 	uint16_be_t first_word_index = heap_data.words_file->word_indices[first_letter_index];
 	uint16_be_t next_word_index = heap_data.words_file->word_indices[first_letter_index + 1];
@@ -589,7 +594,7 @@ void process_input_queue()
 
 			if (!found_controller)
 			{
-				if (entry.ascii)
+				if (entry.ascii && state.input_prompt_active)
 				{
 					if (entry.ascii == '\b')
 					{
