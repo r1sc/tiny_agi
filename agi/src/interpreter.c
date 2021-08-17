@@ -543,35 +543,35 @@ void process_input_queue()
 
 		if (entry.scancode == AGI_KEY_HOME)
 		{
-			EGO.direction = EGO.direction == DIR_UP_LEFT ? DIR_STOPPED : DIR_UP_LEFT;
+			state.variables[VAR_6_EGO_DIRECTION] = state.variables[VAR_6_EGO_DIRECTION] == DIR_UP_LEFT ? DIR_STOPPED : DIR_UP_LEFT;
 		}
 		else if (entry.scancode == AGI_KEY_UP)
 		{
-			EGO.direction = EGO.direction == DIR_UP ? DIR_STOPPED : DIR_UP;
+			state.variables[VAR_6_EGO_DIRECTION] = state.variables[VAR_6_EGO_DIRECTION] == DIR_UP ? DIR_STOPPED : DIR_UP;
 		}
 		else if (entry.scancode == AGI_KEY_PGUP)
 		{
-			EGO.direction = EGO.direction == DIR_UP_RIGHT ? DIR_STOPPED : DIR_UP_RIGHT;
+			state.variables[VAR_6_EGO_DIRECTION] = state.variables[VAR_6_EGO_DIRECTION] == DIR_UP_RIGHT ? DIR_STOPPED : DIR_UP_RIGHT;
 		}
 		else if (entry.scancode == AGI_KEY_RIGHT)
 		{
-			EGO.direction = EGO.direction == DIR_RIGHT ? DIR_STOPPED : DIR_RIGHT;
+			state.variables[VAR_6_EGO_DIRECTION] = state.variables[VAR_6_EGO_DIRECTION] == DIR_RIGHT ? DIR_STOPPED : DIR_RIGHT;
 		}
 		else if (entry.scancode == AGI_KEY_PGDN)
 		{
-			EGO.direction = EGO.direction == DIR_DOWN_RIGHT ? DIR_STOPPED : DIR_DOWN_RIGHT;
+			state.variables[VAR_6_EGO_DIRECTION] = state.variables[VAR_6_EGO_DIRECTION] == DIR_DOWN_RIGHT ? DIR_STOPPED : DIR_DOWN_RIGHT;
 		}
 		else if (entry.scancode == AGI_KEY_DOWN)
 		{
-			EGO.direction = EGO.direction == DIR_DOWN ? DIR_STOPPED : DIR_DOWN;
+			state.variables[VAR_6_EGO_DIRECTION] = state.variables[VAR_6_EGO_DIRECTION] == DIR_DOWN ? DIR_STOPPED : DIR_DOWN;
 		}
 		else if (entry.scancode == AGI_KEY_END)
 		{
-			EGO.direction = EGO.direction == DIR_DOWN_LEFT ? DIR_STOPPED : DIR_DOWN_LEFT;
+			state.variables[VAR_6_EGO_DIRECTION] = state.variables[VAR_6_EGO_DIRECTION] == DIR_DOWN_LEFT ? DIR_STOPPED : DIR_DOWN_LEFT;
 		}
 		else if (entry.scancode == AGI_KEY_LEFT)
 		{
-			EGO.direction = EGO.direction == DIR_LEFT ? DIR_STOPPED : DIR_LEFT;
+			state.variables[VAR_6_EGO_DIRECTION] = state.variables[VAR_6_EGO_DIRECTION] == DIR_LEFT ? DIR_STOPPED : DIR_LEFT;
 		}
 		else
 		{
@@ -644,30 +644,30 @@ void agi_logic_run_cycle()
 
 	if (state.program_control)
 	{
-		EGO.direction = state.variables[VAR_6_EGO_DIRECTION];
+		state.variables[VAR_6_EGO_DIRECTION] = EGO.direction;
 	}
 	else
 	{
-		state.variables[VAR_6_EGO_DIRECTION] = EGO.direction;
+		EGO.direction = state.variables[VAR_6_EGO_DIRECTION];
 	}
 
 	// recalculate direction of motion
 	for (uint8_t objNo = 0; objNo < MAX_NUM_OBJECTS; objNo++)
 	{
-		if (OBJ.active && OBJ.drawn && OBJ.update && OBJ.move_mode == OBJ_MOVEMODE_MOVE_TO)
+		if (OBJ.active && OBJ.update && OBJ.drawn && OBJ.move_mode == OBJ_MOVEMODE_MOVE_TO)
 		{
 			set_dir_from_move_distance(objNo);
 		}
 	}
 
-	uint8_t current_score = state.variables[VAR_3_SCORE];
-	bool sound_on = state.flags[FLAG_9_SOUND_ENABLED];
+	uint8_t previous_score = state.variables[VAR_3_SCORE];
+	bool previous_sound_status = state.flags[FLAG_9_SOUND_ENABLED];
 
 	execute_logic_cycle();
 
 	EGO.direction = state.variables[VAR_6_EGO_DIRECTION];
 
-	if (current_score != state.variables[VAR_3_SCORE] || sound_on != state.flags[FLAG_9_SOUND_ENABLED])
+	if (previous_score != state.variables[VAR_3_SCORE] || previous_sound_status != state.flags[FLAG_9_SOUND_ENABLED])
 	{
 		redraw_status_line();
 	}

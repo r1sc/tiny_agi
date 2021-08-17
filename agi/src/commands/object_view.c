@@ -80,15 +80,13 @@ inline bool point_on_block(const int x_obj, const int y_obj, const rect_t rect)
 
 void update_object(uint8_t objNo)
 {
-	if (OBJ.update)
+	if (OBJ.active && OBJ.update && OBJ.drawn)
 	{
 		int stepSize = OBJ.step_size;
 
-		if (OBJ.move_mode == OBJ_MOVEMODE_MOVE_TO || OBJ.move_mode == OBJ_MOVEMODE_WANDER)
+		if (OBJ.move_mode == OBJ_MOVEMODE_MOVE_TO)
 		{
 			set_dir_from_move_distance(objNo);
-		}
-		if (OBJ.move_mode == OBJ_MOVEMODE_MOVE_TO) {
 			stepSize = OBJ.move_step_size;
 		}
 
@@ -104,6 +102,13 @@ void update_object(uint8_t objNo)
 
 			int newX = OBJ.x;
 			int newY = OBJ.y;
+
+			if (OBJ.move_mode == OBJ_MOVEMODE_WANDER) {
+				OBJ.wander_distance--;
+				if (OBJ.wander_distance == 0 || OBJ.direction == DIR_STOPPED) {
+					wander(objNo);
+				}
+			}
 
 			if (OBJ.direction == DIR_UP || OBJ.direction == DIR_UP_LEFT || OBJ.direction == DIR_UP_RIGHT)
 			{
@@ -162,13 +167,8 @@ void update_object(uint8_t objNo)
 
 				if (OBJ.move_mode == OBJ_MOVEMODE_WANDER)
 				{
-					OBJ.direction = random_between(1, 9);
+					wander(objNo);
 				}
-			}
-
-			if (OBJ.move_mode == OBJ_MOVEMODE_WANDER && OBJ.move_distance_x == 0 && OBJ.move_distance_y == 0)
-			{
-				wander(objNo);
 			}
 
 			if (OBJ.move_mode == OBJ_MOVEMODE_MOVE_TO && OBJ.move_distance_x == 0 && OBJ.move_distance_y == 0)
@@ -177,7 +177,6 @@ void update_object(uint8_t objNo)
 				OBJ.direction = DIR_STOPPED;
 				state.flags[OBJ.move_done_flag] = true;
 			}
-
 
 			if (newY >= 167)
 			{
@@ -244,6 +243,8 @@ void update_object(uint8_t objNo)
 							}
 							OBJ.cel_no = 0;
 							OBJ.is_cycling = false;
+							OBJ.direction = DIR_STOPPED;
+							OBJ.cycling_mode = CYCLE_MODE_NORMAL;
 						}
 						else
 						{
@@ -268,6 +269,8 @@ void update_object(uint8_t objNo)
 							}
 							OBJ.cel_no = numCels - 1;
 							OBJ.is_cycling = false;
+							OBJ.direction = DIR_STOPPED;
+							OBJ.cycling_mode = CYCLE_MODE_NORMAL;
 						}
 						else
 						{
@@ -384,36 +387,20 @@ void animate_obj(uint8_t objNo)
 		return;
 
 	OBJ.active = true;
-	OBJ.is_cycling = true;
 	OBJ.update = true;
-	OBJ.drawn = false;
-
-	OBJ.cycling_mode = CYCLE_MODE_NORMAL;
+	OBJ.is_cycling = true;
 	OBJ.move_mode = OBJ_MOVEMODE_NORMAL;
+	OBJ.cycling_mode = CYCLE_MODE_NORMAL;
 	OBJ.direction = DIR_STOPPED;
-	OBJ.old_view_no = -1;
-	// OBJ.cycle_time = 1;
-	// OBJ.cycles_to_next_update = OBJ.cycle_time;
 
-	// OBJ.step_size = 1;
-	// OBJ.step_time = 1;
-	// OBJ.steps_to_next_update = OBJ.step_time;
-
+	OBJ.drawn = false;
 	OBJ.fixed_priority = -1;
 	OBJ.move_done_flag = -1;
 	OBJ.end_of_loop_flag = -1;
-
-	// OBJ.view_no = 0;
-	// OBJ.loop_no = 0;
-	// OBJ.cel_no = 0;
 	OBJ.observe_horizon = true;
 	OBJ.allowed_on = OBJ_ON_ANYTHING;
 	OBJ.collide_with_objects = true;
 	OBJ.collide_with_blocks = true;
-	// OBJ.move_distance_x = 0;
-	// OBJ.move_distance_y = 0;
-	// OBJ.move_step_size = 0;
-
 }
 
 void block(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2)
@@ -482,6 +469,7 @@ void end_of_loop(uint8_t objNo, uint8_t flag)
 	state.flags[flag] = false;
 	OBJ.end_of_loop_flag = flag;
 	OBJ.cycling_mode = CYCLE_MODE_END_OF_LOOP;
+	OBJ.update = true;
 	OBJ.is_cycling = true;
 }
 
@@ -685,6 +673,7 @@ void reverse_loop(uint8_t objNo, uint8_t flag)
 	state.flags[flag] = false;
 	OBJ.cycling_mode = CYCLE_MODE_REVERSE_LOOP;
 	OBJ.is_cycling = true;
+	OBJ.update = true;
 }
 
 void set_cel(uint8_t objNo, uint8_t num)
@@ -815,7 +804,6 @@ void wander(uint8_t objNo)
 		program_control();
 	}
 	OBJ.move_mode = OBJ_MOVEMODE_WANDER;
-	OBJ.move_distance_x = random_between(6, 51);
-	OBJ.move_distance_y = random_between(6, 51);
-	set_dir_from_move_distance(objNo);
+	OBJ.direction = random_between(1, 9);
+	OBJ.wander_distance = random_between(6, 51);
 }

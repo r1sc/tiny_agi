@@ -57,10 +57,10 @@ void new_room(uint8_t room_no)
 	stop_update(0);
 	for (uint8_t objNo = 0; objNo < MAX_NUM_OBJECTS; objNo++)
 	{
-		OBJ.drawn = false;
 		OBJ.active = false;
+		OBJ.drawn = false;
 		OBJ.update = true;
-		OBJ.fix_loop = false;
+		OBJ.old_view_no = -1;
 		OBJ.step_size = OBJ.step_time = OBJ.steps_to_next_update = OBJ.cycle_time = OBJ.cycles_to_next_update = 1;
 	}
 

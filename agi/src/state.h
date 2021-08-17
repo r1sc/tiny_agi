@@ -11,7 +11,17 @@ typedef struct {
 	unsigned int pc;
 } logicStackEntry_t;
 
+
 typedef struct {
+	bool active;
+	bool drawn;
+	bool fix_loop;
+	bool update;
+	bool observe_horizon;
+	bool is_cycling;
+	bool collide_with_objects;
+	bool collide_with_blocks;
+
 	int x, y;
 	uint8_t view_no;
 	uint8_t loop_no;
@@ -22,32 +32,28 @@ typedef struct {
 	uint8_t old_loop_no;
 	uint8_t old_cel_no;
 	
-	int move_mode;
-
-	bool active;
-	bool drawn;
-	
-	bool fix_loop;
 	int8_t fixed_priority;
-	bool update;
-	bool observe_horizon;
 	uint8_t allowed_on;
+	
+	uint8_t cycling_mode;
 	uint8_t cycle_time;
 	uint8_t cycles_to_next_update;
+	
+	int move_mode;	
 	uint8_t step_time;
 	uint8_t steps_to_next_update;
 
-	bool is_cycling;
-	uint8_t cycling_mode;
-
-	bool collide_with_objects;
 	uint8_t step_size;
-	bool collide_with_blocks;
+
 	int move_distance_x, move_distance_y;
 	uint8_t move_step_size;
 	int move_done_flag;
+	
 	uint8_t end_of_loop_flag;
+
 	uint8_t direction;
+
+	uint8_t wander_distance;
 } object_t;
 
 #pragma pack(push,1)
