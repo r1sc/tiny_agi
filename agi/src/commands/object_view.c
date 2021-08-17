@@ -1,22 +1,20 @@
 #include <stdlib.h>
 
 #include "../state.h"
+#include "../heap.h"
 #include "../actions.h"
 #include "../platform_support.h"
 #include "../view.h"
 #include "../constants.h"
 
-int _random_between(int min, int maxExclusive)
+#pragma region Utils
+int random_between(int min, int maxExclusive)
 {
 	return (rand() % (maxExclusive - min)) + min;
 }
 
-uint8_t _get_priority(uint8_t objNo)
-{
-	if (OBJ.fixed_priority >= 0)
-		return OBJ.fixed_priority;
-
-	uint8_t priority = OBJ.y / 12 + 1;
+uint8_t y_to_priority(uint8_t y) {
+	uint8_t priority = y / 12 + 1;
 	if (priority < 4)
 		priority = 4;
 	if (priority > 15)
@@ -24,8 +22,16 @@ uint8_t _get_priority(uint8_t objNo)
 	return priority;
 }
 
+uint8_t calculate_priority(uint8_t objNo)
+{
+	if (OBJ.fixed_priority >= 0)
+		return OBJ.fixed_priority;
+
+	return y_to_priority(OBJ.y);
+}
+
 #define MIN(x, y) (x < y ? x : y)
-bool _obj_baseline_on_pri(int x, int y, int width, uint8_t searchFor)
+bool obj_baseline_on_pri(int x, int y, int width, uint8_t searchFor)
 {
 	int controlLine = -1;
 	int maxX = MIN(x + width, 160);
@@ -38,7 +44,7 @@ bool _obj_baseline_on_pri(int x, int y, int width, uint8_t searchFor)
 	return false;
 }
 
-void _set_loop_from_dir(uint8_t objNo, int dir)
+void set_loop_from_dir(uint8_t objNo, int dir)
 {
 	if (!OBJ.fix_loop)
 	{
@@ -67,12 +73,12 @@ void _set_loop_from_dir(uint8_t objNo, int dir)
 
 inline bool point_on_block(const int x_obj, const int y_obj, const rect_t rect)
 {
-	return 
+	return
 		((y_obj >= rect.y1 && y_obj <= rect.y2) && (x_obj == rect.x1 || x_obj == rect.x2)) ||
 		((x_obj >= rect.x1 && x_obj <= rect.x2) && (y_obj == rect.y1 || y_obj == rect.y2));
 }
 
-void _update_object(uint8_t objNo)
+void update_object(uint8_t objNo)
 {
 	if (OBJ.update)
 	{
@@ -80,13 +86,13 @@ void _update_object(uint8_t objNo)
 
 		if (OBJ.move_mode == OBJ_MOVEMODE_MOVE_TO || OBJ.move_mode == OBJ_MOVEMODE_WANDER)
 		{
-			_set_dir_from_moveDistance(objNo);
+			set_dir_from_move_distance(objNo);
 		}
-		if(OBJ.move_mode == OBJ_MOVEMODE_MOVE_TO) {
+		if (OBJ.move_mode == OBJ_MOVEMODE_MOVE_TO) {
 			stepSize = OBJ.move_step_size;
 		}
 
-		_set_loop_from_dir(objNo, OBJ.direction);
+		set_loop_from_dir(objNo, OBJ.direction);
 
 		cell_t* cell = _object_cell(&OBJ);
 
@@ -128,10 +134,10 @@ void _update_object(uint8_t objNo)
 					OBJ.move_distance_x = 0;
 			}
 
-			bool unconditionalStop = _obj_baseline_on_pri(newX, newY, cell->width, 0);
-			bool conditionalStop = OBJ.collide_with_blocks && (_obj_baseline_on_pri(newX, newY, cell->width, 1) || (state.block_active && point_on_block(newX, newY, state.block)));
-			bool confinedOnWater = (OBJ.allowed_on == OBJ_ON_WATER) && _obj_baseline_on_pri(newX, newY, cell->width, 3);
-			bool confinedOnLand = (OBJ.allowed_on == OBJ_ON_LAND) && _obj_baseline_on_pri(newX, newY, cell->width, 3);
+			bool unconditionalStop = obj_baseline_on_pri(newX, newY, cell->width, 0);
+			bool conditionalStop = OBJ.collide_with_blocks && (obj_baseline_on_pri(newX, newY, cell->width, 1) || (state.block_active && point_on_block(newX, newY, state.block)));
+			bool confinedOnWater = (OBJ.allowed_on == OBJ_ON_WATER) && obj_baseline_on_pri(newX, newY, cell->width, 3);
+			bool confinedOnLand = (OBJ.allowed_on == OBJ_ON_LAND) && obj_baseline_on_pri(newX, newY, cell->width, 3);
 			bool stop = unconditionalStop || conditionalStop || confinedOnWater || confinedOnLand;
 
 			if (OBJ.collide_with_objects) {
@@ -156,7 +162,7 @@ void _update_object(uint8_t objNo)
 
 				if (OBJ.move_mode == OBJ_MOVEMODE_WANDER)
 				{
-					OBJ.direction = _random_between(1, 9);
+					OBJ.direction = random_between(1, 9);
 				}
 			}
 
@@ -215,8 +221,8 @@ void _update_object(uint8_t objNo)
 
 		if (objNo == 0)
 		{
-			state.flags[FLAG_3_EGO_TOUCHED_TRIGGER] = _obj_baseline_on_pri(OBJ.x, OBJ.y, cell->width, 2);
-			state.flags[FLAG_0_EGO_ON_WATER] = _obj_baseline_on_pri(OBJ.x, OBJ.y, cell->width, 3);
+			state.flags[FLAG_3_EGO_TOUCHED_TRIGGER] = obj_baseline_on_pri(OBJ.x, OBJ.y, cell->width, 2);
+			state.flags[FLAG_0_EGO_ON_WATER] = obj_baseline_on_pri(OBJ.x, OBJ.y, cell->width, 3);
 		}
 
 		if (OBJ.is_cycling)
@@ -281,24 +287,31 @@ void _update_object(uint8_t objNo)
 	}
 }
 
-void _update_all_active()
+void update_all_active()
 {
 	for (uint8_t i = 0; i < 16; i++)
 	{
 		if (state.objects[i].active && state.objects[i].drawn)
 		{
-			_update_object(i);
+			update_object(i);
 		}
 	}
+}
+
+uint8_t pri_2_coord(uint8_t pri) {
+	return (48 + 12 * (pri - 4 - 1));
 }
 
 int cmpfunc(const void* a, const void* b) {
 	object_t* obj_a = &state.objects[*(uint8_t*)a];
 	object_t* obj_b = &state.objects[*(uint8_t*)b];
-	return (obj_a->y - obj_b->y);
+	uint8_t pri_a = obj_a->fixed_priority > -1 ? pri_2_coord(obj_a->fixed_priority) : obj_a->y;
+	uint8_t pri_b = obj_b->fixed_priority > -1 ? pri_2_coord(obj_b->fixed_priority) : obj_b->y;
+	return (pri_a - pri_b);
 }
 
-void _draw_all_active()
+
+void agi_draw_all_active()
 {
 	uint8_t objs_sorted[16];
 	int num_sorted = 0;
@@ -320,7 +333,7 @@ void _draw_all_active()
 	for (int i = 0; i < num_sorted; i++)
 	{
 		int objNo = objs_sorted[i];
-		uint8_t priority = _get_priority(objNo);
+		uint8_t priority = calculate_priority(objNo);
 		_draw_view(OBJ.view_no, OBJ.loop_no, OBJ.cel_no, OBJ.x, OBJ.y, priority, false, false); //draw
 		OBJ.old_view_no = OBJ.view_no;
 		OBJ.old_loop_no = OBJ.loop_no;
@@ -329,21 +342,27 @@ void _draw_all_active()
 		OBJ.old_y = OBJ.y;
 	}
 }
+#pragma endregion
 
 void add_to_pic(uint8_t viewNo, uint8_t loopNo, uint8_t celNo, uint8_t x, uint8_t y, uint8_t pri, uint8_t margin)
 {
-	write_add_to_pic_script_entry(viewNo, loopNo, celNo, x, y, pri);
+	heap_write_add_to_pic_script_entry(viewNo, loopNo, celNo, x, y, pri);
 
 	_draw_view(viewNo, loopNo, celNo, x, y, pri, false, true);
 	if (margin < 4) {
 		int width = _get_cell(viewNo, loopNo, celNo)->width;
+		uint8_t start_priority = y_to_priority(y);
+		uint8_t ym;
+		for (ym = y; y_to_priority(ym) == start_priority; ym--)
+		{
+			pic_pri_set(x, ym, margin);
+			pic_pri_set(x + width, ym, margin);
+		}
 		for (int xm = 0; xm < width; xm++)
 		{
 			pic_pri_set(x + xm, y, margin);
-			pic_pri_set(x + xm, y - 2, margin);
+			pic_pri_set(x + xm, ym+1, margin);
 		}
-		pic_pri_set(x, y - 1, margin);
-		pic_pri_set(x + width - 1, y - 1, margin);
 	}
 }
 
@@ -428,8 +447,8 @@ void cycle_time(uint8_t objNo, uint8_t var)
 
 void discard_view(uint8_t num)
 {
-	if(!agi_discard(&heap_data.loaded_views[num])) {
-		panic("discard_view: View %d not loaded!", num);
+	if (!discard_vol_data(&(heap_data.loaded_views[num]))) {
+		panic("discard_view: view %d not loaded!", num);
 	}
 }
 
@@ -468,7 +487,9 @@ void end_of_loop(uint8_t objNo, uint8_t flag)
 
 void erase(uint8_t objNo)
 {
-	_draw_view(OBJ.view_no, OBJ.loop_no, OBJ.cel_no, OBJ.x, OBJ.y, 0, true, false);
+	if (OBJ.old_view_no > -1) {
+		_draw_view(OBJ.old_view_no, OBJ.old_loop_no, OBJ.old_cel_no, OBJ.old_x, OBJ.old_y, 0, true, false);
+	}
 	OBJ.drawn = false;
 	OBJ.old_view_no = -1;
 }
@@ -486,7 +507,7 @@ void follow_ego(uint8_t objNo, uint8_t stepSize, uint8_t fDoneFlag)
 void force_update(uint8_t objNo)
 {
 	_draw_view(OBJ.view_no, OBJ.loop_no, OBJ.cel_no, OBJ.x, OBJ.y, 0, true, false); //undraw
-	_update_object(objNo);
+	update_object(objNo);
 }
 
 void get_dir(uint8_t objNo, uint8_t var)
@@ -502,7 +523,7 @@ void get_posn(uint8_t objNo, uint8_t var, uint8_t var2)
 
 void get_priority(uint8_t objNo, uint8_t var)
 {
-	state.variables[var] = _get_priority(objNo);
+	state.variables[var] = calculate_priority(objNo);
 }
 
 void ignore_blocks(uint8_t objNo)
@@ -527,7 +548,7 @@ void last_cel(uint8_t objNo, uint8_t var)
 
 void load_view(uint8_t num)
 {
-	write_script_entry(SCRIPT_ENTRY_LOAD_VIEW, num);
+	heap_write_script_entry(SCRIPT_ENTRY_LOAD_VIEW, num);
 
 	if (heap_data.loaded_views[num].buffer)
 		return;
@@ -542,7 +563,7 @@ void load_view_v(uint8_t var)
 
 void move_obj(uint8_t objNo, uint8_t x, uint8_t y, uint8_t stepSize, uint8_t fDoneFlag)
 {
-	if(OBJ.x == x && OBJ.y == y) {
+	if (OBJ.x == x && OBJ.y == y) {
 		set(fDoneFlag);
 		return;
 	}
@@ -794,7 +815,7 @@ void wander(uint8_t objNo)
 		program_control();
 	}
 	OBJ.move_mode = OBJ_MOVEMODE_WANDER;
-	OBJ.move_distance_x = _random_between(6, 51);
-	OBJ.move_distance_y = _random_between(6, 51);
-	_set_dir_from_moveDistance(objNo);
+	OBJ.move_distance_x = random_between(6, 51);
+	OBJ.move_distance_y = random_between(6, 51);
+	set_dir_from_move_distance(objNo);
 }

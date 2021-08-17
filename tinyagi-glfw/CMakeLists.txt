@@ -22,5 +22,3 @@ set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 find_package(OpenGL REQUIRED)
 
 target_link_libraries(tinyagi_glfw glfw OpenGL::GL tinyagi winmm.lib)
-
-# TODO: Add tests and install targets if needed.

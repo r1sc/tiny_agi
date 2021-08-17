@@ -55,32 +55,6 @@ typedef struct {
 	int x1, y1;
 	int x2, y2;
 } rect_t;
-
-typedef struct {
-	uint16_t name_offset;
-	uint8_t room_no;
-} item_t;
-
-typedef struct {
-	uint16_t item_names_offset;
-	uint8_t num_objects;
-	item_t items[];
-} item_file_t;
-
-typedef struct {
-	uint8_t hi_byte;
-	uint8_t lo_byte;
-} uint16_be_t;
-
-typedef struct {
-	uint8_t prefix;
-	uint8_t data[];
-} word_entry_t;
-
-typedef struct {
-	uint16_be_t word_indices[25];
-	uint8_t data[];
-} words_file_t;
 #pragma pack(pop)
 
 typedef struct
@@ -89,22 +63,6 @@ typedef struct
 	char ascii;
 	uint8_t controller_no;
 } controller_assignment_t;
-
-typedef struct {
-	uint8_t script_type;
-	uint8_t resource_number;
-} script_entry_t;
-
-typedef struct {
-	vol_data_t loaded_logics[256];	
-	vol_data_t loaded_pics[256];
-	vol_data_t loaded_views[256];
-	vol_data_t loaded_sounds[256];
-	script_entry_t *script_entries;
-	
-	item_file_t* item_file;
-	words_file_t* words_file;	
-} agi_heap_t;
 
 typedef struct {
 	/* Interpreter state */
@@ -157,31 +115,20 @@ typedef struct {
 	uint16_t parsed_word_groups[20];
 	uint16_t num_parsed_word_groups;
 
-	int script_size;
-	int script_entry_pos;
 } agi_state_t;
 
 typedef struct {
 	uint8_t room_no;
 } item_save_data_t;
 
-extern agi_heap_t heap_data;
 extern agi_state_t state;
 #define EGO state.objects[0]
 
-void agi_free_heap();
-bool agi_discard(vol_data_t* vol_data);
-
-void write_script_entry(uint8_t script_type, uint8_t resource_no);
-void write_add_to_pic_script_entry(uint8_t view_no, uint8_t loop_no, uint8_t cel_no, uint8_t x, uint8_t y, uint8_t pri);
-
-void clear_controller_assignments();
-
 /* Initializes the agi state */
-void agi_reset();
+void state_reset();
+
+/* Updates and draws all active objects */
+void agi_draw_all_active();
 
 /* Steps the simulation */
 void agi_logic_run_cycle();
-
-/* Updates and draws all active objects */
-void _draw_all_active();

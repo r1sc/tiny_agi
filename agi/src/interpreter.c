@@ -1,6 +1,7 @@
 #include <string.h>
 
 #include "state.h"
+#include "heap.h"
 #include "actions.h"
 #include "platform_support.h"
 #include "text_display.h"
@@ -207,15 +208,7 @@ action_t actions[] = {
 	ACTION("pop_script", pop_script, 0),
 	ACTION("hold_key", hold_key, 0)};
 
-#pragma pack(push, 1)
-typedef struct
-{
-	uint8_t num_messages;
-	uint16_t messages_end;
-} agi_messages_header_t;
-#pragma pack(pop)
-
-char *_get_message(uint8_t message_no)
+char *get_message(uint8_t message_no)
 {
 	message_no--;
 	uint8_t *buffer = heap_data.loaded_logics[state.current_logic].buffer;
@@ -227,36 +220,6 @@ char *_get_message(uint8_t message_no)
 	char *message = ((char *)message_section) + offset + 1;
 
 	return message;
-}
-
-const char *decryptionKey = "Avis Durgan";
-
-void _decrypt_messages(uint8_t logic_no)
-{
-	uint8_t *buffer = heap_data.loaded_logics[logic_no].buffer;
-	agi_messages_header_t *message_section = (agi_messages_header_t *)(buffer + ((buffer[1] << 8) | buffer[0]) + 2);
-
-	int ptr_table_len = message_section->num_messages * 2;
-	char *message_ptr = ((uint8_t *)message_section) + 3 + ptr_table_len;
-	char *messages_end = ((uint8_t *)message_section) + message_section->messages_end;
-
-	uint8_t decI = 0;
-
-	while (message_ptr < messages_end)
-	{
-		*(message_ptr++) ^= decryptionKey[decI++];
-		if (decI == 11)
-			decI = 0;
-	}
-	*message_ptr = '\0';
-}
-
-void _decrypt_item_file(uint8_t *item_file, size_t size)
-{
-	for (size_t i = 0; i < size; i++)
-	{
-		item_file[i] ^= decryptionKey[i % 11];
-	}
 }
 
 uint8_t next_data()
@@ -434,7 +397,6 @@ void step()
 
 bool _find_word_group_of_word(char *word, size_t len)
 {
-	char first_letter = *word;
 	int first_letter_index = *word - 'a';
 	uint16_be_t first_word_index = heap_data.words_file->word_indices[first_letter_index];
 	uint16_be_t next_word_index = heap_data.words_file->word_indices[first_letter_index + 1];
@@ -523,7 +485,7 @@ void _parse_word_groups()
 	}
 }
 
-void _set_dir_from_moveDistance(uint8_t objNo)
+void set_dir_from_move_distance(uint8_t objNo)
 {
 	if (OBJ.move_distance_x < 0 && OBJ.move_distance_y < 0)
 	{
@@ -614,12 +576,13 @@ void process_input_queue()
 		else
 		{
 			bool found_controller = false;
-			for (size_t i = 0; i < 50; i++)
+			for (size_t j = 0; j < 50; j++)
 			{
-				if ((state.controller_assignments[i].ascii > 0 && state.controller_assignments[i].ascii == entry.ascii) ||
-					(state.controller_assignments[i].scancode > 0 && state.controller_assignments[i].scancode == entry.scancode))
+				controller_assignment_t controller_assignment = state.controller_assignments[j];
+				if ((controller_assignment.ascii > 0 && controller_assignment.ascii == entry.ascii) ||
+					(controller_assignment.scancode > 0 && controller_assignment.scancode == entry.scancode))
 				{
-					state.controllers[state.controller_assignments[i].controller_no] = true;
+					state.controllers[controller_assignment.controller_no] = true;
 					found_controller = true;
 				}
 			}
@@ -651,7 +614,10 @@ void process_input_queue()
 
 void agi_logic_run_cycle()
 {
-	clear_controller_assignments();
+	for (size_t i = 0; i < MAX_NUM_CONTROLLERS; i++)
+	{
+		state.controllers[i] = false;
+	}
 	
 	state.flags[FLAG_2_COMMAND_ENTERED] = false;
 	state.flags[FLAG_4_SAID_ACCEPTED_INPUT] = false;
@@ -690,7 +656,7 @@ void agi_logic_run_cycle()
 	{
 		if (OBJ.active && OBJ.drawn && OBJ.update && OBJ.move_mode == OBJ_MOVEMODE_MOVE_TO)
 		{
-			_set_dir_from_moveDistance(objNo);
+			set_dir_from_move_distance(objNo);
 		}
 	}
 
@@ -703,7 +669,7 @@ void agi_logic_run_cycle()
 
 	if (current_score != state.variables[VAR_3_SCORE] || sound_on != state.flags[FLAG_9_SOUND_ENABLED])
 	{
-		_redraw_status_line();
+		redraw_status_line();
 	}
 
 	state.variables[VAR_4_OBJ_BORDER_OBJNO] = 0;
@@ -713,5 +679,10 @@ void agi_logic_run_cycle()
 	state.flags[FLAG_6_RESTART_GAME_EXECUTED] = false;
 	state.flags[FLAG_12_GAME_RESTORED] = false;
 
-	_update_all_active();
+	update_all_active();
+}
+
+void agi_initialize() {
+	state_reset();
+	state.flags[FLAG_5_ROOM_EXECUTED_FIRST_TIME] = true;
 }

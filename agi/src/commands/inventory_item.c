@@ -1,4 +1,5 @@
 #include "../state.h"
+#include "../heap.h"
 #include "../actions.h"
 
 void drop(uint8_t item) {

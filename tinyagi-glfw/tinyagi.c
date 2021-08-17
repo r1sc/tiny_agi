@@ -206,22 +206,22 @@ void agi_ext_sound_update(uint16_t channel_hz[4]) {
 	}
 	synth_get_sample_points()*/
 }
-
-agi_save_data_file_ptr agi_save_data_open(const char* mode) {
-	return (agi_save_data_file_ptr)fopen("save.bin", mode);
-}
-
-void agi_save_data_close(agi_save_data_file_ptr file_ptr) {
-	fclose((FILE*)file_ptr);
-}
-
-void agi_save_data_write(agi_save_data_file_ptr file_ptr, void* data, size_t size) {
-	fwrite(data, size, 1, (FILE*)file_ptr);
-}
-
-void agi_save_data_read(agi_save_data_file_ptr file_ptr, void* destination, size_t size) {
-	fread(destination, size, 1, (FILE*)file_ptr);
-}
+//
+//agi_save_data_file_ptr agi_save_data_open(const char* mode) {
+//	return (agi_save_data_file_ptr)fopen("save.bin", mode);
+//}
+//
+//void agi_save_data_close(agi_save_data_file_ptr file_ptr) {
+//	fclose((FILE*)file_ptr);
+//}
+//
+//void agi_save_data_write(agi_save_data_file_ptr file_ptr, void* data, size_t size) {
+//	fwrite(data, size, 1, (FILE*)file_ptr);
+//}
+//
+//void agi_save_data_read(agi_save_data_file_ptr file_ptr, void* destination, size_t size) {
+//	fread(destination, size, 1, (FILE*)file_ptr);
+//}
 
 #define PI 3.14159265358979323846
 int main() {
@@ -259,8 +259,8 @@ int main() {
 
 	glEnable(GL_TEXTURE_2D);
 
-	agi_reset();
-
+	agi_initialize();
+	
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glOrtho(0, 320, 200, 0, -1, 1);
@@ -307,7 +307,7 @@ int main() {
 
 			//_undraw_all();
 			agi_logic_run_cycle();
-			_draw_all_active();
+			agi_draw_all_active();
 			render();
 			state.enter_pressed = false;
 		}

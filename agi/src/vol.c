@@ -53,3 +53,13 @@ vol_data_t load_vol_data(const char* dir_filename, const uint8_t res_no, bool is
 
 	return result;
 }
+
+bool discard_vol_data(vol_data_t* vol_data) {
+	if (vol_data->buffer) {
+		free(vol_data->buffer);
+		vol_data->buffer = NULL;
+		vol_data->size = 0;
+		return true;
+	}
+	return false;
+}

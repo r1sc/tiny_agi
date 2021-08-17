@@ -43,7 +43,7 @@ void configure_screen(uint8_t pPlaytop, uint8_t pInputLine, uint8_t pStatusLine)
 
 void display(uint8_t row, uint8_t col, uint8_t msg)
 {
-	char *message = _get_message(msg);
+	char *message = get_message(msg);
 	_draw_text(&row, &col, message, state.display_fg, state.display_bg);
 }
 
@@ -76,7 +76,7 @@ void _next_word(const char *str, char **end_i)
 
 void _find_longest_line(const char *message, uint8_t max_cols, uint8_t *num_cols, uint8_t *num_lines)
 {
-	int col = 0;
+	uint8_t col = 0;
 	int row = 1;
 	char *start = (char *)message;
 	char *end = start;
@@ -116,7 +116,7 @@ void _find_longest_line(const char *message, uint8_t max_cols, uint8_t *num_cols
 
 void _print(const char *message, int col, int row, uint8_t max_width)
 {
-	_draw_all_active();
+	agi_draw_all_active();
 	uint8_t width, height;
 	_find_longest_line(message, max_width, &width, &height);
 
@@ -195,13 +195,13 @@ void _print(const char *message, int col, int row, uint8_t max_width)
 
 void print(uint8_t msg)
 {
-	char *message = _get_message(msg);
+	char *message = get_message(msg);
 	_print(message, -1, -1, 31);
 }
 
 void print_at(uint8_t msg, uint8_t row, uint8_t col, uint8_t maxWidth)
 {
-	char *message = _get_message(msg);
+	char *message = get_message(msg);
 	_print(message, col, row, maxWidth);
 }
 
@@ -217,7 +217,7 @@ void print_v(uint8_t var)
 
 void set_cursor_char(uint8_t msg)
 {
-	char *message = _get_message(msg);
+	char *message = get_message(msg);
 	state.cursor_char = message[0];
 }
 
@@ -235,16 +235,16 @@ void shake_screen(uint8_t num)
 void status_line_off()
 {
 	state.status_line_on = false;
-	_redraw_status_line();
+	redraw_status_line();
 }
 
 void status_line_on()
 {
 	state.status_line_on = true;
-	_redraw_status_line();
+	redraw_status_line();
 }
 
-void _redraw_status_line() {
+void redraw_status_line() {
 	if (!state.status_line_on){
 		clear_lines(state.status_line, state.status_line, 0);
 	}

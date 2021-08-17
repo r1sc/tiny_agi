@@ -12,18 +12,20 @@ int pic_vis_get(int x, int y);
 void pic_pri_set(int x, int y, int priority);
 int pic_pri_get(int x, int y);
 
-void _decrypt_messages(uint8_t logic_no);
-void _decrypt_item_file(uint8_t* item_file, size_t size);
 uint8_t next_data();
-void _update_all_active();
-void _redraw_status_line();
-void _set_dir_from_moveDistance(uint8_t objNo);
+char* get_message(uint8_t message_no);
+void update_all_active();
+void redraw_status_line();
+void set_dir_from_move_distance(uint8_t objNo);
 
 void load_pic_no(uint8_t pic_no);
 void overlay_pic_no(uint8_t pic_no);
 void draw_pic_no(uint8_t pic_no);
 void discard_pic_no(uint8_t pic_no);
 void load_logic_no_script_write(uint8_t num);
+
+
+
 
 typedef struct {
 	uint8_t numArgs;

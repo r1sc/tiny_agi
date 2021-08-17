@@ -1,6 +1,7 @@
 #include <stdlib.h>
 
 #include "../state.h"
+#include "../heap.h"
 #include "../platform_support.h"
 
 bool vis_enabled = false;
@@ -276,10 +277,10 @@ void show_pic() {
 }
 
 void discard_pic_no(uint8_t pic_no) {
-	write_script_entry(SCRIPT_ENTRY_DISCARD_PIC, pic_no);
+	heap_write_script_entry(SCRIPT_ENTRY_DISCARD_PIC, pic_no);
 
-	if(!agi_discard(&heap_data.loaded_pics[pic_no])) {
-		panic("discard_pic: Pic %d not loaded!", pic_no);
+	if (!discard_vol_data(&(heap_data.loaded_pics[pic_no]))) {
+		panic("discard_pic: pic %d not loaded!", pic_no);
 	}
 }
 
@@ -288,7 +289,7 @@ void discard_pic(uint8_t var) {
 }
 
 void draw_pic_no(uint8_t pic_no) {
-	write_script_entry(SCRIPT_ENTRY_DRAW_PIC, pic_no);
+	heap_write_script_entry(SCRIPT_ENTRY_DRAW_PIC, pic_no);
 
 	_clear_screen();
 	_pic_draw(pic_no);
@@ -299,7 +300,7 @@ void draw_pic(uint8_t var) {
 }
 
 void load_pic_no(uint8_t pic_no) {
-	write_script_entry(SCRIPT_ENTRY_LOAD_PIC, pic_no);
+	heap_write_script_entry(SCRIPT_ENTRY_LOAD_PIC, pic_no);
 
 	if (heap_data.loaded_pics[pic_no].buffer)
 		return;
@@ -312,7 +313,7 @@ void load_pic(uint8_t var) {
 }
 
 void overlay_pic_no(uint8_t pic_no) {
-	write_script_entry(SCRIPT_ENTRY_OVERLAY_PIC, pic_no);
+	heap_write_script_entry(SCRIPT_ENTRY_OVERLAY_PIC, pic_no);
 	_pic_draw(pic_no);
 }
 

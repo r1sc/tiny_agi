@@ -1,5 +1,7 @@
 #include "../actions.h"
 #include "../state.h"
+#include "../heap.h"
+#include "../decryption.h"
 #include "../vol.h"
 #include "../view.h"
 #include "../constants.h"
@@ -31,14 +33,14 @@ void load_logic_no_script_write(uint8_t num)
 		return;
 
 	heap_data.loaded_logics[num] = load_vol_data("logdir", num, true);
-	_decrypt_messages(num);
+	decrypt_messages(num);
 }
 
 void load_logics(uint8_t num)
 {
 	if (num != 0)
 	{
-		write_script_entry(SCRIPT_ENTRY_LOAD_LOGIC, num);
+		heap_write_script_entry(SCRIPT_ENTRY_LOAD_LOGIC, num);
 	}
 	load_logic_no_script_write(num);
 }
@@ -103,20 +105,16 @@ void new_room(uint8_t room_no)
 		state.scan_start[i] = 0;
 	}
 
-	agi_free_heap();
-
 	state.current_logic = 0;
 	state.pc = state.scan_start[0];
 	state.stack_ptr = 0;
-	load_logic_no_script_write(0);
 
-	if (state.script_size == 0)
+	if (heap_data.script_size == 0)
 	{
-		state.script_size = 50;
+		heap_data.script_size = 50;
 	}
 
-	heap_data.script_entries = malloc(state.script_size * sizeof(script_entry_t));
-	state.script_entry_pos = 0;
+	heap_reset();
 }
 
 void new_room_v(uint8_t var)

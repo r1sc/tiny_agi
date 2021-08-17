@@ -30,8 +30,8 @@ extern void agi_stop_sound();
 
 extern void agi_input_queue_push_keypress(char ascii, uint8_t scancode);
 
-typedef void* agi_save_data_file_ptr;
-agi_save_data_file_ptr agi_save_data_open(const char* mode);
-void agi_save_data_write(agi_save_data_file_ptr file_ptr, void* data, size_t size);
-void agi_save_data_read(agi_save_data_file_ptr file_ptr, void* destination, size_t size);
-void agi_save_data_close(agi_save_data_file_ptr file_ptr);
+//typedef void* agi_save_data_file_ptr;
+//agi_save_data_file_ptr agi_save_data_open(const char* mode);
+//void agi_save_data_write(agi_save_data_file_ptr file_ptr, void* data, size_t size);
+//void agi_save_data_read(agi_save_data_file_ptr file_ptr, void* destination, size_t size);
+//void agi_save_data_close(agi_save_data_file_ptr file_ptr);

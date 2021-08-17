@@ -32,6 +32,10 @@ add_library (tinyagi STATIC
 	"src/view.c" 
 	"src/view.h"
 	"src/input_queue.h"
-	"src/input_queue.c" )
+	"src/input_queue.c"  
+	"src/heap.c" 
+	"src/heap.h" 
+	"src/decryption.h"
+	"src/decryption.c")
 
 target_include_directories(tinyagi PUBLIC include)

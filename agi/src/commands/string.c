@@ -14,7 +14,7 @@ void parse(uint8_t str) {
 }
 
 void set_string(uint8_t str, uint8_t msg) {
-	char* message = _get_message(msg);
+	char* message = get_message(msg);
 	strcpy(state.strings[str], message);
 }
 

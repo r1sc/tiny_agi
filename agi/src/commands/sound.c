@@ -1,13 +1,15 @@
 #include "../actions.h"
 #include "../state.h"
+#include "../heap.h"
 #include "../vol.h"
 #include "../platform_support.h"
 
 void load_sound(uint8_t num) {
-	write_script_entry(SCRIPT_ENTRY_LOAD_SOUND, num);
+	heap_write_script_entry(SCRIPT_ENTRY_LOAD_SOUND, num);
 
 	if(heap_data.loaded_sounds[num].buffer)
 		return;
+
 	heap_data.loaded_sounds[num] = load_vol_data("snddir", num, false);
 }
 

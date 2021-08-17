@@ -2,6 +2,7 @@
 
 #include "../actions.h"
 #include "../state.h"
+#include "../heap.h"
 #include "../view.h"
 
 bool equaln(uint8_t var, uint8_t num) {
@@ -45,7 +46,7 @@ bool obj_in_room(uint8_t item, uint8_t var) {
 }
 
 bool posn(uint8_t objNo, uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2) {
-	return OBJ.x > x1 && OBJ.x <= x2 && OBJ.y > y1 && OBJ.y <= y2;
+	return OBJ.x >= x1 && OBJ.x <= x2 && OBJ.y >= y1 && OBJ.y <= y2;
 }
 
 bool controller(uint8_t ctr) {
