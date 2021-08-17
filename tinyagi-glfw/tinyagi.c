@@ -25,7 +25,7 @@ void panic(const char* fmt, ...) {
 	exit(1);
 }
 
-const char* game_path = "C:\\classic\\sierra\\kq3";
+const char* game_path = "C:\\classic\\sierra\\pq";
 agi_file_t get_file(const char* filename) {
 	char path[256];
 	sprintf(path, "%s\\%s\0", game_path, filename);
@@ -205,6 +205,22 @@ void agi_ext_sound_update(uint16_t channel_hz[4]) {
 		synth_set_frequency(i, channel_hz[i]);
 	}
 	synth_get_sample_points()*/
+}
+
+agi_save_data_file_ptr agi_save_data_open(const char* mode) {
+	return (agi_save_data_file_ptr)fopen("save.bin", mode);
+}
+
+void agi_save_data_close(agi_save_data_file_ptr file_ptr) {
+	fclose((FILE*)file_ptr);
+}
+
+void agi_save_data_write(agi_save_data_file_ptr file_ptr, void* data, size_t size) {
+	fwrite(data, size, 1, (FILE*)file_ptr);
+}
+
+void agi_save_data_read(agi_save_data_file_ptr file_ptr, void* destination, size_t size) {
+	fread(destination, size, 1, (FILE*)file_ptr);
 }
 
 #define PI 3.14159265358979323846

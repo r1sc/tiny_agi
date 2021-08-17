@@ -117,13 +117,13 @@ void _pic_draw(uint8_t pic_no) {
 	vis_color = 0;
 	pri_color = 0;
 
-	uint8_t* buffer = state.loaded_pics[pic_no].buffer;
+	uint8_t* buffer = heap_data.loaded_pics[pic_no].buffer;
 	if (!buffer) {
 		panic("No picture loaded!");
 		return;
 	}
 
-	for (size_t i = 0; i < state.loaded_pics[pic_no].size;)
+	for (size_t i = 0; i < heap_data.loaded_pics[pic_no].size;)
 	{
 		uint8_t value = buffer[i++];
 		switch (value) {
@@ -275,30 +275,47 @@ void show_pic() {
 	}
 }
 
-void discard_pic(uint8_t var) {
-	uint8_t pic_no = state.variables[var];
-	if (!state.loaded_pics[pic_no].buffer) {
+void discard_pic_no(uint8_t pic_no) {
+	write_script_entry(SCRIPT_ENTRY_DISCARD_PIC, pic_no);
+
+	if(!agi_discard(&heap_data.loaded_pics[pic_no])) {
 		panic("discard_pic: Pic %d not loaded!", pic_no);
 	}
-	free(state.loaded_pics[pic_no].buffer);
-	state.loaded_pics[pic_no].buffer = NULL;
 }
 
+void discard_pic(uint8_t var) {
+	discard_pic_no(state.variables[var]);
+}
+
+void draw_pic_no(uint8_t pic_no) {
+	write_script_entry(SCRIPT_ENTRY_DRAW_PIC, pic_no);
+
+	_clear_screen();
+	_pic_draw(pic_no);
+}
 
 void draw_pic(uint8_t var) {
-	_clear_screen();
-	_pic_draw(state.variables[var]);
+	draw_pic_no(state.variables[var]);
+}
+
+void load_pic_no(uint8_t pic_no) {
+	write_script_entry(SCRIPT_ENTRY_LOAD_PIC, pic_no);
+
+	if (heap_data.loaded_pics[pic_no].buffer)
+		return;
+
+	heap_data.loaded_pics[pic_no] = load_vol_data("picdir", pic_no, false);
 }
 
 void load_pic(uint8_t var) {
-	uint8_t pic_no = state.variables[var];
+	load_pic_no(state.variables[var]);
+}
 
-	if (state.loaded_pics[pic_no].buffer)
-		return;
-
-	state.loaded_pics[pic_no] = load_vol_data("picdir", pic_no, false);
+void overlay_pic_no(uint8_t pic_no) {
+	write_script_entry(SCRIPT_ENTRY_OVERLAY_PIC, pic_no);
+	_pic_draw(pic_no);
 }
 
 void overlay_pic(uint8_t var) {
-	_pic_draw(state.variables[var]);
+	overlay_pic_no(state.variables[var]);
 }

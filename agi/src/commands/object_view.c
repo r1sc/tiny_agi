@@ -332,6 +332,8 @@ void _draw_all_active()
 
 void add_to_pic(uint8_t viewNo, uint8_t loopNo, uint8_t celNo, uint8_t x, uint8_t y, uint8_t pri, uint8_t margin)
 {
+	write_add_to_pic_script_entry(viewNo, loopNo, celNo, x, y, pri);
+
 	_draw_view(viewNo, loopNo, celNo, x, y, pri, false, true);
 	if (margin < 4) {
 		int width = _get_cell(viewNo, loopNo, celNo)->width;
@@ -371,12 +373,12 @@ void animate_obj(uint8_t objNo)
 	OBJ.move_mode = OBJ_MOVEMODE_NORMAL;
 	OBJ.direction = DIR_STOPPED;
 	OBJ.old_view_no = -1;
-	OBJ.cycle_time = 1;
-	OBJ.cycles_to_next_update = OBJ.cycle_time;
+	// OBJ.cycle_time = 1;
+	// OBJ.cycles_to_next_update = OBJ.cycle_time;
 
-	OBJ.step_size = 1;
-	OBJ.step_time = 1;
-	OBJ.steps_to_next_update = OBJ.step_time;
+	// OBJ.step_size = 1;
+	// OBJ.step_time = 1;
+	// OBJ.steps_to_next_update = OBJ.step_time;
 
 	OBJ.fixed_priority = -1;
 	OBJ.move_done_flag = -1;
@@ -389,9 +391,9 @@ void animate_obj(uint8_t objNo)
 	OBJ.allowed_on = OBJ_ON_ANYTHING;
 	OBJ.collide_with_objects = true;
 	OBJ.collide_with_blocks = true;
-	OBJ.move_distance_x = 0;
-	OBJ.move_distance_y = 0;
-	OBJ.move_step_size = 0;
+	// OBJ.move_distance_x = 0;
+	// OBJ.move_distance_y = 0;
+	// OBJ.move_step_size = 0;
 
 }
 
@@ -426,21 +428,29 @@ void cycle_time(uint8_t objNo, uint8_t var)
 
 void discard_view(uint8_t num)
 {
-	UNIMPLEMENTED
+	if(!agi_discard(&heap_data.loaded_views[num])) {
+		panic("discard_view: View %d not loaded!", num);
+	}
 }
 
 void discard_view_v(uint8_t var)
 {
-	UNIMPLEMENTED
+	discard_view(state.variables[var]);
 }
 
 void distance(uint8_t objNo, uint8_t objNo2, uint8_t var)
 {
-	object_t _OBJ = state.objects[objNo];
 	object_t OBJ2 = state.objects[objNo2];
-	int deltaX = abs(_OBJ.x - OBJ2.x);
-	int deltaY = abs(_OBJ.y - OBJ2.y);
-	state.variables[var] = deltaX + deltaY;
+
+	if (!OBJ.active || !OBJ.drawn || !OBJ2.active || !OBJ2.drawn)
+	{
+		state.variables[var] = 255;
+		return;
+	}
+
+	cell_t* cel1 = _object_cell(&OBJ);
+	cell_t* cel2 = _object_cell(&OBJ2);
+	state.variables[var] = abs(OBJ.y - OBJ2.y) + abs((OBJ.x + (cel1->width >> 1)) - (OBJ2.x + (cel2->width >> 1)));
 }
 
 void draw(uint8_t objNo)
@@ -517,10 +527,12 @@ void last_cel(uint8_t objNo, uint8_t var)
 
 void load_view(uint8_t num)
 {
-	if (state.loaded_views[num].buffer)
+	write_script_entry(SCRIPT_ENTRY_LOAD_VIEW, num);
+
+	if (heap_data.loaded_views[num].buffer)
 		return;
 
-	state.loaded_views[num] = load_vol_data("viewdir", num, false);
+	heap_data.loaded_views[num] = load_vol_data("viewdir", num, false);
 }
 
 void load_view_v(uint8_t var)
@@ -749,10 +761,11 @@ void stop_cycling(uint8_t objNo)
 
 void stop_motion(uint8_t objNo)
 {
+	OBJ.direction = DIR_STOPPED;
 	if (objNo == 0) {
 		program_control();
+		state.variables[VAR_6_EGO_DIRECTION] = DIR_STOPPED;
 	}
-	OBJ.direction = DIR_STOPPED;
 }
 
 void stop_update(uint8_t objNo)

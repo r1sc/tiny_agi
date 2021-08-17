@@ -85,7 +85,7 @@ void _find_longest_line(const char *message, uint8_t max_cols, uint8_t *num_cols
 	while (*end != '\0')
 	{
 		_next_word(start, &end);
-		int word_len = end - start + 1;
+		int word_len = (int)(end - start) + 1;
 
 		if (col + word_len >= max_cols)
 		{
@@ -134,7 +134,7 @@ void _print(const char *message, int col, int row, uint8_t max_width)
 	while (*end != '\0')
 	{
 		_next_word(start, &end);
-		int word_len = end - start + 1;
+		int word_len = (int)(end - start) + 1;
 
 		if (written_line_chars + word_len >= max_width)
 		{

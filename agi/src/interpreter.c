@@ -218,7 +218,7 @@ typedef struct
 char *_get_message(uint8_t message_no)
 {
 	message_no--;
-	uint8_t *buffer = state.loaded_logics[state.current_logic];
+	uint8_t *buffer = heap_data.loaded_logics[state.current_logic].buffer;
 	uint8_t *message_section = buffer + ((buffer[1] << 8) | buffer[0]) + 2;
 
 	uint8_t *message_offset = (message_section + 3 + 2 * message_no);
@@ -233,7 +233,7 @@ const char *decryptionKey = "Avis Durgan";
 
 void _decrypt_messages(uint8_t logic_no)
 {
-	uint8_t *buffer = state.loaded_logics[logic_no];
+	uint8_t *buffer = heap_data.loaded_logics[logic_no].buffer;
 	agi_messages_header_t *message_section = (agi_messages_header_t *)(buffer + ((buffer[1] << 8) | buffer[0]) + 2);
 
 	int ptr_table_len = message_section->num_messages * 2;
@@ -261,7 +261,7 @@ void _decrypt_item_file(uint8_t *item_file, size_t size)
 
 uint8_t next_data()
 {
-	return *(state.loaded_logics[state.current_logic] + 2 + (state.pc++));
+	return *(((uint8_t*)heap_data.loaded_logics[state.current_logic].buffer) + 2 + (state.pc++));
 }
 
 void jump()
@@ -432,21 +432,17 @@ void step()
 	}
 }
 
-
-uint16_t parsed_word_groups[20];
-uint16_t num_parsed_word_groups = 0;
-
 bool _find_word_group_of_word(char *word, size_t len)
 {
 	char first_letter = *word;
 	int first_letter_index = *word - 'a';
-	uint16_be_t first_word_index = state.words_file->word_indices[first_letter_index];
-	uint16_be_t next_word_index = state.words_file->word_indices[first_letter_index + 1];
+	uint16_be_t first_word_index = heap_data.words_file->word_indices[first_letter_index];
+	uint16_be_t next_word_index = heap_data.words_file->word_indices[first_letter_index + 1];
 	uint16_t first_word_offset = (uint16_t)(first_word_index.hi_byte << 8) | (uint16_t)first_word_index.lo_byte;
 	uint16_t next_word_offset = (uint16_t)(next_word_index.hi_byte << 8) | (uint16_t)next_word_index.lo_byte;
 
-	uint8_t *word_entry = ((uint8_t *)state.words_file) + first_word_offset;
-	uint8_t *next_word_entry = ((uint8_t *)state.words_file) + next_word_offset;
+	uint8_t *word_entry = ((uint8_t *)heap_data.words_file) + first_word_offset;
+	uint8_t *next_word_entry = ((uint8_t *)heap_data.words_file) + next_word_offset;
 
 	char prev_word[40];
 	int prev_word_len = 0;
@@ -472,7 +468,7 @@ bool _find_word_group_of_word(char *word, size_t len)
 			// Found match
 			if (word_num > 0)
 			{ // Skip anyword
-				parsed_word_groups[num_parsed_word_groups++] = word_num;
+				state.parsed_word_groups[state.num_parsed_word_groups++] = word_num;
 			}
 			return true;
 		}
@@ -494,7 +490,7 @@ bool _find_word_group_of_word(char *word, size_t len)
 
 void _parse_word_groups()
 {
-	num_parsed_word_groups = 0;
+	state.num_parsed_word_groups = 0;
 
 	char *c = state.input_buffer;
 	char *word_start = c;
@@ -565,7 +561,7 @@ void _set_dir_from_moveDistance(uint8_t objNo)
 
 void execute_logic_cycle()
 {
-	load_logics(0);
+	load_logic_no_script_write(0);
 	state.current_logic = 0;
 	state.pc = state.scan_start[0];
 	state.stack_ptr = 0;
@@ -576,16 +572,6 @@ void execute_logic_cycle()
 		step();
 	}
 }
-
-typedef struct
-{
-	uint8_t scancode;
-	char ascii;
-	uint8_t controller_no;
-} controller_assignment_t;
-
-controller_assignment_t controller_assignments[50];
-bool escape_pressed = false;
 
 void process_input_queue()
 {
@@ -630,9 +616,10 @@ void process_input_queue()
 			bool found_controller = false;
 			for (size_t i = 0; i < 50; i++)
 			{
-				if ((controller_assignments[i].ascii > 0 && controller_assignments[i].ascii == entry.ascii) || (controller_assignments[i].scancode > 0 && controller_assignments[i].scancode == entry.scancode))
+				if ((state.controller_assignments[i].ascii > 0 && state.controller_assignments[i].ascii == entry.ascii) ||
+					(state.controller_assignments[i].scancode > 0 && state.controller_assignments[i].scancode == entry.scancode))
 				{
-					state.controllers[controller_assignments[i].controller_no] = true;
+					state.controllers[state.controller_assignments[i].controller_no] = true;
 					found_controller = true;
 				}
 			}
@@ -643,7 +630,8 @@ void process_input_queue()
 				{
 					if (entry.ascii == '\b')
 					{
-						if(state.input_pos > 0) {
+						if (state.input_pos > 0)
+						{
 							state.input_pos--;
 						}
 					}
@@ -663,12 +651,8 @@ void process_input_queue()
 
 void agi_logic_run_cycle()
 {
-
-	for (size_t i = 0; i < MAX_NUM_CONTROLLERS; i++)
-	{
-		state.controllers[i] = false;
-	}
-
+	clear_controller_assignments();
+	
 	state.flags[FLAG_2_COMMAND_ENTERED] = false;
 	state.flags[FLAG_4_SAID_ACCEPTED_INPUT] = false;
 	state.variables[VAR_19_KEYBOARD_KEY_PRESSED] = 0;
@@ -676,11 +660,14 @@ void agi_logic_run_cycle()
 
 	process_input_queue();
 
-	if (state.enter_pressed) {
-		num_parsed_word_groups = 0;
-		if (state.input_pos > 0) {							
+	if (state.enter_pressed)
+	{
+		state.num_parsed_word_groups = 0;
+		if (state.input_pos > 0)
+		{
 			_parse_word_groups();
-			if(num_parsed_word_groups > 0) {
+			if (state.num_parsed_word_groups > 0)
+			{
 				state.flags[FLAG_2_COMMAND_ENTERED] = true;
 			}
 		}
@@ -689,16 +676,20 @@ void agi_logic_run_cycle()
 		_redraw_prompt();
 	}
 
-	if(state.program_control) {
+	if (state.program_control)
+	{
 		EGO.direction = state.variables[VAR_6_EGO_DIRECTION];
-	} else {
+	}
+	else
+	{
 		state.variables[VAR_6_EGO_DIRECTION] = EGO.direction;
 	}
 
 	// recalculate direction of motion
 	for (uint8_t objNo = 0; objNo < MAX_NUM_OBJECTS; objNo++)
 	{
-		if(OBJ.active && OBJ.drawn && OBJ.update && OBJ.move_mode == OBJ_MOVEMODE_MOVE_TO) {
+		if (OBJ.active && OBJ.drawn && OBJ.update && OBJ.move_mode == OBJ_MOVEMODE_MOVE_TO)
+		{
 			_set_dir_from_moveDistance(objNo);
 		}
 	}
@@ -707,10 +698,11 @@ void agi_logic_run_cycle()
 	bool sound_on = state.flags[FLAG_9_SOUND_ENABLED];
 
 	execute_logic_cycle();
-	
+
 	EGO.direction = state.variables[VAR_6_EGO_DIRECTION];
 
-	if(current_score != state.variables[VAR_3_SCORE] || sound_on != state.flags[FLAG_9_SOUND_ENABLED]) {
+	if (current_score != state.variables[VAR_3_SCORE] || sound_on != state.flags[FLAG_9_SOUND_ENABLED])
+	{
 		_redraw_status_line();
 	}
 
@@ -721,5 +713,5 @@ void agi_logic_run_cycle()
 	state.flags[FLAG_6_RESTART_GAME_EXECUTED] = false;
 	state.flags[FLAG_12_GAME_RESTORED] = false;
 
-	_update_all_active();	
+	_update_all_active();
 }

@@ -37,15 +37,15 @@ bool issetv(uint8_t var) {
 }
 
 bool has(uint8_t item) {
-	return state.item_file->items[item].room_no == 255;
+	return heap_data.item_file->items[item].room_no == 255;
 }
 
 bool obj_in_room(uint8_t item, uint8_t var) {	
-	return state.variables[var] == state.item_file->items[item].room_no;
+	return state.variables[var] == heap_data.item_file->items[item].room_no;
 }
 
 bool posn(uint8_t objNo, uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2) {
-	return OBJ.x >= x1 && OBJ.x <= x2 && OBJ.y >= y1 && OBJ.y <= y2;
+	return OBJ.x > x1 && OBJ.x <= x2 && OBJ.y > y1 && OBJ.y <= y2;
 }
 
 bool controller(uint8_t ctr) {
@@ -69,8 +69,8 @@ bool said() {
 			rol = true;
 			continue;
 		}
-		else if (match && i < num_parsed_word_groups) {
-			if (parsed_word_groups[i] != logic_word_no) {
+		else if (match && i < state.num_parsed_word_groups) {
+			if (state.parsed_word_groups[i] != logic_word_no) {
 				match = false;
 			}
 		}
@@ -93,7 +93,7 @@ bool said() {
 	if (state.variables[VAR_9_MISSING_WORD_NO] > 0) {
 		match = false;
 	}
-	else if (!rol && num_parsed_word_groups > numparams) {
+	else if (!rol && state.num_parsed_word_groups > numparams) {
 		match = false;
 	}
 	else if (match) {

@@ -7,9 +7,6 @@
 #define UNIMPLEMENTED printf("(Logic: %d, pc: %d) Unimplemented command: %s\n", state.current_logic, state.pc, __func__);
 #define WARNING(x) printf("Unimplemented command: %s - %s\n", __func__, x);
 
-extern uint16_t parsed_word_groups[20];
-extern uint16_t num_parsed_word_groups;
-
 void pic_vis_set(int x, int y, int color);
 int pic_vis_get(int x, int y);
 void pic_pri_set(int x, int y, int priority);
@@ -22,6 +19,11 @@ void _update_all_active();
 void _redraw_status_line();
 void _set_dir_from_moveDistance(uint8_t objNo);
 
+void load_pic_no(uint8_t pic_no);
+void overlay_pic_no(uint8_t pic_no);
+void draw_pic_no(uint8_t pic_no);
+void discard_pic_no(uint8_t pic_no);
+void load_logic_no_script_write(uint8_t num);
 
 typedef struct {
 	uint8_t numArgs;

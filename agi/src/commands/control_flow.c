@@ -7,8 +7,9 @@
 
 #include <stdlib.h>
 
-void call(uint8_t logicNo) {
-	load_logics(logicNo);
+void call(uint8_t logicNo)
+{
+	load_logic_no_script_write(logicNo);
 
 	state.callstack[state.stack_ptr].logic_no = state.current_logic;
 	state.callstack[state.stack_ptr].pc = state.pc;
@@ -18,24 +19,37 @@ void call(uint8_t logicNo) {
 	state.pc = state.scan_start[state.current_logic];
 }
 
-void call_v(uint8_t var) {
+void call_v(uint8_t var)
+{
 	uint8_t logicNo = state.variables[var];
 	call(logicNo);
 }
 
-void load_logics(uint8_t num) {
-	if (state.loaded_logics[num])
+void load_logic_no_script_write(uint8_t num)
+{
+	if (heap_data.loaded_logics[num].buffer)
 		return;
 
-	state.loaded_logics[num] = load_vol_data("logdir", num, true).buffer;
+	heap_data.loaded_logics[num] = load_vol_data("logdir", num, true);
 	_decrypt_messages(num);
 }
 
-void load_logics_v(uint8_t var) {
+void load_logics(uint8_t num)
+{
+	if (num != 0)
+	{
+		write_script_entry(SCRIPT_ENTRY_LOAD_LOGIC, num);
+	}
+	load_logic_no_script_write(num);
+}
+
+void load_logics_v(uint8_t var)
+{
 	load_logics(state.variables[var]);
 }
 
-void new_room(uint8_t room_no) {	
+void new_room(uint8_t room_no)
+{
 	stop_sound();
 
 	stop_update(0);
@@ -45,9 +59,9 @@ void new_room(uint8_t room_no) {
 		OBJ.active = false;
 		OBJ.update = true;
 		OBJ.fix_loop = false;
-		OBJ.step_size = OBJ.step_time = OBJ.steps_to_next_update = OBJ.cycle_time = OBJ.cycles_to_next_update = 1;		
+		OBJ.step_size = OBJ.step_time = OBJ.steps_to_next_update = OBJ.cycle_time = OBJ.cycles_to_next_update = 1;
 	}
-	
+
 	player_control();
 
 	unblock();
@@ -63,7 +77,8 @@ void new_room(uint8_t room_no) {
 	state.variables[VAR_8_NUM_PAGES_FREE] = 10;
 
 	// if ego touching edge place ego
-	switch (state.variables[VAR_2_EGO_BORDER_CODE]) {
+	switch (state.variables[VAR_2_EGO_BORDER_CODE])
+	{
 	case BORDER_TOP:
 		EGO.y = 166;
 		break;
@@ -83,59 +98,56 @@ void new_room(uint8_t room_no) {
 	state.variables[VAR_9_MISSING_WORD_NO] = 0;
 	state.flags[FLAG_2_COMMAND_ENTERED] = false;
 
-
 	for (size_t i = 1; i < 256; i++)
 	{
 		state.scan_start[i] = 0;
-		if (state.loaded_logics[i]) {
-			free(state.loaded_logics[i]);
-			state.loaded_logics[i] = NULL;
-		}
 	}
-	for (size_t i = 0; i < 256; i++)
-	{
-		if(state.loaded_sounds[i]){
-			free(state.loaded_sounds[i]);
-			state.loaded_sounds[i] = NULL;
-		}
-		if (state.loaded_pics[i].buffer) {
-			free(state.loaded_pics[i].buffer);
-			state.loaded_pics[i].buffer = NULL;
-		}
-		if (state.loaded_views[i].buffer) {
-			free(state.loaded_views[i].buffer);
-			state.loaded_views[i].buffer = NULL;
-		}
-	}
+
+	agi_free_heap();
 
 	state.current_logic = 0;
 	state.pc = state.scan_start[0];
 	state.stack_ptr = 0;
+	load_logic_no_script_write(0);
+
+	if (state.script_size == 0)
+	{
+		state.script_size = 50;
+	}
+
+	heap_data.script_entries = malloc(state.script_size * sizeof(script_entry_t));
+	state.script_entry_pos = 0;
 }
 
-void new_room_v(uint8_t var) {
+void new_room_v(uint8_t var)
+{
 	new_room(state.variables[var]);
 }
 
-void pop_script() {
+void pop_script()
+{
 	UNIMPLEMENTED
 }
 
-void push_script() {
+void push_script()
+{
 	UNIMPLEMENTED
 }
 
-void reset_scan_start() {
+void reset_scan_start()
+{
 	state.scan_start[state.current_logic] = 0;
 }
 
-void _return() {
+void _return()
+{
 	if (state.current_logic == 0)
 	{
 		state.cycle_complete = true;
 		return;
 	}
-	if (state.stack_ptr == 0) {
+	if (state.stack_ptr == 0)
+	{
 		panic("Logic stack underflow!");
 		return;
 	}
@@ -145,6 +157,7 @@ void _return() {
 	state.pc = prevLogic.pc;
 }
 
-void set_scan_start() {
+void set_scan_start()
+{
 	state.scan_start[state.current_logic] = state.pc;
 }

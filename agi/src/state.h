@@ -82,6 +82,30 @@ typedef struct {
 	uint8_t data[];
 } words_file_t;
 #pragma pack(pop)
+
+typedef struct
+{
+	uint8_t scancode;
+	char ascii;
+	uint8_t controller_no;
+} controller_assignment_t;
+
+typedef struct {
+	uint8_t script_type;
+	uint8_t resource_number;
+} script_entry_t;
+
+typedef struct {
+	vol_data_t loaded_logics[256];	
+	vol_data_t loaded_pics[256];
+	vol_data_t loaded_views[256];
+	vol_data_t loaded_sounds[256];
+	script_entry_t *script_entries;
+	
+	item_file_t* item_file;
+	words_file_t* words_file;	
+} agi_heap_t;
+
 typedef struct {
 	/* Interpreter state */
 	unsigned int pc;
@@ -91,13 +115,13 @@ typedef struct {
 	bool or;
 	bool negate;
 	uint8_t current_logic;
-	uint16_t scan_start[256];
+
 	logicStackEntry_t callstack[AGI_CALLSTACK_DEPTH];
 	unsigned int stack_ptr;
+	
 	bool cycle_complete;
-	uint8_t* loaded_logics[256];
 
-	/* Game state */
+	uint16_t scan_start[256];	
 	uint8_t variables[256];
 	bool flags[256];
 	char strings[12][40];
@@ -118,25 +142,40 @@ typedef struct {
 
 	object_t objects[MAX_NUM_OBJECTS];
 
-	vol_data_t loaded_pics[256];
-	vol_data_t loaded_views[256];
-
-	item_file_t* item_file;
-	words_file_t* words_file;
-
 	uint8_t display_fg;
 	uint8_t display_bg;
 
 	int sound_flag;
-	uint8_t* loaded_sounds[256];
 
 	bool status_line_on;
 
-	bool controllers[MAX_NUM_CONTROLLERS];
+	bool controllers[MAX_NUM_CONTROLLERS];	
+	controller_assignment_t controller_assignments[MAX_NUM_CONTROLLERS];
+
+	bool escape_pressed;
+
+	uint16_t parsed_word_groups[20];
+	uint16_t num_parsed_word_groups;
+
+	int script_size;
+	int script_entry_pos;
 } agi_state_t;
 
+typedef struct {
+	uint8_t room_no;
+} item_save_data_t;
+
+extern agi_heap_t heap_data;
 extern agi_state_t state;
 #define EGO state.objects[0]
+
+void agi_free_heap();
+bool agi_discard(vol_data_t* vol_data);
+
+void write_script_entry(uint8_t script_type, uint8_t resource_no);
+void write_add_to_pic_script_entry(uint8_t view_no, uint8_t loop_no, uint8_t cel_no, uint8_t x, uint8_t y, uint8_t pri);
+
+void clear_controller_assignments();
 
 /* Initializes the agi state */
 void agi_reset();

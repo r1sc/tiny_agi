@@ -4,18 +4,18 @@
 #include "actions.h"
 
 uint8_t _view_num_loops(uint8_t view_no) {
-	view_t* view = (view_t*)state.loaded_views[view_no].buffer;
+	view_t* view = (view_t*)heap_data.loaded_views[view_no].buffer;
 	return view->num_loops;
 }
 
 uint8_t _view_num_cels(uint8_t view_no, uint8_t loop_no) {
-	view_t* view = (view_t*)state.loaded_views[view_no].buffer;
+	view_t* view = (view_t*)heap_data.loaded_views[view_no].buffer;
 	loop_t* loop = (loop_t*)((uint8_t*)(view)+view->loop_offsets[loop_no]);
 	return loop->num_cells;
 }
 
 cell_t* _get_cell(uint8_t view_no, uint8_t loop_no, uint8_t cel_no) {
-	view_t* view = (view_t*)state.loaded_views[view_no].buffer;
+	view_t* view = (view_t*)heap_data.loaded_views[view_no].buffer;
 	loop_t* loop = (loop_t*)((uint8_t*)(view)+view->loop_offsets[loop_no]);
 	cell_t* cell = (cell_t*)((uint8_t*)(loop)+loop->cell_offsets[cel_no]);
 	return cell;
@@ -36,7 +36,7 @@ uint8_t _get_pri(int x, int y, bool add_to_pic) {
 }
 
 void _draw_view(uint8_t view_no, uint8_t loop_no, uint8_t cel_no, uint8_t x, uint8_t y, uint8_t priority, bool erase, bool add_to_pic) {
-	view_t* view = state.loaded_views[view_no].buffer;
+	view_t* view = heap_data.loaded_views[view_no].buffer;
 	loop_t* loop = (loop_t*)((uint8_t*)(view)+view->loop_offsets[loop_no]);
 	cell_t* cell = (cell_t*)((uint8_t*)(loop)+loop->cell_offsets[cel_no]);
 	uint8_t transparentColor = cell->transparent_color_and_mirroring & 0x0F;
@@ -83,7 +83,9 @@ void _draw_view(uint8_t view_no, uint8_t loop_no, uint8_t cel_no, uint8_t x, uin
 								
 								if (add_to_pic) {
 									pic_vis_set(screenX, screenY, color);
-									pic_pri_set(screenX, screenY, priority);
+									if (pic_pri_get(screenX, screenY) >= 3) {
+										pic_pri_set(screenX, screenY, priority);
+									}
 								}
 							}
 						}
