@@ -24,7 +24,7 @@ uint8_t y_to_priority(uint8_t y) {
 
 uint8_t calculate_priority(uint8_t objNo)
 {
-	if (OBJ.fixed_priority >= 0)
+	if (OBJ.has_fixed_priority)
 		return OBJ.fixed_priority;
 
 	return y_to_priority(OBJ.y);
@@ -94,7 +94,7 @@ void update_object(uint8_t objNo)
 
 		cell_t* cell = _object_cell(&OBJ);
 
-		if (OBJ.observe_horizon && state.flags[FLAG_5_ROOM_EXECUTED_FIRST_TIME] && OBJ.y <= state.horizon)
+		if (!OBJ.ignore_horizon && state.flags[FLAG_5_ROOM_EXECUTED_FIRST_TIME] && OBJ.y <= state.horizon)
 			OBJ.y = state.horizon + 1;
 
 		if (OBJ.steps_to_next_update == 0)
@@ -140,18 +140,19 @@ void update_object(uint8_t objNo)
 			}
 
 			bool unconditionalStop = obj_baseline_on_pri(newX, newY, cell->width, 0);
-			bool conditionalStop = OBJ.collide_with_blocks && (obj_baseline_on_pri(newX, newY, cell->width, 1) || (state.block_active && point_on_block(newX, newY, state.block)));
+			bool conditionalStop = !OBJ.ignore_blocks && (obj_baseline_on_pri(newX, newY, cell->width, 1) || (state.block_active && point_on_block(newX, newY, state.block)));
 			bool confinedOnWater = (OBJ.allowed_on == OBJ_ON_WATER) && obj_baseline_on_pri(newX, newY, cell->width, 3);
 			bool confinedOnLand = (OBJ.allowed_on == OBJ_ON_LAND) && obj_baseline_on_pri(newX, newY, cell->width, 3);
 			bool stop = unconditionalStop || conditionalStop || confinedOnWater || confinedOnLand;
 
-			if (OBJ.collide_with_objects) {
+			if (!OBJ.ignore_objects) {
 				for (size_t i = 0; i < MAX_NUM_OBJECTS; i++)
 				{
-					if (i != objNo && state.objects[i].active && state.objects[i].drawn && state.objects[i].collide_with_objects) {
-						if (newY == state.objects[i].y
-							&& newX + cell->width > state.objects[i].x
-							&& newX < state.objects[i].x + _object_cell(&state.objects[i])->width
+					object_t other_object = state.objects[i];
+					if (i != objNo && other_object.active && other_object.drawn && !other_object.ignore_objects) {
+						if (newY == other_object.y
+							&& newX + cell->width > other_object.x
+							&& newX < other_object.x + _object_cell(&other_object)->width
 							)
 						{
 							stop = true;
@@ -186,7 +187,7 @@ void update_object(uint8_t objNo)
 					state.variables[VAR_4_OBJ_BORDER_OBJNO] = objNo;
 				}
 			}
-			else if (newY <= 0 || (OBJ.observe_horizon && newY <= state.horizon))
+			else if (newY <= 0 || (!OBJ.ignore_horizon && newY <= state.horizon))
 			{
 				state.variables[objNo == 0 ? VAR_2_EGO_BORDER_CODE : VAR_5_OBJ_BORDER_CODE] = BORDER_TOP;
 				if (objNo != 0)
@@ -308,8 +309,8 @@ uint8_t pri_2_coord(uint8_t pri) {
 int cmpfunc(const void* a, const void* b) {
 	object_t* obj_a = &state.objects[*(uint8_t*)a];
 	object_t* obj_b = &state.objects[*(uint8_t*)b];
-	uint8_t pri_a = obj_a->fixed_priority > -1 ? pri_2_coord(obj_a->fixed_priority) : obj_a->y;
-	uint8_t pri_b = obj_b->fixed_priority > -1 ? pri_2_coord(obj_b->fixed_priority) : obj_b->y;
+	uint8_t pri_a = obj_a->has_fixed_priority ? pri_2_coord(obj_a->fixed_priority) : obj_a->y;
+	uint8_t pri_b = obj_b->has_fixed_priority ? pri_2_coord(obj_b->fixed_priority) : obj_b->y;
 	return (pri_a - pri_b);
 }
 
@@ -394,13 +395,11 @@ void animate_obj(uint8_t objNo)
 	OBJ.direction = DIR_STOPPED;
 
 	OBJ.drawn = false;
-	OBJ.fixed_priority = -1;
-	OBJ.move_done_flag = -1;
-	OBJ.end_of_loop_flag = -1;
-	OBJ.observe_horizon = true;
+	OBJ.has_fixed_priority = false;
+	OBJ.ignore_horizon = false;
 	OBJ.allowed_on = OBJ_ON_ANYTHING;
-	OBJ.collide_with_objects = true;
-	OBJ.collide_with_blocks = true;
+	OBJ.ignore_objects = false;
+	OBJ.ignore_blocks = false;
 }
 
 void block(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2)
@@ -516,17 +515,17 @@ void get_priority(uint8_t objNo, uint8_t var)
 
 void ignore_blocks(uint8_t objNo)
 {
-	OBJ.collide_with_blocks = false;
+	OBJ.ignore_blocks = true;
 }
 
 void ignore_horizon(uint8_t objNo)
 {
-	OBJ.observe_horizon = false;
+	OBJ.ignore_horizon = true;
 }
 
 void ignore_objs(uint8_t objNo)
 {
-	OBJ.collide_with_objects = false;
+	OBJ.ignore_objects = true;
 }
 
 void last_cel(uint8_t objNo, uint8_t var)
@@ -607,17 +606,17 @@ void object_on_water(uint8_t objNo)
 
 void observe_blocks(uint8_t objNo)
 {
-	OBJ.collide_with_blocks = true;
+	OBJ.ignore_blocks = false;
 }
 
 void observe_horizon(uint8_t objNo)
 {
-	OBJ.observe_horizon = true;
+	OBJ.ignore_horizon = false;
 }
 
 void observe_objs(uint8_t objNo)
 {
-	OBJ.collide_with_objects = true;
+	OBJ.ignore_objects = false;
 }
 
 void position(uint8_t objNo, uint8_t x, uint8_t y)
@@ -638,7 +637,7 @@ void release_loop(uint8_t objNo)
 
 void release_priority(uint8_t objNo)
 {
-	OBJ.fixed_priority = -1;
+	OBJ.has_fixed_priority = false;
 }
 
 void reposition(uint8_t objNo, uint8_t var, uint8_t var2)
@@ -709,6 +708,7 @@ void set_loop_v(uint8_t objNo, uint8_t var)
 
 void set_priority(uint8_t objNo, uint8_t num)
 {
+	OBJ.has_fixed_priority = true;
 	OBJ.fixed_priority = num;
 }
 

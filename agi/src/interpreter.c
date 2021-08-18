@@ -229,7 +229,9 @@ uint8_t next_data()
 
 void jump()
 {
-	int16_t jump = next_data() | (next_data() << 8);
+	int16_t a = (int16_t)next_data();
+	int16_t b = (int16_t)next_data();
+	int16_t jump = a | (b << 8);
 	state.pc += jump;
 }
 

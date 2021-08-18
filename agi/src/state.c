@@ -51,10 +51,10 @@ void state_reset() {
 
 	for (size_t i = 0; i < MAX_NUM_OBJECTS; i++)
 	{
-		state.objects[i].old_view_no = -1;
-		state.objects[i].fixed_priority = -1;
-		state.objects[i].move_done_flag = -1;
-		state.objects[i].end_of_loop_flag = -1;
+		state.objects[i].active = false;
+		state.objects[i].drawn = false;
+		state.objects[i].update = true;
+		state.objects[i].old_view_no = -1;		
 	}
 
 	state.display_fg = 15;

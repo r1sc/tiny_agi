@@ -65,7 +65,9 @@ bool said() {
 	bool rol = false;
 	for (size_t i = 0; i < numparams; i++)
 	{
-		uint16_t logic_word_no = (uint16_t)(next_data() | (next_data() << 8));
+		uint16_t a = next_data();
+		uint16_t b = next_data();
+		uint16_t logic_word_no = a | (b << 8);
 		if (rol || logic_word_no == 9999) {
 			rol = true;
 			continue;
@@ -81,22 +83,20 @@ bool said() {
 	}
 
 	if(!state.or && state.and_result == false) { // Skip checking if in AND-testing mode and the previous result was false
-		return false;
+		match = false;
+	}	
+	else if(!state.flags[FLAG_2_COMMAND_ENTERED]) {
+		match = false; // No command entered
 	}
-	
-	if(!state.flags[FLAG_2_COMMAND_ENTERED]) {
-		return false; // No command entered
+	else if(state.flags[FLAG_4_SAID_ACCEPTED_INPUT]) {
+		match = false; // Already accepted earlier
 	}
-	if(state.flags[FLAG_4_SAID_ACCEPTED_INPUT]) {
-		return false; // Already accepted earlier
-	}
-
-	if (state.variables[VAR_9_MISSING_WORD_NO] > 0) {
+	else if (state.variables[VAR_9_MISSING_WORD_NO] > 0) {
 		match = false;
 	}
 	else if (!rol && state.num_parsed_word_groups > numparams) {
 		match = false;
-	}
+	}	
 	else if (match) {
 		state.flags[FLAG_4_SAID_ACCEPTED_INPUT] = true;
 	}

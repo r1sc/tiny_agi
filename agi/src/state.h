@@ -17,10 +17,11 @@ typedef struct {
 	bool drawn;
 	bool fix_loop;
 	bool update;
-	bool observe_horizon;
+	bool ignore_horizon;
 	bool is_cycling;
-	bool collide_with_objects;
-	bool collide_with_blocks;
+	bool ignore_objects;
+	bool ignore_blocks;
+	bool has_fixed_priority;
 
 	int x, y;
 	uint8_t view_no;
@@ -32,14 +33,14 @@ typedef struct {
 	uint8_t old_loop_no;
 	uint8_t old_cel_no;
 	
-	int8_t fixed_priority;
+	uint8_t fixed_priority;
 	uint8_t allowed_on;
 	
 	uint8_t cycling_mode;
 	uint8_t cycle_time;
 	uint8_t cycles_to_next_update;
 	
-	int move_mode;	
+	uint8_t move_mode;
 	uint8_t step_time;
 	uint8_t steps_to_next_update;
 
@@ -47,7 +48,7 @@ typedef struct {
 
 	int move_distance_x, move_distance_y;
 	uint8_t move_step_size;
-	int move_done_flag;
+	uint8_t move_done_flag;
 	
 	uint8_t end_of_loop_flag;
 
