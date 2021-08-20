@@ -25,7 +25,7 @@ void panic(const char* fmt, ...) {
 	exit(1);
 }
 
-const char* game_path = "C:\\classic\\sierra\\pq";
+const char* game_path = "C:\\classic\\sierra\\kq3";
 agi_file_t get_file(const char* filename) {
 	char path[256];
 	sprintf(path, "%s\\%s\0", game_path, filename);
@@ -157,7 +157,7 @@ void character_callback(GLFWwindow* window, unsigned int codepoint)
 
 void agi_stop_sound(){}
 void agi_play_sound(uint8_t* sound_data) {
-	state.flags[state.sound_flag] = true;
+	//state.flags[state.sound_flag] = true;
 }
 
 GLFWwindow* window;

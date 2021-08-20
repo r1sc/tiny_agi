@@ -66,6 +66,10 @@ void _draw_line(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2) {
 	}
 }
 
+bool can_fill(uint8_t x, uint8_t y) {
+	return pic_vis_get(x, y) == 15 || pic_pri_get(x, y) == 4;
+}
+
 void _flood_fill(uint8_t startX, uint8_t startY)
 {
 	if (!vis_enabled && !pri_enabled) return;
@@ -81,12 +85,16 @@ void _flood_fill(uint8_t startX, uint8_t startY)
 #define push(x,y) { enqueue(x); enqueue(y); }
 
 	push(startX, startY);
+	uint8_t start_pri = pic_pri_get(startX, startY);
+
 	while (wp != rp) {
 		uint8_t x = pop();
 		uint8_t y = pop();
-		if (vis_enabled && pic_vis_get(x, y) != 15)
-			continue;
-		if (pri_enabled && pic_pri_get(x, y) != 4)
+
+		bool vis_stop = vis_enabled && pic_vis_get(x, y) != 15;
+		bool pri_stop = pri_enabled && pic_pri_get(x, y) != start_pri;
+
+		if (vis_stop || pri_stop)
 			continue;
 
 		_pset(x, y);
