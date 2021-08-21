@@ -132,7 +132,7 @@ int main()
     printf("AGI Machine ready! Let's wait two seconds for the monitor to settle...\n");
     busy_wait_ms(2000);
 
-    agi_reset();
+    agi_initialize();
 
     const fileentry_t *fontEntry = ar_find_file("font.bin");
     font_data = (uint8_t *)ar_ptr_to(fontEntry);
@@ -175,32 +175,29 @@ int main()
             char c = getchar_timeout_us(0);
             if (c != 0xFF)
             {
-                if (!state.program_control)
+                if (c == 65)
+                    agi_input_queue_push_keypress(0, AGI_KEY_UP);
+                else if (c == 66)
+                    agi_input_queue_push_keypress(0, AGI_KEY_DOWN);
+                else if (c == 68)
+                    agi_input_queue_push_keypress(0, AGI_KEY_LEFT);
+                else if (c == 67)
+                    agi_input_queue_push_keypress(0, AGI_KEY_RIGHT);
+                else if (c == 49)
+                    agi_input_queue_push_keypress(0, AGI_KEY_HOME);
+                else if (c == 53)
+                    agi_input_queue_push_keypress(0, AGI_KEY_PGUP);
+                else if (c == 52)
+                    agi_input_queue_push_keypress(0, AGI_KEY_END);
+                else if (c == 54)
+                    agi_input_queue_push_keypress(0, AGI_KEY_PGDN);
+                else if (c >= 32 && c <= 122 && c != 91)
                 {
-                    if (c == 65)
-                        state.variables[VAR_6_EGO_DIRECTION] = state.variables[VAR_6_EGO_DIRECTION] == DIR_UP ? DIR_STOPPED : DIR_UP;
-                    else if (c == 66)
-                        state.variables[VAR_6_EGO_DIRECTION] = state.variables[VAR_6_EGO_DIRECTION] ==  DIR_DOWN ? DIR_STOPPED : DIR_DOWN;
-                    else if (c == 68)
-                        state.variables[VAR_6_EGO_DIRECTION] = state.variables[VAR_6_EGO_DIRECTION] == DIR_LEFT ? DIR_STOPPED : DIR_LEFT;
-                    else if (c == 67)
-                        state.variables[VAR_6_EGO_DIRECTION] = state.variables[VAR_6_EGO_DIRECTION] == DIR_RIGHT ? DIR_STOPPED : DIR_RIGHT;
-                    else if (c == 49)
-                        state.variables[VAR_6_EGO_DIRECTION] = state.variables[VAR_6_EGO_DIRECTION] == DIR_UP_LEFT ? DIR_STOPPED : DIR_UP_LEFT;
-                    else if (c == 53)
-                        state.variables[VAR_6_EGO_DIRECTION] = state.variables[VAR_6_EGO_DIRECTION] == DIR_UP_RIGHT ? DIR_STOPPED : DIR_UP_RIGHT;
-                    else if (c == 52)
-                        state.variables[VAR_6_EGO_DIRECTION] = state.variables[VAR_6_EGO_DIRECTION] == DIR_DOWN_LEFT ? DIR_STOPPED : DIR_DOWN_LEFT;
-                    else if (c == 54)
-                        state.variables[VAR_6_EGO_DIRECTION] = state.variables[VAR_6_EGO_DIRECTION] == DIR_DOWN_RIGHT ? DIR_STOPPED : DIR_DOWN_RIGHT;
-                    else if (c >= 32 && c <= 122 && c != 91)
-                    {
-                        agi_push_char(c);
-                    }
-                    else if (c == '\b')
-                    {
-                        agi_push_char('\b');
-                    }
+                    agi_input_queue_push_keypress(c, 0);
+                }
+                else if (c == '\b')
+                {
+                    agi_input_queue_push_keypress('\b', 0);
                 }
 
                 if (c == 13)
@@ -215,7 +212,7 @@ int main()
 
         if (!vsync_serviced && vga_current_timing_line > 480)
         {            
-            _draw_all_active();
+            agi_draw_all_active();
             update_sound();
             vsync_serviced = true;
         }

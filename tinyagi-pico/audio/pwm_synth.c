@@ -13,7 +13,7 @@ uint slice_num;
 // Sine wave sample rate = 8272Hz, sample tone ~= 523Hz (C4)
 const int sample_length = 6924;
 const float sample_rate_hz = 22050.0f;
-const float num_sine_curves_per_sec = sample_rate_hz / (float)30;
+const float num_sine_curves_per_sec = sample_rate_hz / (float)25;
 
 pwm_synth_audio_channel_state_t pwm_synth_channels[PWM_SYNTH_NUM_CHANNELS];
 
