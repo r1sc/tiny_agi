@@ -36,6 +36,9 @@ add_library (tinyagi STATIC
 	"src/heap.c" 
 	"src/heap.h" 
 	"src/decryption.h"
-	"src/decryption.c")
+	"src/decryption.c"
+	"src/menu.h"
+	"src/menu.c"
+)
 
 target_include_directories(tinyagi PUBLIC include)

@@ -25,7 +25,7 @@ void panic(const char* fmt, ...) {
 	exit(1);
 }
 
-const char* game_path = "C:\\classic\\sierra\\kq3";
+const char* game_path = "C:\\classic\\sierra\\pq";
 agi_file_t get_file(const char* filename) {
 	char path[256];
 	sprintf(path, "%s\\%s\0", game_path, filename);
@@ -147,6 +147,10 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	if (key == GLFW_KEY_BACKSPACE && action == GLFW_PRESS) {
 		agi_input_queue_push_keypress('\b', 0);
 	}
+
+	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
+		agi_input_queue_push_keypress((char)27, 0);
+	}
 }
 
 void character_callback(GLFWwindow* window, unsigned int codepoint)
@@ -169,10 +173,6 @@ void render() {
 			for (size_t x = 0; x < 160; x++)
 			{	
 				screen_set_160(x, y, priority_get(x, y));
-				/*unsigned int c = palette[priority_get(x, y)];
-
-				framebuffer[(y + state.play_top * 8) * 320 + (x << 1) + 0] = c;
-				framebuffer[(y + state.play_top * 8) * 320 + (x << 1) + 1] = c;*/
 			}
 		}
 	}
@@ -185,7 +185,6 @@ void render() {
 	glTexCoord2f(0, 1);	glVertex2f(0, 200);
 	glEnd();
 
-	/* Swap front and back buffers */
 	glfwSwapBuffers(window);
 }
 
@@ -199,57 +198,17 @@ void wait_for_enter() {
 	}
 }
 
-void agi_ext_sound_update(uint16_t channel_hz[4]) {
-	/*for (size_t i = 0; i < 4; i++)
-	{
-		synth_set_frequency(i, channel_hz[i]);
-	}
-	synth_get_sample_points()*/
-}
-//
-//agi_save_data_file_ptr agi_save_data_open(const char* mode) {
-//	return (agi_save_data_file_ptr)fopen("save.bin", mode);
-//}
-//
-//void agi_save_data_close(agi_save_data_file_ptr file_ptr) {
-//	fclose((FILE*)file_ptr);
-//}
-//
-//void agi_save_data_write(agi_save_data_file_ptr file_ptr, void* data, size_t size) {
-//	fwrite(data, size, 1, (FILE*)file_ptr);
-//}
-//
-//void agi_save_data_read(agi_save_data_file_ptr file_ptr, void* destination, size_t size) {
-//	fread(destination, size, 1, (FILE*)file_ptr);
-//}
-
-#define PI 3.14159265358979323846
 int main() {
-
-	// Init audio
-	/*winmm_audio_init();
-	
-	uint8_t sample[64];
-	for (size_t i = 0; i < 64; i++)
-	{
-		sample[i] = (uint8_t)(sin((i / 64.0f) * PI * 2) * 255);
-	}
-	synth_set_sample(sample, 64);*/
-
-
-	/* Initialize the library */
 	if (!glfwInit())
 		return -1;
 
-	/* Create a windowed mode window and its OpenGL context */
-	window = glfwCreateWindow(960, 600, "TinyAGI", NULL, NULL);
+	window = glfwCreateWindow(320 * 4, 200 * 4, "TinyAGI", NULL, NULL);
 	if (!window)
 	{
 		glfwTerminate();
 		return -1;
 	}
 
-	/* Make the window's context current */
 	glfwMakeContextCurrent(window);
 	glfwSwapInterval(0);
 
@@ -278,43 +237,15 @@ int main() {
 
 	int clock_counter = 0;
 	double last_s = 0;
-	/* Loop until the user closes the window */
 	while (!glfwWindowShouldClose(window))
 	{
-		double now = glfwGetTime();
-		double delta = now - last_s;
+		double now = glfwGetTime() * 1000;
 
-		if (delta >= (((double)state.variables[10]) * 0.05)) {
-			last_s = now;
+		agi_logic_run_cycle((uint32_t)now);
+		agi_draw_all_active();
+		render();
 
-			clock_counter++;
-			if (clock_counter > 20) {
-				state.variables[VAR_11_CLOCK_SECONDS]++;
-				if (state.variables[VAR_11_CLOCK_SECONDS] == 60) {
-					state.variables[VAR_11_CLOCK_SECONDS] = 0;
-					state.variables[VAR_12_CLOCK_MINUTES]++;
-					if (state.variables[VAR_12_CLOCK_MINUTES] == 60) {
-						state.variables[VAR_12_CLOCK_MINUTES] = 0;
-						state.variables[VAR_13_CLOCK_HOURS]++;
-						if (state.variables[VAR_13_CLOCK_HOURS] == 24) {
-							state.variables[VAR_13_CLOCK_HOURS] = 0;
-							state.variables[VAR_14_CLOCK_DAYS]++;
-						}
-					}
-				}
-				clock_counter = 0;
-			}
-
-			//_undraw_all();
-			agi_logic_run_cycle();
-			agi_draw_all_active();
-			render();
-			state.enter_pressed = false;
-		}
-
-		/* Poll for and process events */
 		glfwPollEvents();
-
 		Sleep(1);
 	}
 

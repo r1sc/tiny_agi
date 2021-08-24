@@ -8,6 +8,27 @@
 
 agi_state_t state;
 
+void free_menu_item(menu_item_t* node) {
+	if (node->next) {
+		free_menu_item(node->next);
+	}
+	free(node);
+}
+
+void free_menu(menu_header_t *node) {
+	if (node->next) {
+		free_menu(node->next);
+	}
+	free(node);
+}
+
+void free_controller(controller_assignment_t* node) {
+	if (node->next) {
+		free_controller(node->next);
+	}
+	free(node);
+}
+
 void state_reset() {
 	state.pc = 0;
 	state.test = false;
@@ -40,7 +61,6 @@ void state_reset() {
 	state.status_line = 0;
 	state.program_control = false;
 	state.enter_pressed = false;
-	state.escape_pressed = false;
 	state.horizon = 36;
 	state.input_prompt_active = false;
 	state.cursor_char = '_';
@@ -74,4 +94,19 @@ void state_reset() {
 	state.variables[VAR_22_SOUND_TYPE] = 3; // Tandy
 	state.variables[VAR_26_MONITOR_TYPE] = 3; // EGA
 	state.flags[FLAG_9_SOUND_ENABLED] = true;
+
+	if (state.first_menu) {
+		free_menu(state.first_menu);
+	}
+	state.first_menu = NULL;
+	state.current_menu = &state.first_menu;
+	state.prev_menu = NULL;
+	state.prev_menu_item = NULL;
+	state.in_menu = false;
+
+	if (state.first_controller_assignment) {
+		free_controller(state.first_controller_assignment);
+	}
+	state.first_controller_assignment = NULL;
+	state.current_controller_assignment = &state.first_controller_assignment;
 }

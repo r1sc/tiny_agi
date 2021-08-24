@@ -6,6 +6,7 @@
 #include "platform_support.h"
 #include "text_display.h"
 #include "input_queue.h"
+#include "menu.h"
 
 /* Test definitions */
 
@@ -28,7 +29,7 @@ test_t tests[] = {
 	TEST(compare_strings, 2),
 	TEST(obj_in_box, 5),
 	TEST(center_posn, 5),
-	TEST(right_posn, 5)};
+	TEST(right_posn, 5) };
 
 /* Action definitions */
 
@@ -206,39 +207,34 @@ action_t actions[] = {
 	ACTION("set_simple", set_simple, 1),
 	ACTION("push_script", push_script, 0),
 	ACTION("pop_script", pop_script, 0),
-	ACTION("hold_key", hold_key, 0)};
+	ACTION("hold_key", hold_key, 0) };
 
-char *get_message(uint8_t message_no)
-{
+char* get_message(uint8_t logic_no, uint8_t message_no) {
 	message_no--;
-	uint8_t *buffer = heap_data.loaded_logics[state.current_logic].buffer;
-	uint8_t *message_section = buffer + ((buffer[1] << 8) | buffer[0]) + 2;
+	uint8_t* buffer = heap_data.loaded_logics[logic_no].buffer;
+	uint8_t* message_section = buffer + ((buffer[1] << 8) | buffer[0]) + 2;
 
-	uint8_t *message_offset = (message_section + 3 + 2 * message_no);
+	uint8_t* message_offset = (message_section + 3 + 2 * message_no);
 	uint16_t offset = *(message_offset) | (*(message_offset + 1) << 8);
 
-	char *message = ((char *)message_section) + offset + 1;
+	char* message = ((char*)message_section) + offset + 1;
 
 	return message;
 }
 
-uint8_t next_data()
-{
+uint8_t next_data() {
 	return *(((uint8_t*)heap_data.loaded_logics[state.current_logic].buffer) + 2 + (state.pc++));
 }
 
-void jump()
-{
+void jump() {
 	int16_t a = (int16_t)next_data();
 	int16_t b = (int16_t)next_data();
 	int16_t jump = a | (b << 8);
 	state.pc += jump;
 }
 
-bool doTest(uint8_t opcode)
-{
-	switch (tests[opcode].numArgs)
-	{
+bool doTest(uint8_t opcode) {
+	switch (tests[opcode].numArgs) {
 	case 0:
 		return tests[opcode].test();
 	case 1:
@@ -279,65 +275,52 @@ bool doTest(uint8_t opcode)
 	}
 }
 
-void step()
-{
+void step() {
 	uint8_t opcode = next_data();
 
-	if (opcode == 0xFF)
-	{
-		if (state.test)
-		{
+	if (opcode == 0xFF) {
+		if (state.test) {
 			bool testResult = state.and_result && state.or_result;
-			if (!testResult)
-			{
+			if (!testResult) {
 				jump();
 			}
-			else
-			{
+			else {
 				state.pc += 2;
 			}
 		}
-		else
-		{
+		else {
 			state.and_result = true;
 			state.or_result = true;
 		}
 		state.test = !state.test;
 	}
-	else if (opcode == 0xFE)
-	{
+	else if (opcode == 0xFE) {
 		jump();
 	}
-	else if (opcode == 0xFD)
-	{
+	else if (opcode == 0xFD) {
 		state.negate = true;
 	}
-	else if (opcode == 0xFC)
-	{
-		state.or = !state.or ;
-		if (state.or)
+	else if (opcode == 0xFC) {
+		state. or = !state. or ;
+		if (state. or )
 			state.or_result = false;
 	}
-	else
-	{
-		if (state.test)
-		{
+	else {
+		if (state.test) {
 			bool pass = doTest(opcode);
 			if (state.negate)
 				pass = !pass;
 
 			state.negate = false;
 
-			if (state.or)
+			if (state. or )
 				state.or_result = state.or_result || pass;
 			else
 				state.and_result = state.and_result && pass;
 		}
-		else
-		{
+		else {
 			//printf("Logic %d: %s\n", state.current_logic, actions[opcode].name);
-			switch (actions[opcode].numArgs)
-			{
+			switch (actions[opcode].numArgs) {
 			case 0:
 				actions[opcode].action();
 				break;
@@ -397,8 +380,7 @@ void step()
 	}
 }
 
-bool _find_word_group_of_word(char *word, size_t len)
-{
+bool _find_word_group_of_word(char* word, size_t len) {
 	if (len == 0)
 		return true;
 	if (*word < 'a' || *word > 'z')
@@ -410,21 +392,18 @@ bool _find_word_group_of_word(char *word, size_t len)
 	uint16_t first_word_offset = (uint16_t)(first_word_index.hi_byte << 8) | (uint16_t)first_word_index.lo_byte;
 	uint16_t next_word_offset = (uint16_t)(next_word_index.hi_byte << 8) | (uint16_t)next_word_index.lo_byte;
 
-	uint8_t *word_entry = ((uint8_t *)heap_data.words_file) + first_word_offset;
-	uint8_t *next_word_entry = ((uint8_t *)heap_data.words_file) + next_word_offset;
+	uint8_t* word_entry = ((uint8_t*)heap_data.words_file) + first_word_offset;
+	uint8_t* next_word_entry = ((uint8_t*)heap_data.words_file) + next_word_offset;
 
 	char prev_word[40];
 	int prev_word_len = 0;
 
-	while (1)
-	{
+	while (1) {
 		prev_word_len = *(word_entry++);
-		while (1)
-		{
+		while (1) {
 			char c = *(word_entry++) ^ 0x7F;
 			prev_word[prev_word_len++] = c & 0x7F;
-			if (c >> 7)
-			{
+			if (c >> 7) {
 				break;
 			}
 		}
@@ -432,22 +411,17 @@ bool _find_word_group_of_word(char *word, size_t len)
 		uint16_t word_num_lo = *(word_entry++);
 		uint16_t word_num = (word_num_hi << 8) | word_num_lo;
 		// end of word -- check match
-		if (prev_word_len == len && strncmp(word, prev_word, len) == 0)
-		{
+		if (prev_word_len == len && strncmp(word, prev_word, len) == 0) {
 			// Found match
-			if (word_num > 0)
-			{ // Skip anyword
+			if (word_num > 0) { // Skip anyword
 				state.parsed_word_groups[state.num_parsed_word_groups++] = word_num;
 			}
 			return true;
 		}
 
-		if (word_entry >= next_word_entry)
-		{
-			if (len == 1)
-			{
-				if (*word == 'a' || *word == 'i')
-				{
+		if (word_entry >= next_word_entry) {
+			if (len == 1) {
+				if (*word == 'a' || *word == 'i') {
 					return true;
 				}
 			}
@@ -457,22 +431,18 @@ bool _find_word_group_of_word(char *word, size_t len)
 	return false;
 }
 
-void _parse_word_groups()
-{
+void _parse_word_groups() {
 	state.num_parsed_word_groups = 0;
 
-	char *c = state.input_buffer;
-	char *word_start = c;
+	char* c = state.input_buffer;
+	char* word_start = c;
 	size_t word_len = 0;
 	int word_i = 0;
 
-	while (c < state.input_buffer + state.input_pos)
-	{
-		if (*c == ' ' || *c == '.')
-		{
+	while (c < state.input_buffer + state.input_pos) {
+		if (*c == ' ' || *c == '.') {
 			// Find out word group to parsed word
-			if (!_find_word_group_of_word(word_start, word_len))
-			{
+			if (!_find_word_group_of_word(word_start, word_len)) {
 				state.variables[VAR_9_MISSING_WORD_NO] = word_i;
 			}
 			c++;
@@ -480,213 +450,275 @@ void _parse_word_groups()
 			word_len = 0;
 			word_i++;
 		}
-		else
-		{
+		else {
 			word_len++;
 			c++;
 		}
 	}
-	if (!_find_word_group_of_word(word_start, word_len) && state.variables[VAR_9_MISSING_WORD_NO] == 0)
-	{
+	if (!_find_word_group_of_word(word_start, word_len) && state.variables[VAR_9_MISSING_WORD_NO] == 0) {
 		state.variables[VAR_9_MISSING_WORD_NO] = word_i;
 	}
 }
 
-void set_dir_from_move_distance(uint8_t objNo)
-{
-	if (OBJ.move_distance_x < 0 && OBJ.move_distance_y < 0)
-	{
+void set_dir_from_move_distance(uint8_t objNo) {
+	if (OBJ.move_distance_x < 0 && OBJ.move_distance_y < 0) {
 		OBJ.direction = DIR_UP_LEFT;
 	}
-	else if (OBJ.move_distance_x < 0 && OBJ.move_distance_y > 0)
-	{
+	else if (OBJ.move_distance_x < 0 && OBJ.move_distance_y > 0) {
 		OBJ.direction = DIR_DOWN_LEFT;
 	}
-	else if (OBJ.move_distance_x > 0 && OBJ.move_distance_y < 0)
-	{
+	else if (OBJ.move_distance_x > 0 && OBJ.move_distance_y < 0) {
 		OBJ.direction = DIR_UP_RIGHT;
 	}
-	else if (OBJ.move_distance_x > 0 && OBJ.move_distance_y > 0)
-	{
+	else if (OBJ.move_distance_x > 0 && OBJ.move_distance_y > 0) {
 		OBJ.direction = DIR_DOWN_RIGHT;
 	}
-	else if (OBJ.move_distance_x < 0)
-	{
+	else if (OBJ.move_distance_x < 0) {
 		OBJ.direction = DIR_LEFT;
 	}
-	else if (OBJ.move_distance_x > 0)
-	{
+	else if (OBJ.move_distance_x > 0) {
 		OBJ.direction = DIR_RIGHT;
 	}
-	else if (OBJ.move_distance_y < 0)
-	{
+	else if (OBJ.move_distance_y < 0) {
 		OBJ.direction = DIR_UP;
 	}
-	else if (OBJ.move_distance_y > 0)
-	{
+	else if (OBJ.move_distance_y > 0) {
 		OBJ.direction = DIR_DOWN;
 	}
 }
 
-void execute_logic_cycle()
-{
+void execute_logic_cycle() {
 	load_logic_no_script_write(0);
 	state.current_logic = 0;
 	state.pc = state.scan_start[0];
 	state.stack_ptr = 0;
 
 	state.cycle_complete = false;
-	while (!state.cycle_complete)
-	{
+	while (!state.cycle_complete) {
 		step();
 	}
 }
 
-void process_input_queue()
-{
-	for (int i = 0; i < queue_pos; i++)
-	{
+void process_input_game(input_queue_entry_t entry) {
+	if (entry.scancode == AGI_KEY_HOME) {
+		state.variables[VAR_6_EGO_DIRECTION] = state.variables[VAR_6_EGO_DIRECTION] == DIR_UP_LEFT ? DIR_STOPPED : DIR_UP_LEFT;
+	}
+	else if (entry.scancode == AGI_KEY_UP) {
+		state.variables[VAR_6_EGO_DIRECTION] = state.variables[VAR_6_EGO_DIRECTION] == DIR_UP ? DIR_STOPPED : DIR_UP;
+	}
+	else if (entry.scancode == AGI_KEY_PGUP) {
+		state.variables[VAR_6_EGO_DIRECTION] = state.variables[VAR_6_EGO_DIRECTION] == DIR_UP_RIGHT ? DIR_STOPPED : DIR_UP_RIGHT;
+	}
+	else if (entry.scancode == AGI_KEY_RIGHT) {
+		state.variables[VAR_6_EGO_DIRECTION] = state.variables[VAR_6_EGO_DIRECTION] == DIR_RIGHT ? DIR_STOPPED : DIR_RIGHT;
+	}
+	else if (entry.scancode == AGI_KEY_PGDN) {
+		state.variables[VAR_6_EGO_DIRECTION] = state.variables[VAR_6_EGO_DIRECTION] == DIR_DOWN_RIGHT ? DIR_STOPPED : DIR_DOWN_RIGHT;
+	}
+	else if (entry.scancode == AGI_KEY_DOWN) {
+		state.variables[VAR_6_EGO_DIRECTION] = state.variables[VAR_6_EGO_DIRECTION] == DIR_DOWN ? DIR_STOPPED : DIR_DOWN;
+	}
+	else if (entry.scancode == AGI_KEY_END) {
+		state.variables[VAR_6_EGO_DIRECTION] = state.variables[VAR_6_EGO_DIRECTION] == DIR_DOWN_LEFT ? DIR_STOPPED : DIR_DOWN_LEFT;
+	}
+	else if (entry.scancode == AGI_KEY_LEFT) {
+		state.variables[VAR_6_EGO_DIRECTION] = state.variables[VAR_6_EGO_DIRECTION] == DIR_LEFT ? DIR_STOPPED : DIR_LEFT;
+	}
+	else if (entry.scancode == AGI_KEY_F3) {
+		strcpy(state.input_buffer, state.prev_input_buffer);
+		state.input_pos = state.prev_input_pos;
+		_redraw_prompt();
+	}
+	else {
+		bool found_controller = false;
+		controller_assignment_t** controller_assignment = &state.first_controller_assignment;
+		while ((*controller_assignment) != NULL) {
+			controller_assignment_t* c = *controller_assignment;
+			if ((c->ascii != 0 && c->ascii == entry.ascii) || (c->scancode != 0 && c->scancode == entry.scancode)) {
+				found_controller = true;
+				state.controllers[c->controller] = true;
+				break;
+			}
+
+			controller_assignment = &((*controller_assignment)->next);
+		}
+
+		if (!found_controller) {
+			if (entry.ascii && state.input_prompt_active) {
+				if (entry.ascii == '\b') {
+					if (state.input_pos > 0) {
+						state.input_pos--;
+					}
+				}
+				else {
+					state.input_buffer[state.input_pos++] = entry.ascii;
+				}
+				state.input_buffer[state.input_pos] = '\0';
+				_redraw_prompt();
+			}
+		}
+	}
+}
+
+void close_menu() {
+	state.in_menu = false;
+	show_pic();
+	redraw_status_line();
+}
+
+void process_input_menu(input_queue_entry_t entry) {
+	if (entry.ascii == 27) {
+		close_menu();
+		return;
+	}
+
+	menu_header_t* menu = *state.current_menu;
+	menu_item_t* menu_item = *state.current_menu_item;
+
+	if (entry.scancode == AGI_KEY_UP) {
+		if (menu_item->prev != NULL) {
+			state.current_menu_item = &menu_item->prev;
+		}
+	}
+	else if (entry.scancode == AGI_KEY_DOWN) {
+		if (menu_item->next != NULL) {
+			state.current_menu_item = &menu_item->next;
+		}
+	}
+	else if (entry.scancode == AGI_KEY_LEFT) {
+		if (menu->prev != NULL) {
+			state.current_menu = &menu->prev;
+			state.current_menu_item = &(*state.current_menu)->first_item;
+		}
+	}
+	else if (entry.scancode == AGI_KEY_RIGHT) {
+		if (menu->next != NULL) {
+			state.current_menu = &menu->next;
+			state.current_menu_item = &(*state.current_menu)->first_item;
+		}
+	}
+
+	show_pic();
+	redraw_menu();
+}
+
+void process_input_queue() {
+	for (int i = 0; i < queue_pos; i++) {
 		input_queue_entry_t entry = queue[i];
 
-		if (entry.scancode == AGI_KEY_HOME)
-		{
-			state.variables[VAR_6_EGO_DIRECTION] = state.variables[VAR_6_EGO_DIRECTION] == DIR_UP_LEFT ? DIR_STOPPED : DIR_UP_LEFT;
+		if (state.in_menu) {
+			process_input_menu(entry);
 		}
-		else if (entry.scancode == AGI_KEY_UP)
-		{
-			state.variables[VAR_6_EGO_DIRECTION] = state.variables[VAR_6_EGO_DIRECTION] == DIR_UP ? DIR_STOPPED : DIR_UP;
-		}
-		else if (entry.scancode == AGI_KEY_PGUP)
-		{
-			state.variables[VAR_6_EGO_DIRECTION] = state.variables[VAR_6_EGO_DIRECTION] == DIR_UP_RIGHT ? DIR_STOPPED : DIR_UP_RIGHT;
-		}
-		else if (entry.scancode == AGI_KEY_RIGHT)
-		{
-			state.variables[VAR_6_EGO_DIRECTION] = state.variables[VAR_6_EGO_DIRECTION] == DIR_RIGHT ? DIR_STOPPED : DIR_RIGHT;
-		}
-		else if (entry.scancode == AGI_KEY_PGDN)
-		{
-			state.variables[VAR_6_EGO_DIRECTION] = state.variables[VAR_6_EGO_DIRECTION] == DIR_DOWN_RIGHT ? DIR_STOPPED : DIR_DOWN_RIGHT;
-		}
-		else if (entry.scancode == AGI_KEY_DOWN)
-		{
-			state.variables[VAR_6_EGO_DIRECTION] = state.variables[VAR_6_EGO_DIRECTION] == DIR_DOWN ? DIR_STOPPED : DIR_DOWN;
-		}
-		else if (entry.scancode == AGI_KEY_END)
-		{
-			state.variables[VAR_6_EGO_DIRECTION] = state.variables[VAR_6_EGO_DIRECTION] == DIR_DOWN_LEFT ? DIR_STOPPED : DIR_DOWN_LEFT;
-		}
-		else if (entry.scancode == AGI_KEY_LEFT)
-		{
-			state.variables[VAR_6_EGO_DIRECTION] = state.variables[VAR_6_EGO_DIRECTION] == DIR_LEFT ? DIR_STOPPED : DIR_LEFT;
-		}
-		else
-		{
-			bool found_controller = false;
-			for (size_t j = 0; j < 50; j++)
-			{
-				controller_assignment_t controller_assignment = state.controller_assignments[j];
-				if ((controller_assignment.ascii > 0 && controller_assignment.ascii == entry.ascii) ||
-					(controller_assignment.scancode > 0 && controller_assignment.scancode == entry.scancode))
-				{
-					state.controllers[controller_assignment.controller_no] = true;
-					found_controller = true;
-				}
-			}
-
-			if (!found_controller)
-			{
-				if (entry.ascii && state.input_prompt_active)
-				{
-					if (entry.ascii == '\b')
-					{
-						if (state.input_pos > 0)
-						{
-							state.input_pos--;
-						}
-					}
-					else
-					{
-						state.input_buffer[state.input_pos++] = entry.ascii;
-					}
-					state.input_buffer[state.input_pos] = '\0';
-					_redraw_prompt();
-				}
-			}
+		else {
+			process_input_game(entry);
 		}
 	}
 
 	queue_pos = 0;
 }
 
-void agi_logic_run_cycle()
-{
-	for (size_t i = 0; i < MAX_NUM_CONTROLLERS; i++)
-	{
-		state.controllers[i] = false;
-	}
-	
-	state.flags[FLAG_2_COMMAND_ENTERED] = false;
-	state.flags[FLAG_4_SAID_ACCEPTED_INPUT] = false;
-	state.variables[VAR_19_KEYBOARD_KEY_PRESSED] = 0;
-	state.variables[VAR_9_MISSING_WORD_NO] = 0;
+uint32_t last_ms = 0;
+uint32_t last_clock = 0;
+bool agi_logic_run_cycle(uint32_t now_ms) {
+	uint32_t delta_ms = now_ms - last_ms;
+	uint32_t target_ms = ((uint32_t)state.variables[10]) * 50;
 
-	process_input_queue();
+	if (delta_ms >= target_ms) {
+		last_ms = now_ms;
 
-	if (state.enter_pressed)
-	{
-		state.num_parsed_word_groups = 0;
-		if (state.input_pos > 0)
-		{
-			_parse_word_groups();
-			if (state.num_parsed_word_groups > 0)
-			{
-				state.flags[FLAG_2_COMMAND_ENTERED] = true;
+		uint32_t clock_delta = now_ms - last_clock;
+		if (clock_delta >= 1000) {
+			last_clock = now_ms;
+
+			state.variables[VAR_11_CLOCK_SECONDS]++;
+			if (state.variables[VAR_11_CLOCK_SECONDS] == 60) {
+				state.variables[VAR_11_CLOCK_SECONDS] = 0;
+				state.variables[VAR_12_CLOCK_MINUTES]++;
+				if (state.variables[VAR_12_CLOCK_MINUTES] == 60) {
+					state.variables[VAR_12_CLOCK_MINUTES] = 0;
+					state.variables[VAR_13_CLOCK_HOURS]++;
+					if (state.variables[VAR_13_CLOCK_HOURS] == 24) {
+						state.variables[VAR_13_CLOCK_HOURS] = 0;
+						state.variables[VAR_14_CLOCK_DAYS]++;
+					}
+				}
 			}
 		}
-		state.input_pos = 0;
-		state.input_buffer[state.input_pos] = '\0';
-		_redraw_prompt();
-	}
 
-	if (state.program_control)
-	{
-		state.variables[VAR_6_EGO_DIRECTION] = EGO.direction;
-	}
-	else
-	{
-		EGO.direction = state.variables[VAR_6_EGO_DIRECTION];
-	}
-
-	// recalculate direction of motion
-	for (uint8_t objNo = 0; objNo < MAX_NUM_OBJECTS; objNo++)
-	{
-		if (OBJ.active && OBJ.update && OBJ.drawn && OBJ.move_mode == OBJ_MOVEMODE_MOVE_TO)
-		{
-			set_dir_from_move_distance(objNo);
+		for (size_t i = 0; i < MAX_NUM_CONTROLLERS; i++) {
+			state.controllers[i] = false;
 		}
+
+		state.flags[FLAG_2_COMMAND_ENTERED] = false;
+		state.flags[FLAG_4_SAID_ACCEPTED_INPUT] = false;
+		state.variables[VAR_19_KEYBOARD_KEY_PRESSED] = 0;
+		state.variables[VAR_9_MISSING_WORD_NO] = 0;
+
+		process_input_queue();
+
+		if (state.in_menu) {
+			if (state.enter_pressed) {
+				state.controllers[(*state.current_menu_item)->controller] = true;
+				close_menu();
+			}
+		}
+
+		if (!state.in_menu) {
+			if (state.enter_pressed) {
+				state.num_parsed_word_groups = 0;
+				if (state.input_pos > 0) {
+					_parse_word_groups();
+					if (state.num_parsed_word_groups > 0) {
+						state.flags[FLAG_2_COMMAND_ENTERED] = true;
+					}
+				}
+				strcpy(state.prev_input_buffer, state.input_buffer);
+				state.prev_input_pos = state.input_pos;
+
+				state.input_pos = 0;
+				state.input_buffer[state.input_pos] = '\0';
+				_redraw_prompt();
+			}
+
+			if (state.program_control) {
+				state.variables[VAR_6_EGO_DIRECTION] = EGO.direction;
+			}
+			else {
+				EGO.direction = state.variables[VAR_6_EGO_DIRECTION];
+			}
+
+			// recalculate direction of motion
+			for (uint8_t objNo = 0; objNo < MAX_NUM_OBJECTS; objNo++) {
+				if (OBJ.active && OBJ.update && OBJ.drawn && OBJ.move_mode == OBJ_MOVEMODE_MOVE_TO) {
+					set_dir_from_move_distance(objNo);
+				}
+			}
+
+			uint8_t previous_score = state.variables[VAR_3_SCORE];
+			bool previous_sound_status = state.flags[FLAG_9_SOUND_ENABLED];
+
+			execute_logic_cycle();
+
+			state.enter_pressed = false;
+			EGO.direction = state.variables[VAR_6_EGO_DIRECTION];
+
+			if (previous_score != state.variables[VAR_3_SCORE] || previous_sound_status != state.flags[FLAG_9_SOUND_ENABLED]) {
+				redraw_status_line();
+			}
+
+			state.variables[VAR_4_OBJ_BORDER_OBJNO] = 0;
+			state.variables[VAR_5_OBJ_BORDER_CODE] = 0;
+
+			state.flags[FLAG_5_ROOM_EXECUTED_FIRST_TIME] = false;
+			state.flags[FLAG_6_RESTART_GAME_EXECUTED] = false;
+			state.flags[FLAG_12_GAME_RESTORED] = false;
+
+			update_all_active();
+		}
+
+		return true;
 	}
-
-	uint8_t previous_score = state.variables[VAR_3_SCORE];
-	bool previous_sound_status = state.flags[FLAG_9_SOUND_ENABLED];
-
-	execute_logic_cycle();
-
-	EGO.direction = state.variables[VAR_6_EGO_DIRECTION];
-
-	if (previous_score != state.variables[VAR_3_SCORE] || previous_sound_status != state.flags[FLAG_9_SOUND_ENABLED])
-	{
-		redraw_status_line();
-	}
-
-	state.variables[VAR_4_OBJ_BORDER_OBJNO] = 0;
-	state.variables[VAR_5_OBJ_BORDER_CODE] = 0;
-
-	state.flags[FLAG_5_ROOM_EXECUTED_FIRST_TIME] = false;
-	state.flags[FLAG_6_RESTART_GAME_EXECUTED] = false;
-	state.flags[FLAG_12_GAME_RESTORED] = false;
-
-	update_all_active();
+	return false;
 }
 
 void agi_initialize() {

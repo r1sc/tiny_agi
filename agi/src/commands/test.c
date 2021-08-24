@@ -50,8 +50,7 @@ bool posn(uint8_t objNo, uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2) {
 }
 
 bool controller(uint8_t ctr) {
-	// TODO
-	return false;
+	return state.controllers[ctr];
 }
 
 bool have_key() {

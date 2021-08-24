@@ -191,6 +191,9 @@ int main()
                     agi_input_queue_push_keypress(0, AGI_KEY_END);
                 else if (c == 54)
                     agi_input_queue_push_keypress(0, AGI_KEY_PGDN);
+                else if(c == 82) {
+                    agi_input_queue_push_keypress(0, AGI_KEY_F3);
+                }
                 else if (c >= 32 && c <= 122 && c != 91)
                 {
                     agi_input_queue_push_keypress(c, 0);

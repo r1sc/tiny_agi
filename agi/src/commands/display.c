@@ -43,7 +43,7 @@ void configure_screen(uint8_t pPlaytop, uint8_t pInputLine, uint8_t pStatusLine)
 
 void display(uint8_t row, uint8_t col, uint8_t msg)
 {
-	char *message = get_message(msg);
+	char *message = get_message(state.current_logic, msg);
 	_draw_text(&row, &col, message, state.display_fg, state.display_bg);
 }
 
@@ -195,13 +195,13 @@ void _print(const char *message, int col, int row, uint8_t max_width)
 
 void print(uint8_t msg)
 {
-	char *message = get_message(msg);
+	char *message = get_message(state.current_logic, msg);
 	_print(message, -1, -1, 31);
 }
 
 void print_at(uint8_t msg, uint8_t row, uint8_t col, uint8_t maxWidth)
 {
-	char *message = get_message(msg);
+	char *message = get_message(state.current_logic, msg);
 	_print(message, col, row, maxWidth);
 }
 
@@ -217,7 +217,7 @@ void print_v(uint8_t var)
 
 void set_cursor_char(uint8_t msg)
 {
-	char *message = get_message(msg);
+	char *message = get_message(state.current_logic, msg);
 	state.cursor_char = message[0];
 }
 

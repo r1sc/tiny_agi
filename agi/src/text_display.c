@@ -46,7 +46,7 @@ void _draw_text(uint8_t* row, uint8_t* col, const char* text, uint8_t fg, uint8_
 				break;
 			}
 			case 'm': { // Message
-				char* msg = get_message(num_buffer);
+				char* msg = get_message(state.current_logic, num_buffer);
 				_draw_text(row, col, msg, fg, bg);
 				break;
 			}

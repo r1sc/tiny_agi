@@ -64,12 +64,33 @@ typedef struct {
 } rect_t;
 #pragma pack(pop)
 
-typedef struct
-{
+typedef struct controller_assignment_t {
 	uint8_t scancode;
 	char ascii;
-	uint8_t controller_no;
+	uint8_t controller;
+	struct controller_assignment_t* next;
 } controller_assignment_t;
+
+typedef struct {
+	uint16_t message_no;
+	uint8_t logic_no;
+} menu_message_t;
+
+typedef struct menu_item_t {
+	menu_message_t text;
+	uint8_t controller;
+
+	struct menu_item_t* prev;
+	struct menu_item_t* next;
+} menu_item_t;
+
+typedef struct menu_header_t {
+	menu_message_t text;
+	menu_item_t* first_item;
+
+	struct menu_header_t* prev;
+	struct menu_header_t* next;
+} menu_header_t;
 
 typedef struct {
 	/* Interpreter state */
@@ -99,6 +120,8 @@ typedef struct {
 	uint8_t horizon;
 	bool input_prompt_active;
 	char cursor_char;
+	char prev_input_buffer[40];
+	uint8_t prev_input_pos;
 	char input_buffer[40];
 	uint8_t input_pos;
 	
@@ -115,13 +138,20 @@ typedef struct {
 	bool status_line_on;
 
 	bool controllers[MAX_NUM_CONTROLLERS];	
-	controller_assignment_t controller_assignments[MAX_NUM_CONTROLLERS];
-
-	bool escape_pressed;
+	controller_assignment_t *first_controller_assignment;
+	controller_assignment_t** current_controller_assignment;
 
 	uint16_t parsed_word_groups[20];
 	uint16_t num_parsed_word_groups;
 
+	menu_header_t* first_menu;
+	menu_header_t** current_menu;
+	menu_header_t* prev_menu;
+
+	menu_item_t** current_menu_item;
+	menu_item_t* prev_menu_item;
+
+	bool in_menu;
 } agi_state_t;
 
 typedef struct {
@@ -138,4 +168,6 @@ void state_reset();
 void agi_draw_all_active();
 
 /* Steps the simulation */
-void agi_logic_run_cycle();
+bool agi_logic_run_cycle(uint32_t delta_ms);
+
+void agi_input_queue_push_keypress(char ascii, uint8_t scancode);
