@@ -25,8 +25,15 @@ typedef struct {
 } view_t;
 #pragma pack(pop)
 
+typedef struct {
+	int width;
+	int height;
+	char* description;
+} viewinfo_t;
+
 uint8_t _view_num_loops(uint8_t viewNo);
 uint8_t _view_num_cels(uint8_t viewNo, uint8_t loopNo);
+viewinfo_t view_get_show_obj_info(uint8_t view_no);
 cell_t* _get_cell(uint8_t viewNo, uint8_t loopNo, uint8_t cellNo);
 cell_t* _object_cell(const object_t* obj);
 void _draw_view(uint8_t viewNo, uint8_t loopNo, uint8_t cellNo, uint8_t x, uint8_t y, uint8_t priority, bool erase, bool addToPic);

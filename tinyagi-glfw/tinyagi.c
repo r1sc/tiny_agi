@@ -25,7 +25,7 @@ void panic(const char* fmt, ...) {
 	exit(1);
 }
 
-const char* game_path = "C:\\classic\\sierra\\pq";
+const char* game_path = "C:\\classic\\sierra\\kq3";
 agi_file_t get_file(const char* filename) {
 	char path[256];
 	sprintf(path, "%s\\%s\0", game_path, filename);
@@ -100,11 +100,17 @@ void _draw_char(unsigned int start_x, unsigned int start_y, unsigned char c, uin
 
 	for (unsigned int y = 0; y < 8; y++)
 	{
+		int screen_y = y + start_y;
 		unsigned char rowData = font_data[c * 8 + y];
 		for (unsigned int x = 0; x < 8; x++)
 		{
+			int screen_x = x + start_x;
 			bool on = (rowData & 0x80) == 0x80;
-			screen_set_320(x + start_x, y + start_y, on ? fg : bg);
+
+			screen_set_320(screen_x, screen_y, on ? fg : bg);
+			if (screen_y > state.play_top * 8 && screen_y < 168) {
+				priority_set(screen_x >> 1, screen_y - (state.play_top * 8), 255);
+			}
 			rowData = rowData << 1;
 		}
 	}

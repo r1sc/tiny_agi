@@ -55,6 +55,7 @@ void set_menu(uint8_t msg) {
 	menu->next = NULL;
 	
 	state.prev_menu = menu;
+	state.prev_menu_item = NULL;
 	state.current_menu = &menu->next;
 	state.current_menu_item = &menu->first_item;
 }

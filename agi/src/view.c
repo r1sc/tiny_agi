@@ -15,6 +15,18 @@ uint8_t _view_num_cels(uint8_t view_no, uint8_t loop_no) {
 	return loop->num_cells;
 }
 
+viewinfo_t view_get_show_obj_info(uint8_t view_no) {
+	view_t* view = (view_t*)(heap_data.loaded_views[view_no].buffer);
+	loop_t* loop = (loop_t*)((uint8_t*)(view)+view->loop_offsets[0]);
+	cell_t* cell = (cell_t*)((uint8_t*)(loop)+loop->cell_offsets[0]);
+
+	viewinfo_t info;
+	info.width = cell->width;
+	info.height = cell->height;
+	info.description = (char*)(((char*)view) + view->description_offset);
+	return info;
+}
+
 cell_t* _get_cell(uint8_t view_no, uint8_t loop_no, uint8_t cel_no) {
 	view_t* view = (view_t*)(heap_data.loaded_views[view_no].buffer);
 	loop_t* loop = (loop_t*)((uint8_t*)(view)+view->loop_offsets[loop_no]);
@@ -71,7 +83,10 @@ void _draw_view(uint8_t view_no, uint8_t loop_no, uint8_t cel_no, uint8_t x, uin
 					uint8_t screenY = y - (cell->height - 1) + sy;
 					uint8_t screenX = sx; // + (mirrored ? cell->width - 1 : 0);
 					if (screenX < 160 && screenY < 168 && screenX >= 0 && screenY >= 0) {
-						if (erase) {
+						if (add_to_pic == false && priority_get(screenX, screenY) == 255) {
+							;
+						}
+						else if (erase) {
 							screen_set_160(screenX, screenY, pic_vis_get(screenX, screenY));
 							priority_set(screenX, screenY, pic_pri_get(screenX, screenY));
 						}

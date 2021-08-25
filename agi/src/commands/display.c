@@ -26,7 +26,7 @@ void clear_text_rect(uint8_t row1, uint8_t col1, uint8_t row2, uint8_t col2, uin
 
 void close_dialogue()
 {
-	UNIMPLEMENTED
+	// DO NOTHING - only needed on Hercules graphics cards
 }
 
 void close_window()
@@ -59,150 +59,33 @@ void graphics()
 
 void open_dialogue()
 {
-	UNIMPLEMENTED
+	// DO NOTHING - only needed on Hercules graphics cards
 }
 
-void _next_word(const char *str, char **end_i)
+void _print(const char *message, int row, int col, uint8_t max_width, bool pause)
 {
-	for (char *c = (char *)str;; c++)
-	{
-		if (*c == '\0' || *c == ' ' || *c == '\n')
-		{
-			*end_i = c;
-			return;
-		}
-	}
-}
-
-void _find_longest_line(const char *message, uint8_t max_cols, uint8_t *num_cols, uint8_t *num_lines)
-{
-	uint8_t col = 0;
-	int row = 1;
-	char *start = (char *)message;
-	char *end = start;
-	*num_cols = 0;
-
-	while (*end != '\0')
-	{
-		_next_word(start, &end);
-		int word_len = (int)(end - start) + 1;
-
-		if (col + word_len >= max_cols)
-		{
-			if (col > *num_cols)
-			{
-				*num_cols = col;
-			}
-			col = 0;
-			row++;
-		}
-
-		col += word_len;
-
-		if (*end == '\n')
-		{
-			col = 0;
-			row++;
-		}
-
-		start = end + 1;
+	if (pause) {
+		agi_draw_all_active();
 	}
 	
-	if (col > *num_cols) {
-		*num_cols = col;
+	print_message_box(message, max_width, row, col);
+
+	if (pause) {
+		wait_for_enter();
+		show_pic();
 	}
-	*num_lines = row;
-}
-
-void _print(const char *message, int col, int row, uint8_t max_width)
-{
-	agi_draw_all_active();
-	uint8_t width, height;
-	_find_longest_line(message, max_width, &width, &height);
-
-	if (col == -1)
-		col = 20 - (width >> 1);
-	if (row == -1)
-		row = 11 - (height >> 1);
-
-	int start_col = col;
-	int start_row = row;
-	int written_line_chars = 0;
-	char *start = (char *)message;
-	char *end = start;
-
-	while (*end != '\0')
-	{
-		_next_word(start, &end);
-		int word_len = (int)(end - start) + 1;
-
-		if (written_line_chars + word_len >= max_width)
-		{
-			for (size_t i = written_line_chars; i < width; i++)
-			{
-				_draw_char((start_col + i) * 8, row * 8, ' ', 0, 15);
-			}
-			col = start_col;
-			row++;
-			written_line_chars = 0;
-		}
-
-		for (; start <= end; start++)
-		{
-			if (*start == '\0')
-				break;
-			_draw_char(col * 8, row * 8, *start, 0, 15);
-			col++;
-			written_line_chars++;
-		}
-
-		if (*end == '\n')
-		{
-			for (size_t i = written_line_chars; i < width; i++)
-			{
-				_draw_char((start_col + i) * 8, row * 8, ' ', 0, 15);
-			}
-			col = start_col;
-			row++;
-			written_line_chars = 0;
-		}
-	}
-
-	for (size_t i = written_line_chars; i < width; i++)
-	{
-		_draw_char((start_col + i) * 8, row * 8, ' ', 4, 15);
-	}
-
-	row++;
-	for (int x = start_col; x < start_col + width - 1; x++)
-	{
-		_draw_char(x * 8, (start_row - 1) * 8, 0xC4, 4, 15);
-		_draw_char(x * 8, row * 8, 0xC4, 4, 15);
-	}
-	for (int y = start_row; y < row; y++)
-	{
-		_draw_char((start_col - 1) * 8, y * 8, 0xB3, 4, 15);
-		_draw_char((start_col + width - 1) * 8, y * 8, 0xB3, 4, 15);
-	}
-	_draw_char((start_col - 1) * 8, (start_row - 1) * 8, 0xDA, 4, 15);
-	_draw_char((start_col + width - 1) * 8, (start_row - 1) * 8, 0xBF, 4, 15);
-	_draw_char((start_col - 1) * 8, row * 8, 0xC0, 4, 15);
-	_draw_char((start_col + width - 1) * 8, row * 8, 0xD9, 4, 15);
-
-	wait_for_enter();
-	show_pic();
 }
 
 void print(uint8_t msg)
 {
 	char *message = get_message(state.current_logic, msg);
-	_print(message, -1, -1, 31);
+	_print(message, 0, 0, 30, true);
 }
 
 void print_at(uint8_t msg, uint8_t row, uint8_t col, uint8_t maxWidth)
 {
 	char *message = get_message(state.current_logic, msg);
-	_print(message, col, row, maxWidth);
+	_print(message, row, col, maxWidth, false);
 }
 
 void print_at_v(uint8_t var, uint8_t row, uint8_t col, uint8_t maxWidth)

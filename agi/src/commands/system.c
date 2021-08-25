@@ -28,7 +28,10 @@ void init_joy() {
 }
 
 void pause() {
-	UNIMPLEMENTED
+	agi_draw_all_active();
+	print_message_box("      Game paused.\nPress Enter to continue.", 30, 0, 0);
+	wait_for_enter();
+	show_pic();
 }
 
 void player_control() {

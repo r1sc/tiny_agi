@@ -1,5 +1,12 @@
 #pragma once
 
+#define VERTICAL_BAR (unsigned char)0xB3
+#define HORIZONTAL_BAR (unsigned char)0xC4
+#define CORNER_NE_BAR (unsigned char)0xBF
+#define CORNER_SW_BAR (unsigned char)0xC0
+#define CORNER_SE_BAR (unsigned char)0xD9
+#define CORNER_NW_BAR (unsigned char)0xDA
+
 #define VAR_0_CURRENT_ROOM 0
 #define VAR_1_PREVIOUS_ROOM 1
 #define VAR_2_EGO_BORDER_CODE 2

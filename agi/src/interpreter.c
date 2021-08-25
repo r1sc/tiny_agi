@@ -579,10 +579,19 @@ void process_input_menu(input_queue_entry_t entry) {
 		if (menu_item->prev != NULL) {
 			state.current_menu_item = &menu_item->prev;
 		}
+		else {
+			while ((*state.current_menu_item)->next != NULL) {
+				state.current_menu_item = &menu_item->next;
+				menu_item = menu_item->next;
+			}
+		}
 	}
 	else if (entry.scancode == AGI_KEY_DOWN) {
 		if (menu_item->next != NULL) {
 			state.current_menu_item = &menu_item->next;
+		}
+		else {
+			state.current_menu_item = &menu->first_item;
 		}
 	}
 	else if (entry.scancode == AGI_KEY_LEFT) {

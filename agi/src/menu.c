@@ -4,13 +4,7 @@
 #include "state.h"
 #include "text_display.h"
 #include "actions.h"
-
-#define VERTICAL_BAR (unsigned char)0xB3
-#define HORIZONTAL_BAR (unsigned char)0xC4
-#define CORNER_NE_BAR (unsigned char)0xBF
-#define CORNER_SW_BAR (unsigned char)0xC0
-#define CORDER_SE_BAR (unsigned char)0xD9
-#define CORNER_NW_BAR (unsigned char)0xDA
+#include "constants.h"
 
 void redraw_menu() {	
 	uint8_t row = 0;
@@ -94,7 +88,7 @@ void redraw_menu() {
 			_draw_char(col * 8, row * 8, CORNER_SW_BAR, 0, 15);
 		}
 		else if (col == right_col) {
-			_draw_char(col * 8, row * 8, CORDER_SE_BAR, 0, 15);
+			_draw_char(col * 8, row * 8, CORNER_SE_BAR, 0, 15);
 		}
 		else {
 			_draw_char(col * 8, row * 8, HORIZONTAL_BAR, 0, 15);

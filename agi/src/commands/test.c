@@ -81,6 +81,9 @@ bool said() {
 		}
 	}
 
+	if (!state.or_result && !state.and_result)
+		return false;
+
 	if(!state.or && state.and_result == false) { // Skip checking if in AND-testing mode and the previous result was false
 		match = false;
 	}	
