@@ -127,24 +127,22 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 		state.enter_pressed = true;
 	}
 
-	if (!state.program_control) {
-		if ((key == GLFW_KEY_UP || key == GLFW_KEY_KP_8) && action == GLFW_PRESS)
-			agi_input_queue_push_keypress(0, AGI_KEY_UP);
-		else if ((key == GLFW_KEY_DOWN || key == GLFW_KEY_KP_2) && action == GLFW_PRESS)
-			agi_input_queue_push_keypress(0, AGI_KEY_DOWN);
-		else if ((key == GLFW_KEY_LEFT || key == GLFW_KEY_KP_4) && action == GLFW_PRESS)
-			agi_input_queue_push_keypress(0, AGI_KEY_LEFT);
-		else if ((key == GLFW_KEY_RIGHT || key == GLFW_KEY_KP_6) && action == GLFW_PRESS)
-			agi_input_queue_push_keypress(0, AGI_KEY_RIGHT);
-		else if (key == GLFW_KEY_KP_7 && action == GLFW_PRESS)
-			agi_input_queue_push_keypress(0, AGI_KEY_HOME);
-		else if (key == GLFW_KEY_KP_9 && action == GLFW_PRESS)
-			agi_input_queue_push_keypress(0, AGI_KEY_PGUP);
-		else if (key == GLFW_KEY_KP_1 && action == GLFW_PRESS)
-			agi_input_queue_push_keypress(0, AGI_KEY_END);
-		else if (key == GLFW_KEY_KP_3 && action == GLFW_PRESS)
-			agi_input_queue_push_keypress(0, AGI_KEY_PGDN);
-	}
+	if ((key == GLFW_KEY_UP || key == GLFW_KEY_KP_8) && action == GLFW_PRESS)
+		agi_input_queue_push_keypress(0, AGI_KEY_UP);
+	else if ((key == GLFW_KEY_DOWN || key == GLFW_KEY_KP_2) && action == GLFW_PRESS)
+		agi_input_queue_push_keypress(0, AGI_KEY_DOWN);
+	else if ((key == GLFW_KEY_LEFT || key == GLFW_KEY_KP_4) && action == GLFW_PRESS)
+		agi_input_queue_push_keypress(0, AGI_KEY_LEFT);
+	else if ((key == GLFW_KEY_RIGHT || key == GLFW_KEY_KP_6) && action == GLFW_PRESS)
+		agi_input_queue_push_keypress(0, AGI_KEY_RIGHT);
+	else if (key == GLFW_KEY_KP_7 && action == GLFW_PRESS)
+		agi_input_queue_push_keypress(0, AGI_KEY_HOME);
+	else if (key == GLFW_KEY_KP_9 && action == GLFW_PRESS)
+		agi_input_queue_push_keypress(0, AGI_KEY_PGUP);
+	else if (key == GLFW_KEY_KP_1 && action == GLFW_PRESS)
+		agi_input_queue_push_keypress(0, AGI_KEY_END);
+	else if (key == GLFW_KEY_KP_3 && action == GLFW_PRESS)
+		agi_input_queue_push_keypress(0, AGI_KEY_PGDN);
 
 	if (key == GLFW_KEY_TAB && action == GLFW_PRESS) {
 		show_priority = !show_priority;

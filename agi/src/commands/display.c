@@ -31,7 +31,7 @@ void close_dialogue()
 
 void close_window()
 {
-	UNIMPLEMENTED
+	show_pic();
 }
 
 void configure_screen(uint8_t pPlaytop, uint8_t pInputLine, uint8_t pStatusLine)
@@ -43,7 +43,7 @@ void configure_screen(uint8_t pPlaytop, uint8_t pInputLine, uint8_t pStatusLine)
 
 void display(uint8_t row, uint8_t col, uint8_t msg)
 {
-	char *message = get_message(state.current_logic, msg);
+	const char *message = get_message(state.current_logic, msg);
 	_draw_text(&row, &col, message, state.display_fg, state.display_bg);
 }
 
@@ -78,13 +78,14 @@ void _print(const char *message, int row, int col, uint8_t max_width, bool pause
 
 void print(uint8_t msg)
 {
-	char *message = get_message(state.current_logic, msg);
-	_print(message, 0, 0, 30, true);
+	const char *message = get_message(state.current_logic, msg);
+	bool pause = !state.flags[FLAG_15_NON_BLOCKING_WINDOWS];
+	_print(message, 0, 0, 30, pause);
 }
 
 void print_at(uint8_t msg, uint8_t row, uint8_t col, uint8_t maxWidth)
 {
-	char *message = get_message(state.current_logic, msg);
+	const char *message = get_message(state.current_logic, msg);
 	_print(message, row, col, maxWidth, false);
 }
 
@@ -100,7 +101,7 @@ void print_v(uint8_t var)
 
 void set_cursor_char(uint8_t msg)
 {
-	char *message = get_message(state.current_logic, msg);
+	const char *message = get_message(state.current_logic, msg);
 	state.cursor_char = message[0];
 }
 

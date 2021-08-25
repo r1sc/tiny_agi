@@ -209,7 +209,7 @@ action_t actions[] = {
 	ACTION("pop_script", pop_script, 0),
 	ACTION("hold_key", hold_key, 0) };
 
-char* get_message(uint8_t logic_no, uint8_t message_no) {
+const char* get_message(uint8_t logic_no, uint8_t message_no) {
 	message_no--;
 	uint8_t* buffer = heap_data.loaded_logics[logic_no].buffer;
 	uint8_t* message_section = buffer + ((buffer[1] << 8) | buffer[0]) + 2;

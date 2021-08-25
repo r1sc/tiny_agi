@@ -15,7 +15,7 @@ void redraw_menu() {
 	int left_col = 0;
 
 	while (menu != NULL) {
-		char* message = get_message(menu->text.logic_no, menu->text.message_no);
+		const char* message = get_message(menu->text.logic_no, menu->text.message_no);
 		
 		uint8_t fg = 0;
 		uint8_t bg = 15;
@@ -44,7 +44,7 @@ void redraw_menu() {
 	row = 2;
 
 	while (menu_item != NULL) {
-		char* message = get_message(menu_item->text.logic_no, menu_item->text.message_no);
+		const char* message = get_message(menu_item->text.logic_no, menu_item->text.message_no);
 		if (menu_item == menu->first_item) {
 			int width = strlen(message) + 1; // add borders
 			right_col = left_col + width;

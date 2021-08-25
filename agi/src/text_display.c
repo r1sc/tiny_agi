@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "text_display.h"
 #include "platform_support.h"
@@ -10,7 +11,7 @@
 void _draw_text(uint8_t* row, uint8_t* col, const char* text, uint8_t fg, uint8_t bg) {
 	unsigned int i = 0;
 	uint8_t num_buffer = 0;
-
+	
 	while (1) {
 		char c = text[i++];
 		if (c == '%') {
@@ -47,7 +48,7 @@ void _draw_text(uint8_t* row, uint8_t* col, const char* text, uint8_t fg, uint8_
 				break;
 			}
 			case 'm': { // Message
-				char* msg = get_message(state.current_logic, num_buffer);
+				const char* msg = get_message(state.current_logic, num_buffer);
 				_draw_text(row, col, msg, fg, bg);
 				break;
 			}
@@ -85,7 +86,7 @@ void _redraw_prompt() {
 	_draw_text(&row, &col, state.input_buffer, 15, 0);
 }
 
-int read_num(char** source) {
+int read_num(const char** source) {
 	int num = 0;
 	while (**source >= '0' && **source <= '9') {
 		int digit = **source - '0';
@@ -94,15 +95,20 @@ int read_num(char** source) {
 	}
 	return num;
 }
+char* last_space;
+int line_width;
+int total_line_width;
+int rows;
+int max_width;
 
-char* format_and_print(char* dest, char* source, char* last_space, int *line_width, int* total_line_width, int *rows, int max_width) {
+char* format_and_print(char* dest, const char* source) {
 	while (*source != '\0') {
-		if (*line_width == max_width) {
+		if (line_width == max_width) {
 			if (last_space != NULL) {
 				*last_space = '\n';
-				int offset = dest - last_space - 1;
-				if (*line_width - offset > *total_line_width) {
-					*total_line_width = *line_width - offset;
+				int offset = dest - last_space;
+				if (line_width - offset > total_line_width) {
+					total_line_width = line_width - offset;
 				}
 				dest = last_space + 1;
 				source -= offset;
@@ -115,15 +121,26 @@ char* format_and_print(char* dest, char* source, char* last_space, int *line_wid
 				dest++;
 			}
 
-			*line_width = 0;
-			(*rows)++;
+			line_width = 0;
+			rows++;
 		}
 		else {
 			if (*source == '\\') {
 				source++;
 				*dest = *source;
 				dest++;
-				(*line_width)++;
+				line_width++;
+			}
+			else if (*source == '\n') {
+				*dest = *source;
+				source++;
+				dest++;
+
+				if (line_width > total_line_width) {
+					total_line_width = line_width;
+				}
+				line_width = 0;
+				rows++;
 			}
 			else {
 				switch (*source) {
@@ -133,31 +150,42 @@ char* format_and_print(char* dest, char* source, char* last_space, int *line_wid
 					case 'g':
 						source++;
 						int global_message_no = read_num(&source);
-						char* global_message = get_message(0, global_message_no);
-						dest = format_and_print(dest, global_message, last_space, line_width, total_line_width, rows, max_width);
+						const char* global_message = get_message(0, global_message_no);
+						dest = format_and_print(dest, global_message);
 						break;
 					case 'm':
 						source++;
 						int message_no = read_num(&source);
-						char* message = get_message(state.current_logic, message_no);
-						dest = format_and_print(dest, message, last_space, line_width, total_line_width, rows, max_width);
+						const char* message = get_message(state.current_logic, message_no);
+						dest = format_and_print(dest, message);
 						break;
 					case 's':
 						source++;
 						int str_no = read_num(&source);
 						char* str = state.strings[str_no];
-						dest = format_and_print(dest, str, last_space, line_width, total_line_width, rows, max_width);
+						dest = format_and_print(dest, (const char*)str);
+						break;
+					case 'v':
+						source++;
+						int var_no = read_num(&source);
+						int num_width = 0;
+						if (*source == '|') {
+							num_width = read_num(&source);
+						}
+						char num_str[4];
+						sprintf(num_str, "%0*d", num_width, state.variables[var_no]);
+						dest = format_and_print(dest, (const char*)num_str);
 						break;
 					case 'w':
 						source++;
 						int word_no = read_num(&source);
-						dest = format_and_print(dest, "<some word>", last_space, line_width, total_line_width, rows, max_width);
+						dest = format_and_print(dest, "<some word>");
 						break;
 					case 'o':
 						source++;
 						int obj_no = read_num(&source);
 						const char* description = (const char*)(((uint8_t*)heap_data.item_file->items) + heap_data.item_file->items[obj_no].name_offset);
-						dest = format_and_print(dest, description, last_space, line_width, total_line_width, rows, max_width);
+						dest = format_and_print(dest, description);
 						break;
 					}
 					break;
@@ -166,33 +194,29 @@ char* format_and_print(char* dest, char* source, char* last_space, int *line_wid
 				default:
 					*dest = *source;
 					dest++;
-					(*line_width)++;
-
-					if (*source == '\n') {
-						(*rows)++;
-						*line_width = 0;
-					}
-
+					line_width++;
 					source++;
 				}
 			}
 		}
 	}
-	if (*line_width > *total_line_width) {
-		*total_line_width = *line_width;
+	if (line_width > total_line_width) {
+		total_line_width = line_width;
 	}
 	*dest = '\0';
 	return dest;
 }
 
-void print_message_box(char* text, int max_width, int desired_row, int desired_col) {
+void print_message_box(char* text, int width, int desired_row, int desired_col) {
 	char dest[600];
-	char* last_space = NULL;
-	int line_width = 0;
-	int rows = 0;
-	int total_line_width = 0;
 	
-	format_and_print(dest, text, last_space, &line_width,&total_line_width, &rows, max_width);	
+	last_space = NULL;
+	line_width = 0;
+	rows = 0;
+	total_line_width = 0;
+	max_width = width;
+
+	format_and_print(dest, text);	
 
 	uint8_t start_row = 11 - (rows >> 1);
 	if (desired_row > 0) {
