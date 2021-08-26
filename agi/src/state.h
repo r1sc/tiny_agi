@@ -92,6 +92,7 @@ typedef struct menu_header_t {
 	struct menu_header_t* next;
 } menu_header_t;
 
+
 typedef struct {
 	/* Interpreter state */
 	unsigned int pc;
@@ -151,7 +152,9 @@ typedef struct {
 	menu_item_t** current_menu_item;
 	menu_item_t* prev_menu_item;
 
-	bool in_menu;
+	uint8_t game_state;
+	uint8_t target_var; // For get.num
+	uint8_t target_str; // For get.string
 } agi_state_t;
 
 typedef struct {

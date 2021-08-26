@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "text_display.h"
 #include "platform_support.h"
@@ -73,13 +74,17 @@ void _draw_text(uint8_t* row, uint8_t* col, const char* text, uint8_t fg, uint8_
 	}
 }
 
-void _redraw_prompt() {	
+void redraw_prompt(const char* prompt_text) {	
 	uint8_t row = state.input_line_row;
-	uint8_t col = 2;
+	uint8_t col = 0;
 	_draw_text(&row, &col, "                                        ", 0, 0);
 	
-	_draw_char(0, state.input_line_row * 8, state.strings[0][0], 15, 0);
-	_draw_char((1 + state.input_pos) * 8, state.input_line_row * 8, state.cursor_char, 15, 0);
+	//_draw_char(0, state.input_line_row * 8, state.strings[0][0], 15, 0);
+	row = state.input_line_row;
+	col = 0;
+	_draw_text(&row, &col, prompt_text, 15, 0);
+	size_t len = strlen(prompt_text);
+	_draw_char((len + state.input_pos) * 8, state.input_line_row * 8, state.cursor_char, 15, 0);
 
 	row = state.input_line_row;
 	col = 1;
@@ -95,13 +100,14 @@ int read_num(const char** source) {
 	}
 	return num;
 }
-char* last_space;
+
 int line_width;
 int total_line_width;
 int rows;
 int max_width;
 
 char* format_and_print(char* dest, const char* source) {
+	char* last_space = dest;
 	while (*source != '\0') {
 		if (line_width == max_width) {
 			if (last_space != NULL) {
@@ -207,10 +213,9 @@ char* format_and_print(char* dest, const char* source) {
 	return dest;
 }
 
-void print_message_box(char* text, int width, int desired_row, int desired_col) {
+void print_message_box(const char* text, int width, int desired_row, int desired_col) {
 	char dest[600];
 	
-	last_space = NULL;
 	line_width = 0;
 	rows = 0;
 	total_line_width = 0;
@@ -271,4 +276,7 @@ void print_message_box(char* text, int width, int desired_row, int desired_col) 
 		_draw_char(start_col * 8, r * 8, VERTICAL_BAR, 4, 15);
 		_draw_char(end_col * 8, r * 8, VERTICAL_BAR, 4, 15);
 	}
+
+	state.variables[VAR_21_MESSAGE_WINDOW_TIMER] = 0;
+	state.flags[FLAG_15_NON_BLOCKING_WINDOWS] = false;
 }

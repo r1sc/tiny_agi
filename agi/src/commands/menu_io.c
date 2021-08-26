@@ -20,7 +20,7 @@ void hold_key() {
 
 void menu_input() {
 	if (state.flags[FLAG_14_MENU_ENABLED]) {
-		state.in_menu = true;
+		state.game_state = STATE_MENU;
 		state.current_menu = &state.first_menu;
 		state.current_menu_item = &state.first_menu->first_item;
 		redraw_menu();

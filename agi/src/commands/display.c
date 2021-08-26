@@ -79,14 +79,15 @@ void _print(const char *message, int row, int col, uint8_t max_width, bool pause
 void print(uint8_t msg)
 {
 	const char *message = get_message(state.current_logic, msg);
-	bool pause = !state.flags[FLAG_15_NON_BLOCKING_WINDOWS];
+	bool pause = true; // TODO: Broken //!state.flags[FLAG_15_NON_BLOCKING_WINDOWS];
 	_print(message, 0, 0, 30, pause);
 }
 
 void print_at(uint8_t msg, uint8_t row, uint8_t col, uint8_t maxWidth)
 {
 	const char *message = get_message(state.current_logic, msg);
-	_print(message, row, col, maxWidth, false);
+	bool pause = true; // TODO: Broken //!state.flags[FLAG_15_NON_BLOCKING_WINDOWS];
+	_print(message, row, col, maxWidth, pause);
 }
 
 void print_at_v(uint8_t var, uint8_t row, uint8_t col, uint8_t maxWidth)

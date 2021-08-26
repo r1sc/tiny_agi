@@ -33,7 +33,8 @@ void div_v(uint8_t var, uint8_t var2) {
 }
 
 void get_num(uint8_t str, uint8_t var) {
-	UNIMPLEMENTED
+	state.game_state = STATE_GET_NUM;	
+	state.target_var = var;
 }
 
 void increment(uint8_t var) {

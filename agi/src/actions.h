@@ -13,7 +13,7 @@ void pic_pri_set(int x, int y, int priority);
 int pic_pri_get(int x, int y);
 
 uint8_t next_data();
-const char* get_message(uint8_t logic_no, uint8_t message_no);
+const char* get_message(uint8_t logic_no, uint16_t message_no);
 void update_all_active();
 void redraw_status_line();
 void set_dir_from_move_distance(uint8_t objNo);

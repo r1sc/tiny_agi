@@ -209,7 +209,7 @@ action_t actions[] = {
 	ACTION("pop_script", pop_script, 0),
 	ACTION("hold_key", hold_key, 0) };
 
-const char* get_message(uint8_t logic_no, uint8_t message_no) {
+const char* get_message(uint8_t logic_no, uint16_t message_no) {
 	message_no--;
 	uint8_t* buffer = heap_data.loaded_logics[logic_no].buffer;
 	uint8_t* message_section = buffer + ((buffer[1] << 8) | buffer[0]) + 2;
@@ -527,7 +527,7 @@ void process_input_game(input_queue_entry_t entry) {
 	else if (entry.scancode == AGI_KEY_F3) {
 		strcpy(state.input_buffer, state.prev_input_buffer);
 		state.input_pos = state.prev_input_pos;
-		_redraw_prompt();
+		redraw_prompt(state.strings[0]);
 	}
 	else {
 		bool found_controller = false;
@@ -554,14 +554,14 @@ void process_input_game(input_queue_entry_t entry) {
 					state.input_buffer[state.input_pos++] = entry.ascii;
 				}
 				state.input_buffer[state.input_pos] = '\0';
-				_redraw_prompt();
+				redraw_prompt(state.strings[0]);
 			}
 		}
 	}
 }
 
 void close_menu() {
-	state.in_menu = false;
+	state.game_state = STATE_PLAYING;
 	show_pic();
 	redraw_status_line();
 }
@@ -615,11 +615,9 @@ void process_input_queue() {
 	for (int i = 0; i < queue_pos; i++) {
 		input_queue_entry_t entry = queue[i];
 
-		if (state.in_menu) {
-			process_input_menu(entry);
-		}
-		else {
-			process_input_game(entry);
+		switch (state.game_state) {
+		case STATE_MENU:process_input_menu(entry); break;
+		default: process_input_game(entry);	break;
 		}
 	}
 
@@ -665,14 +663,14 @@ bool agi_logic_run_cycle(uint32_t now_ms) {
 
 		process_input_queue();
 
-		if (state.in_menu) {
+		if (state.game_state == STATE_MENU) {
 			if (state.enter_pressed) {
 				state.controllers[(*state.current_menu_item)->controller] = true;
 				close_menu();
 			}
 		}
 
-		if (!state.in_menu) {
+		if (state.game_state == STATE_PLAYING) {
 			if (state.enter_pressed) {
 				state.num_parsed_word_groups = 0;
 				if (state.input_pos > 0) {
@@ -686,7 +684,7 @@ bool agi_logic_run_cycle(uint32_t now_ms) {
 
 				state.input_pos = 0;
 				state.input_buffer[state.input_pos] = '\0';
-				_redraw_prompt();
+				redraw_prompt(state.strings[0]);
 			}
 
 			if (state.program_control) {

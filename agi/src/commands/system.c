@@ -8,7 +8,7 @@
 
 void accept_input() {
 	state.input_prompt_active = true;
-	_redraw_prompt();
+	redraw_prompt(state.strings[0]);
 }
 
 void cancel_line() {

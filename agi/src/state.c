@@ -102,11 +102,12 @@ void state_reset() {
 	state.current_menu = &state.first_menu;
 	state.prev_menu = NULL;
 	state.prev_menu_item = NULL;
-	state.in_menu = false;
 
 	if (state.first_controller_assignment) {
 		free_controller(state.first_controller_assignment);
 	}
 	state.first_controller_assignment = NULL;
 	state.current_controller_assignment = &state.first_controller_assignment;
+
+	state.game_state = STATE_PLAYING;
 }
