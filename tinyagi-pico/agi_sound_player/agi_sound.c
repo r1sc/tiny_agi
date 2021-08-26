@@ -47,6 +47,7 @@ bool agi_sound_tick(int delta_ms)
     {       
         if(sound_data == NULL) {
             pwm_synth_channels[i].hz = 0;
+            pwm_synth_channels[i].sample_pos = 0;
             continue;
         }
 

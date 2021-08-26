@@ -24,12 +24,12 @@ void __not_in_flash_func(pih)() {
     {
         pwm_synth_audio_channel_state_t* state = &pwm_synth_channels[i];
         if(state->hz == 0) {
-            combined_samples += 128;
+            combined_samples += 127;
         } else {
             float steps_per_sample = state->hz / num_sine_curves_per_sec;
 
             // float steps_per_sample = (float)(multiplier * state->hz) / sample_rate_hz;
-            uint16_t sample = strings[(int)state->sample_pos] + 128;
+            uint16_t sample = strings[(int)state->sample_pos] + 127;
 
             state->sample_pos += steps_per_sample;
             if(state->sample_pos >= sample_length) {

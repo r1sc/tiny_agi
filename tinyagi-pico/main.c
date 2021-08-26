@@ -205,12 +205,12 @@ void get_char(uint8_t *ascii, uint8_t *scancode)
     {
         if (buf[0] == 27)
         {
-            printf("Escape seq (%d): ", len);
-            for (size_t i = 0; i < len; i++)
-            {
-                printf("%c (%d) ", buf[i] == 27 ? 'E' : buf[i], buf[i]);
-            }
-            printf("\n");
+            // printf("Escape seq (%d): ", len);
+            // for (size_t i = 0; i < len; i++)
+            // {
+            //     printf("%c (%d) ", buf[i] == 27 ? 'E' : buf[i], buf[i]);
+            // }
+            // printf("\n");
             
             if(len == 1) {
                 *ascii = 27;
