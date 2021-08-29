@@ -82,7 +82,7 @@ void new_room(uint8_t room_no)
 	switch (state.variables[VAR_2_EGO_BORDER_CODE])
 	{
 	case BORDER_TOP:
-		EGO.y = 166;
+		EGO.y = 165;
 		break;
 	case BORDER_BOTTOM:
 		EGO.y = state.horizon + 1;

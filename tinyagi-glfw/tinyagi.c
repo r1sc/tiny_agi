@@ -25,7 +25,7 @@ void panic(const char* fmt, ...) {
 	exit(1);
 }
 
-const char* game_path = "C:\\classic\\sierra\\kq3";
+const char* game_path = "C:\\classic\\sierra\\lsl";
 agi_file_t get_file(const char* filename) {
 	char path[256];
 	sprintf(path, "%s\\%s\0", game_path, filename);
@@ -264,6 +264,12 @@ void wait_for_enter() {
 		Sleep(10);
 		glfwPollEvents();
 	}
+}
+
+void check_key() {
+	render();
+	glfwPollEvents();
+	Sleep(10);
 }
 
 int main() {

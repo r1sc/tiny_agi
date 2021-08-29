@@ -153,8 +153,6 @@ typedef struct {
 	menu_item_t* prev_menu_item;
 
 	uint8_t game_state;
-	uint8_t target_var; // For get.num
-	uint8_t target_str; // For get.string
 } agi_state_t;
 
 typedef struct {

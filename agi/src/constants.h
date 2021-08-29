@@ -1,10 +1,7 @@
 #pragma once
 
 #define STATE_PLAYING 0
-#define STATE_MBOX_WAITING 1
-#define STATE_MENU 2
-#define STATE_GET_NUM 3
-#define STATE_GET_STRING 4
+#define STATE_MENU 1
 
 #define VERTICAL_BAR (unsigned char)0xB3
 #define HORIZONTAL_BAR (unsigned char)0xC4

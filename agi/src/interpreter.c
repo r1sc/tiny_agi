@@ -544,17 +544,21 @@ void process_input_game(input_queue_entry_t entry) {
 		}
 
 		if (!found_controller) {
-			if (entry.ascii && state.input_prompt_active) {
-				if (entry.ascii == '\b') {
-					if (state.input_pos > 0) {
-						state.input_pos--;
+			if (entry.ascii) {
+				if (state.input_prompt_active) {
+					if (entry.ascii == '\b') {
+						if (state.input_pos > 0) {
+							state.input_pos--;
+						}
 					}
+					else {
+						state.input_buffer[state.input_pos++] = entry.ascii;
+					}
+					state.input_buffer[state.input_pos] = '\0';
+					redraw_prompt(state.strings[0]);
 				}
-				else {
-					state.input_buffer[state.input_pos++] = entry.ascii;
-				}
-				state.input_buffer[state.input_pos] = '\0';
-				redraw_prompt(state.strings[0]);
+
+				state.variables[VAR_19_KEYBOARD_KEY_PRESSED] = entry.ascii;
 			}
 		}
 	}
@@ -627,10 +631,9 @@ void process_input_queue() {
 uint32_t last_ms = 0;
 uint32_t last_clock = 0;
 bool agi_logic_run_cycle(uint32_t now_ms) {
-	uint32_t delta_ms = now_ms - last_ms;
 	uint32_t target_ms = ((uint32_t)state.variables[10]) * 50;
 
-	if (delta_ms >= target_ms) {
+	if (now_ms >= last_ms + target_ms) {
 		last_ms = now_ms;
 
 		uint32_t clock_delta = now_ms - last_clock;

@@ -24,7 +24,7 @@ void heap_reload_object_file() {
 
 	memcpy(heap_data.item_file, item_file.data, item_file.size);
 
-	//free(item_file.data);
+	free_file(item_file);
 
 	decrypt_item_file((uint8_t*)heap_data.item_file, item_file.size);
 }

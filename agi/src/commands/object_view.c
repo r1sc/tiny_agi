@@ -142,14 +142,6 @@ void update_object(uint8_t objNo) {
 				}
 			}
 
-			if (stop) {
-				newX = OBJ.x;
-				newY = OBJ.y;
-
-				if (OBJ.move_mode == OBJ_MOVEMODE_WANDER) {
-					wander(objNo);
-				}
-			}
 
 			if (OBJ.move_mode == OBJ_MOVEMODE_MOVE_TO && OBJ.move_distance_x == 0 && OBJ.move_distance_y == 0) {
 				OBJ.move_mode = OBJ_MOVEMODE_NORMAL;
@@ -157,7 +149,7 @@ void update_object(uint8_t objNo) {
 				state.flags[OBJ.move_done_flag] = true;
 			}
 
-			if (newY >= 167) {
+			if (newY > 167) {
 				state.variables[objNo == 0 ? VAR_2_EGO_BORDER_CODE : VAR_5_OBJ_BORDER_CODE] = BORDER_BOTTOM;
 				if (objNo != 0) {
 					state.variables[VAR_4_OBJ_BORDER_OBJNO] = objNo;
@@ -179,6 +171,15 @@ void update_object(uint8_t objNo) {
 				state.variables[objNo == 0 ? VAR_2_EGO_BORDER_CODE : VAR_5_OBJ_BORDER_CODE] = BORDER_RIGHT;
 				if (objNo != 0) {
 					state.variables[VAR_4_OBJ_BORDER_OBJNO] = objNo;
+				}
+			}
+
+			if (stop) {
+				newX = OBJ.x;
+				newY = OBJ.y;
+
+				if (OBJ.move_mode == OBJ_MOVEMODE_WANDER) {
+					wander(objNo);
 				}
 			}
 
