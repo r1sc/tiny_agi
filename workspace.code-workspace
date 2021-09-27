@@ -22,7 +22,7 @@
 				"stopAtEntry": false,
 				"cwd": "${workspaceFolder:tinyagi-glfw}",
 				"environment": [],
-				"console": "externalTerminal"
+				"console": "internalConsole"
 			},
 			{
 				"name": "Pico Debug",

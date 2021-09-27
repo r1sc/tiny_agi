@@ -9,6 +9,26 @@
 #include "constants.h"
 #include "heap.h"
 
+void _draw_char(unsigned int start_x, unsigned int start_y, unsigned char c, uint8_t fg, uint8_t bg) {
+	if (c == '\n')
+		return;
+
+	for (unsigned int y = 0; y < 8; y++) {
+		int screen_y = y + start_y;
+		unsigned char rowData = font_data[c * 8 + y];
+		for (unsigned int x = 0; x < 8; x++) {
+			int screen_x = x + start_x;
+			bool on = (rowData & 0x80) == 0x80;
+
+			screen_set_320(screen_x, screen_y, on ? fg : bg);
+			if (screen_y > state.play_top * 8 && screen_y < 168) {
+				priority_set(screen_x >> 1, screen_y - (state.play_top * 8), 255);
+			}
+			rowData = rowData << 1;
+		}
+	}
+}
+
 void _draw_text(uint8_t* row, uint8_t* col, const char* text, uint8_t fg, uint8_t bg) {
 	unsigned int i = 0;
 	uint8_t num_buffer = 0;

@@ -7,12 +7,13 @@ add_subdirectory(../agi ${CMAKE_CURRENT_BINARY_DIR}/tinyagi)
 
 add_executable (tinyagi_glfw
 	"tinyagi.c" 
+	"font.c"
 	"winmm_audio.h" 
 	"winmm_audio.c" 
 	"panic.h" 
 	"synth.h" 
 	"synth.c"
-)
+ "e:/slask/tinyagi/tinyagi-glfw/font.c")
 
 	
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)

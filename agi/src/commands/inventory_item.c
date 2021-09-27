@@ -5,6 +5,8 @@
 #include "../view.h"
 #include "../platform_support.h"
 
+#include <string.h>
+
 void drop(uint8_t item) {
 	heap_data.item_file->items[item].room_no = 0;
 }
@@ -45,5 +47,28 @@ void show_obj_v(uint8_t var) {
 }
 
 void status() {
-	UNIMPLEMENTED
+	char inventory[1024];
+	char* inventory_msg_pos = inventory;
+	inventory_msg_pos += sprintf(inventory_msg_pos, "You are carrying:\n\n");
+
+	int num_objects_carrying = 0;
+	uint16_t first_offset = heap_data.item_file->items[0].name_offset;
+	for (uint8_t i = 0; (3 + i * 3) <= first_offset; i++)
+	{
+		const item_t item = heap_data.item_file->items[i];
+		if(item.room_no == 255) {
+			inventory_msg_pos += sprintf(inventory_msg_pos, num_objects_carrying % 2 == 0 ? "%s      " : "%s\n", ITEM_NAME(i));
+			num_objects_carrying++;
+		}
+	}
+	
+	if(num_objects_carrying == 0) {
+		sprintf(inventory_msg_pos, "Nothing");
+	}
+
+	agi_draw_all_active();
+	print_message_box(inventory, 40, 0, 0);
+	wait_for_enter();
+	show_pic();
+	agi_draw_all_active();
 }

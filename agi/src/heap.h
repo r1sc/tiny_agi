@@ -15,6 +15,8 @@ typedef struct {
 	item_t items[];
 } item_file_t;
 
+#define ITEM_NAME(obj_no) (const char*)(((uint8_t*)heap_data.item_file->items) + heap_data.item_file->items[obj_no].name_offset)
+
 typedef struct {
 	uint8_t hi_byte;
 	uint8_t lo_byte;

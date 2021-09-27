@@ -26,10 +26,11 @@ extern void _draw_char(unsigned int start_x, unsigned int start_y, unsigned char
 extern void agi_play_sound(uint8_t* sound_data);
 extern void agi_stop_sound();
 
+extern uint8_t font_data[];
 
 
-//typedef void* agi_save_data_file_ptr;
-//agi_save_data_file_ptr agi_save_data_open(const char* mode);
-//void agi_save_data_write(agi_save_data_file_ptr file_ptr, void* data, size_t size);
-//void agi_save_data_read(agi_save_data_file_ptr file_ptr, void* destination, size_t size);
-//void agi_save_data_close(agi_save_data_file_ptr file_ptr);
+typedef void* agi_save_data_file_ptr;
+agi_save_data_file_ptr agi_save_data_open(const char* mode);
+void agi_save_data_write(agi_save_data_file_ptr file_ptr, void* data, size_t size);
+void agi_save_data_read(agi_save_data_file_ptr file_ptr, void* destination, size_t size);
+void agi_save_data_close(agi_save_data_file_ptr file_ptr);
