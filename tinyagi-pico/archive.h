@@ -12,22 +12,21 @@ typedef struct {
 
 const fileentry_t files[] = {
 {"font.bin", 0, 2048},
-{"logdir", 2048, 390},
-{"object", 2438, 778},
-{"picdir", 3216, 531},
-{"snddir", 3747, 120},
-{"viewdir", 3867, 756},
-{"vol.0", 4623, 78782},
-{"vol.1", 83405, 365256},
-{"vol.2", 448661, 206032},
-{"vol.3", 654693, 13},
-{"words.tok", 654706, 5670},
+{"logdir", 2048, 426},
+{"object", 2474, 331},
+{"picdir", 2805, 444},
+{"snddir", 3249, 210},
+{"viewdir", 3459, 720},
+{"vol.0", 4179, 70654},
+{"vol.1", 74833, 161225},
+{"vol.2", 236058, 411824},
+{"words.tok", 647882, 6828},
 };
 
 uint8_t* ARCHIVE_START = (uint8_t*)0x10100000;
 
 const fileentry_t* ar_find_file(const char* filename) {
-    for (size_t i = 0; i < 11; i++)
+    for (size_t i = 0; i < 10; i++)
     {
         if(strcmp(filename, files[i].name) == 0){
             return &files[i];

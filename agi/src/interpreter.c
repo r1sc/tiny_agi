@@ -385,12 +385,22 @@ bool _find_word_group_of_word(char* word, size_t len) {
 		return true;
 	if (*word < 'a' || *word > 'z')
 		return true;
-
+		
 	int first_letter_index = *word - 'a';
-	uint16_be_t first_word_index = heap_data.words_file->word_indices[first_letter_index];
-	uint16_be_t next_word_index = heap_data.words_file->word_indices[first_letter_index + 1];
-	uint16_t first_word_offset = (uint16_t)(first_word_index.hi_byte << 8) | (uint16_t)first_word_index.lo_byte;
-	uint16_t next_word_offset = (uint16_t)(next_word_index.hi_byte << 8) | (uint16_t)next_word_index.lo_byte;
+
+	uint16_t first_word_offset = 0;
+	while (first_word_offset == 0) {
+		uint16_be_t first_word_index = heap_data.words_file->word_indices[first_letter_index];
+		first_word_offset = (uint16_t)(first_word_index.hi_byte << 8) | (uint16_t)first_word_index.lo_byte;
+		first_letter_index--;
+	} 
+
+	uint16_t next_word_offset = 0;
+	while (next_word_offset <= first_word_offset) {
+		uint16_be_t next_word_index = heap_data.words_file->word_indices[first_letter_index + 1];
+		next_word_offset = (uint16_t)(next_word_index.hi_byte << 8) | (uint16_t)next_word_index.lo_byte;
+		first_letter_index++;
+	}
 
 	uint8_t* word_entry = ((uint8_t*)heap_data.words_file) + first_word_offset;
 	uint8_t* next_word_entry = ((uint8_t*)heap_data.words_file) + next_word_offset;

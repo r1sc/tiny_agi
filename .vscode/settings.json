@@ -1,3 +1,4 @@
 {
-    "cortex-debug.openocdPath": "E:\\apps\\openocd\\openocd.exe"
+    "cortex-debug.openocdPath": "E:\\apps\\openocd\\openocd.exe",
+    "cmake.sourceDirectory": "${workspaceFolder}/tinyagi-glfw"
 }

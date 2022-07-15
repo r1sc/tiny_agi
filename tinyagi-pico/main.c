@@ -159,21 +159,23 @@ unsigned char font_data[2048] =
         0x1C, 0x36, 0x36, 0x1C, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x18, 0x18, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x18, 0x00, 0x00, 0x00, 0x0F, 0x0C, 0x0C, 0xCC, 0x6C, 0x3C, 0x1C, 0x0C,
         0x3C, 0x36, 0x36, 0x36, 0x36, 0x00, 0x00, 0x00, 0x38, 0x0C, 0x18, 0x30, 0x3C, 0x00, 0x00, 0x00, 0x00, 0x00, 0x3C, 0x3C, 0x3C, 0x3C, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
-void _draw_char(unsigned int start_x, unsigned int start_y, unsigned char c, uint8_t fg, uint8_t bg)
-{
-    if (c == '\n')
-        return;
+agi_save_data_file_ptr agi_save_data_open(const char* mode) {
+	return NULL;
+}
 
-    for (unsigned int y = 0; y < 8; y++)
-    {
-        unsigned char rowData = font_data[c * 8 + y];
-        for (unsigned int x = 0; x < 8; x++)
-        {
-            bool on = (rowData & 0x80) == 0x80;
-            screen_set_320(x + start_x, y + start_y, on ? fg : bg);
-            rowData = rowData << 1;
-        }
-    }
+void agi_save_data_write(agi_save_data_file_ptr file_ptr, void* data, size_t size) {
+}
+
+void agi_save_data_read(agi_save_data_file_ptr file_ptr, void* destination, size_t size) {
+}
+
+void agi_save_data_close(agi_save_data_file_ptr file_ptr) {
+}
+
+void check_key() {
+	//render();
+    // TODO
+	//Sleep(10);
 }
 
 void agi_play_sound(uint8_t *sound_data)
@@ -191,7 +193,7 @@ void agi_stop_sound()
 void get_char(uint8_t *ascii, uint8_t *scancode)
 {
     char buf[7];
-    buf[6] = '/0';
+    buf[6] = '\0';
     int len = 0;
     char c;
     while ((c = getchar_timeout_us(0)) != 0xFF)
@@ -276,7 +278,7 @@ int main()
         if (delta_ms >= 50)
         {
             last = now;
-            uint8_t ascii, scancode;
+            uint8_t ascii = 0, scancode = 0;
             get_char(&ascii, &scancode);
             if(ascii != 0 || scancode != 0) {
                 if(ascii == 13){

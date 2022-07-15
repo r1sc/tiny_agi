@@ -77,6 +77,7 @@ void restore_game() {
 	{		
 		agi_save_data_read(file, (void*)&(heap_data.script_entries[i]), sizeof(script_entry_t));
 	}
+	agi_save_data_close(file);
 	
 	bool write_lock = state.flags[FLAG_7_SCRIPT_BUFFER_WRITE_LOCK];
 	state.flags[FLAG_7_SCRIPT_BUFFER_WRITE_LOCK] = true;
@@ -120,7 +121,6 @@ void restore_game() {
 				break;
 		}
 	}
-	agi_save_data_close(file);
 	
 	state.flags[FLAG_7_SCRIPT_BUFFER_WRITE_LOCK] = write_lock;
 	state.flags[FLAG_12_GAME_RESTORED] = true;
