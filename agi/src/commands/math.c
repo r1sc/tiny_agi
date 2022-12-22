@@ -40,8 +40,8 @@ void get_num(uint8_t msg_no, uint8_t var) {
 	const char* msg = get_message(state.current_logic, msg_no);
 	redraw_prompt(msg);
 
-	state.input_buffer[0] = '\0';
-	state.input_pos = 0;
+	system_state.input_buffer[0] = '\0';
+	system_state.input_pos = 0;
 	state.enter_pressed = false;
 
 	bool done = false;
@@ -51,13 +51,13 @@ void get_num(uint8_t msg_no, uint8_t var) {
 		for (int i = 0; i < queue_pos; i++) {
 			input_queue_entry_t entry = queue[i];
 
-			if (state.input_pos < 2 && entry.ascii >= '0' && entry.ascii <= '9') {
-				state.input_buffer[state.input_pos++] = entry.ascii;
-				state.input_buffer[state.input_pos] = '\0';
+			if (system_state.input_pos < 2 && entry.ascii >= '0' && entry.ascii <= '9') {
+				system_state.input_buffer[system_state.input_pos++] = entry.ascii;
+				system_state.input_buffer[system_state.input_pos] = '\0';
 				redraw_prompt(msg);
 			}
-			else if (entry.ascii == '\b' && state.input_pos > 0) {
-				state.input_buffer[state.input_pos--] = '\0';
+			else if (entry.ascii == '\b' && system_state.input_pos > 0) {
+				system_state.input_buffer[system_state.input_pos--] = '\0';
 				redraw_prompt(msg);
 			}
 			else if (entry.ascii == 27) {
@@ -69,14 +69,14 @@ void get_num(uint8_t msg_no, uint8_t var) {
 		queue_pos = 0;		
 
 		if (state.enter_pressed) {
-			uint8_t value = (uint8_t)atoi(state.input_buffer);
+			uint8_t value = (uint8_t)atoi(system_state.input_buffer);
 			state.variables[var] = value;
 			done = true;			
 		}
 	}	
 
-	state.input_buffer[0] = '\0';
-	state.input_pos = 0;
+	system_state.input_buffer[0] = '\0';
+	system_state.input_pos = 0;
 	redraw_prompt(state.strings[0]);
 }
 

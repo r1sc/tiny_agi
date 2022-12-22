@@ -11,7 +11,7 @@ void redraw_menu() {
 	uint8_t col = 1;
 	_draw_char(0, 0, ' ', 0, 15);
 
-	menu_header_t* menu = state.first_menu;
+	menu_header_t* menu = system_state.first_menu;
 	int left_col = 0;
 
 	while (menu != NULL) {
@@ -20,7 +20,7 @@ void redraw_menu() {
 		uint8_t fg = 0;
 		uint8_t bg = 15;
 
-		if (menu == *state.current_menu) {
+		if (menu == *system_state.current_menu) {
 			fg = 15;
 			bg = 0;
 			left_col = col - 1; // subtract 1 for the border
@@ -38,7 +38,7 @@ void redraw_menu() {
 	}
 
 	
-	menu = *state.current_menu;
+	menu = *system_state.current_menu;
 	menu_item_t* menu_item = menu->first_item;
 	int right_col = 0;
 	row = 2;
@@ -69,7 +69,7 @@ void redraw_menu() {
 		uint8_t fg = 0;
 		uint8_t bg = 15;
 
-		if (menu_item == *state.current_menu_item) {
+		if (menu_item == *system_state.current_menu_item) {
 			fg = 15;
 			bg = 0;
 		}

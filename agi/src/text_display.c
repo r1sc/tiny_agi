@@ -104,11 +104,11 @@ void redraw_prompt(const char* prompt_text) {
 	col = 0;
 	_draw_text(&row, &col, prompt_text, 15, 0);
 	size_t len = strlen(prompt_text);
-	_draw_char((len + state.input_pos) * 8, state.input_line_row * 8, state.cursor_char, 15, 0);
+	_draw_char((len + system_state.input_pos) * 8, state.input_line_row * 8, state.cursor_char, 15, 0);
 
 	row = state.input_line_row;
 	col = len;
-	_draw_text(&row, &col, state.input_buffer, 15, 0);
+	_draw_text(&row, &col, system_state.input_buffer, 15, 0);
 }
 
 int read_num(const char** source) {

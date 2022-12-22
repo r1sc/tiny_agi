@@ -71,8 +71,8 @@ bool said() {
 			rol = true;
 			continue;
 		}
-		else if (match && i < state.num_parsed_word_groups) {
-			if (state.parsed_word_groups[i] != logic_word_no) {
+		else if (match && i < system_state.num_parsed_word_groups) {
+			if (system_state.parsed_word_groups[i] != logic_word_no) {
 				match = false;
 			}
 		}
@@ -96,7 +96,7 @@ bool said() {
 	else if (state.variables[VAR_9_MISSING_WORD_NO] > 0) {
 		match = false;
 	}
-	else if (!rol && state.num_parsed_word_groups > numparams) {
+	else if (!rol && system_state.num_parsed_word_groups > numparams) {
 		match = false;
 	}	
 	else if (match) {

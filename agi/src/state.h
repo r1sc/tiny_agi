@@ -121,10 +121,7 @@ typedef struct {
 	uint8_t horizon;
 	bool input_prompt_active;
 	char cursor_char;
-	char prev_input_buffer[40];
-	uint8_t prev_input_pos;
-	char input_buffer[40];
-	uint8_t input_pos;
+	
 	
 	bool block_active;
 	rect_t block;
@@ -139,7 +136,18 @@ typedef struct {
 	bool status_line_on;
 
 	bool controllers[MAX_NUM_CONTROLLERS];	
-	controller_assignment_t *first_controller_assignment;
+	
+
+	uint8_t game_state;
+} agi_state_t;
+
+typedef struct {
+	char prev_input_buffer[40];
+	uint8_t prev_input_pos;
+	char input_buffer[40];
+	uint8_t input_pos;
+
+	controller_assignment_t* first_controller_assignment;
 	controller_assignment_t** current_controller_assignment;
 
 	uint16_t parsed_word_groups[20];
@@ -151,19 +159,21 @@ typedef struct {
 
 	menu_item_t** current_menu_item;
 	menu_item_t* prev_menu_item;
-
-	uint8_t game_state;
-} agi_state_t;
+} agi_system_state_t;
 
 typedef struct {
 	uint8_t room_no;
 } item_save_data_t;
 
 extern agi_state_t state;
+extern agi_system_state_t system_state;
+
 #define EGO state.objects[0]
 
 /* Initializes the agi state */
 void state_reset();
+
+void state_system_reset();
 
 /* Updates and draws all active objects */
 void agi_draw_all_active();

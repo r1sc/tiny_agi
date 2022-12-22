@@ -62,16 +62,20 @@ void restore_game() {
 	agi_save_data_file_ptr file = agi_save_data_open("rb");
 	agi_save_data_read(file, &state, sizeof(agi_state_t));
 	
-	uint8_t num_items;
-	agi_save_data_read(file, &num_items, sizeof(uint8_t));	
-	for (size_t i = 0; i < num_items; i++)
+
+	item_t* item = heap_data.item_file->items;
+	item_t* end = (item_t*)((char*)heap_data.item_file->items + heap_data.item_file->item_names_offset + 2);
+
+	while (item < end)
 	{
-		agi_save_data_read(file, (void*)&(heap_data.item_file->items[i].room_no), sizeof(uint8_t));
+		agi_save_data_read(file, &item->room_no, sizeof(uint8_t));
+		item++;
 	}
-	
+		
 	agi_save_data_read(file, &(heap_data.script_size), sizeof(int));
 	agi_save_data_read(file, &(heap_data.script_entry_pos), sizeof(int));
 	heap_data.script_entries = (script_entry_t*)malloc(heap_data.script_size * sizeof(script_entry_t));
+
 	// replay scripts
 	for (int i = 0; i < heap_data.script_entry_pos; i++)
 	{		
@@ -132,10 +136,12 @@ void save_game() {
 	agi_save_data_file_ptr file = agi_save_data_open("wb");
 	agi_save_data_write(file, &state, sizeof(agi_state_t));
 
-	agi_save_data_write(file, &(heap_data.item_file->num_objects), sizeof(uint8_t));
-	for (size_t i = 0; i < heap_data.item_file->num_objects; i++)
+	item_t* item = heap_data.item_file->items;
+	item_t* end = (item_t*)((char*)heap_data.item_file->items + heap_data.item_file->item_names_offset + 2);
+	while(item < end)
 	{
-		agi_save_data_write(file, &(heap_data.item_file->items[i].room_no), sizeof(uint8_t));
+		agi_save_data_write(file, &item->room_no, sizeof(uint8_t));
+		item++;
 	}
 
 	agi_save_data_write(file, &(heap_data.script_size), sizeof(int));

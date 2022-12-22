@@ -7,6 +7,7 @@
 #include <string.h>
 
 agi_state_t state;
+agi_system_state_t system_state;
 
 void free_menu_item(menu_item_t* node) {
 	if (node->next) {
@@ -64,8 +65,6 @@ void state_reset() {
 	state.horizon = 36;
 	state.input_prompt_active = false;
 	state.cursor_char = '_';
-	state.input_buffer[0] = '\0';
-	state.input_pos = 0;
 
 	state.block_active = false;
 
@@ -86,28 +85,31 @@ void state_reset() {
 	{
 		state.controllers[i] = false;
 	}
-	
-	state.num_parsed_word_groups = 0;
-
 
 	state.variables[VAR_20_COMPUTER_TYPE] = 0; // IBM-PC
 	state.variables[VAR_22_SOUND_TYPE] = 3; // Tandy
 	state.variables[VAR_26_MONITOR_TYPE] = 3; // EGA
-	state.flags[FLAG_9_SOUND_ENABLED] = true;
-
-	if (state.first_menu) {
-		free_menu(state.first_menu);
-	}
-	state.first_menu = NULL;
-	state.current_menu = &state.first_menu;
-	state.prev_menu = NULL;
-	state.prev_menu_item = NULL;
-
-	if (state.first_controller_assignment) {
-		free_controller(state.first_controller_assignment);
-	}
-	state.first_controller_assignment = NULL;
-	state.current_controller_assignment = &state.first_controller_assignment;
+	state.flags[FLAG_9_SOUND_ENABLED] = true;		
 
 	state.game_state = STATE_PLAYING;
+}
+
+void state_system_reset() {
+	system_state.input_buffer[0] = '\0';
+	system_state.input_pos = 0;
+	system_state.num_parsed_word_groups = 0;
+
+	if (system_state.first_menu) {
+		free_menu(system_state.first_menu);
+	}
+	system_state.first_menu = NULL;
+	system_state.current_menu = &system_state.first_menu;
+	system_state.prev_menu = NULL;
+	system_state.prev_menu_item = NULL;
+
+	if (system_state.first_controller_assignment) {
+		free_controller(system_state.first_controller_assignment);
+	}
+	system_state.first_controller_assignment = NULL;
+	system_state.current_controller_assignment = &system_state.first_controller_assignment;
 }

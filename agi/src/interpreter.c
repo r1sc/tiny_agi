@@ -424,7 +424,7 @@ bool _find_word_group_of_word(char* word, size_t len) {
 		if (prev_word_len == len && strncmp(word, prev_word, len) == 0) {
 			// Found match
 			if (word_num > 0) { // Skip anyword
-				state.parsed_word_groups[state.num_parsed_word_groups++] = word_num;
+				system_state.parsed_word_groups[system_state.num_parsed_word_groups++] = word_num;
 			}
 			return true;
 		}
@@ -442,14 +442,14 @@ bool _find_word_group_of_word(char* word, size_t len) {
 }
 
 void _parse_word_groups() {
-	state.num_parsed_word_groups = 0;
+	system_state.num_parsed_word_groups = 0;
 
-	char* c = state.input_buffer;
+	char* c = system_state.input_buffer;
 	char* word_start = c;
 	size_t word_len = 0;
 	int word_i = 0;
 
-	while (c < state.input_buffer + state.input_pos) {
+	while (c < system_state.input_buffer + system_state.input_pos) {
 		if (*c == ' ' || *c == '.') {
 			// Find out word group to parsed word
 			if (!_find_word_group_of_word(word_start, word_len)) {
@@ -535,13 +535,13 @@ void process_input_game(input_queue_entry_t entry) {
 		state.variables[VAR_6_EGO_DIRECTION] = state.variables[VAR_6_EGO_DIRECTION] == DIR_LEFT ? DIR_STOPPED : DIR_LEFT;
 	}
 	else if (entry.scancode == AGI_KEY_F3) {
-		strcpy(state.input_buffer, state.prev_input_buffer);
-		state.input_pos = state.prev_input_pos;
+		strcpy(system_state.input_buffer, system_state.prev_input_buffer);
+		system_state.input_pos = system_state.prev_input_pos;
 		redraw_prompt(state.strings[0]);
 	}
 	else {
 		bool found_controller = false;
-		controller_assignment_t** controller_assignment = &state.first_controller_assignment;
+		controller_assignment_t** controller_assignment = &system_state.first_controller_assignment;
 		while ((*controller_assignment) != NULL) {
 			controller_assignment_t* c = *controller_assignment;
 			if ((c->ascii != 0 && c->ascii == entry.ascii) || (c->scancode != 0 && c->scancode == entry.scancode)) {
@@ -557,14 +557,14 @@ void process_input_game(input_queue_entry_t entry) {
 			if (entry.ascii) {
 				if (state.input_prompt_active) {
 					if (entry.ascii == '\b') {
-						if (state.input_pos > 0) {
-							state.input_pos--;
+						if (system_state.input_pos > 0) {
+							system_state.input_pos--;
 						}
 					}
 					else {
-						state.input_buffer[state.input_pos++] = entry.ascii;
+						system_state.input_buffer[system_state.input_pos++] = entry.ascii;
 					}
-					state.input_buffer[state.input_pos] = '\0';
+					system_state.input_buffer[system_state.input_pos] = '\0';
 					redraw_prompt(state.strings[0]);
 				}
 
@@ -586,38 +586,38 @@ void process_input_menu(input_queue_entry_t entry) {
 		return;
 	}
 
-	menu_header_t* menu = *state.current_menu;
-	menu_item_t* menu_item = *state.current_menu_item;
+	menu_header_t* menu = *system_state.current_menu;
+	menu_item_t* menu_item = *system_state.current_menu_item;
 
 	if (entry.scancode == AGI_KEY_UP) {
 		if (menu_item->prev != NULL) {
-			state.current_menu_item = &menu_item->prev;
+			system_state.current_menu_item = &menu_item->prev;
 		}
 		else {
-			while ((*state.current_menu_item)->next != NULL) {
-				state.current_menu_item = &menu_item->next;
+			while ((*system_state.current_menu_item)->next != NULL) {
+				system_state.current_menu_item = &menu_item->next;
 				menu_item = menu_item->next;
 			}
 		}
 	}
 	else if (entry.scancode == AGI_KEY_DOWN) {
 		if (menu_item->next != NULL) {
-			state.current_menu_item = &menu_item->next;
+			system_state.current_menu_item = &menu_item->next;
 		}
 		else {
-			state.current_menu_item = &menu->first_item;
+			system_state.current_menu_item = &menu->first_item;
 		}
 	}
 	else if (entry.scancode == AGI_KEY_LEFT) {
 		if (menu->prev != NULL) {
-			state.current_menu = &menu->prev;
-			state.current_menu_item = &(*state.current_menu)->first_item;
+			system_state.current_menu = &menu->prev;
+			system_state.current_menu_item = &(*system_state.current_menu)->first_item;
 		}
 	}
 	else if (entry.scancode == AGI_KEY_RIGHT) {
 		if (menu->next != NULL) {
-			state.current_menu = &menu->next;
-			state.current_menu_item = &(*state.current_menu)->first_item;
+			system_state.current_menu = &menu->next;
+			system_state.current_menu_item = &(*system_state.current_menu)->first_item;
 		}
 	}
 
@@ -678,25 +678,25 @@ bool agi_logic_run_cycle(uint32_t now_ms) {
 
 		if (state.game_state == STATE_MENU) {
 			if (state.enter_pressed) {
-				state.controllers[(*state.current_menu_item)->controller] = true;
+				state.controllers[(*system_state.current_menu_item)->controller] = true;
 				close_menu();
 			}
 		}
 
 		if (state.game_state == STATE_PLAYING) {
 			if (state.enter_pressed) {
-				state.num_parsed_word_groups = 0;
-				if (state.input_pos > 0) {
+				system_state.num_parsed_word_groups = 0;
+				if (system_state.input_pos > 0) {
 					_parse_word_groups();
-					if (state.num_parsed_word_groups > 0) {
+					if (system_state.num_parsed_word_groups > 0) {
 						state.flags[FLAG_2_COMMAND_ENTERED] = true;
 					}
 				}
-				strcpy(state.prev_input_buffer, state.input_buffer);
-				state.prev_input_pos = state.input_pos;
+				strcpy(system_state.prev_input_buffer, system_state.input_buffer);
+				system_state.prev_input_pos = system_state.input_pos;
 
-				state.input_pos = 0;
-				state.input_buffer[state.input_pos] = '\0';
+				system_state.input_pos = 0;
+				system_state.input_buffer[system_state.input_pos] = '\0';
 				redraw_prompt(state.strings[0]);
 			}
 
@@ -743,5 +743,6 @@ bool agi_logic_run_cycle(uint32_t now_ms) {
 
 void agi_initialize() {
 	state_reset();
+	state_system_reset();
 	state.flags[FLAG_5_ROOM_EXECUTED_FIRST_TIME] = true;
 }

@@ -11,7 +11,7 @@ typedef struct {
 
 typedef struct {
 	uint16_t item_names_offset;
-	uint8_t num_objects;
+	uint8_t num_animated_objects;
 	item_t items[];
 } item_file_t;
 
