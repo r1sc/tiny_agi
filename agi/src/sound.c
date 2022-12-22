@@ -1,8 +1,5 @@
-#include "pico/stdlib.h"
-#include <stdio.h>
-
-#include "agi_sound.h"
-#include "../audio/pwm_synth.h"
+#include "sound.h"
+#include "platform_support.h"
 
 typedef struct
 {

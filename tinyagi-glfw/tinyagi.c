@@ -11,7 +11,6 @@
 
 #include "agi.h"
 #include "winmm_audio.h"
-#include "synth.h"
 
 uint8_t screen_priority[160 * 168];
 uint32_t framebuffer[320 * 200];
@@ -25,7 +24,7 @@ void panic(const char* fmt, ...) {
 	exit(1);
 }
 
-const char* game_path = "C:\\classic\\sierra\\kq3";
+const char* game_path = "C:\\classic\\sierra\\sq2";
 agi_file_t get_file(const char* filename) {
 	char path[256];
 	sprintf(path, "%s\\%s\0", game_path, filename);

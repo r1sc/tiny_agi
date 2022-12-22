@@ -16,6 +16,7 @@ add_library (tinyagi STATIC
 	"src/vol.c"
 	"src/vol.h"
 	"src/constants.h"
+	"src/sound.h"
 	"src/commands/control_flow.c"
 	"src/commands/debugging.c"
 	"src/commands/display.c"
@@ -39,6 +40,7 @@ add_library (tinyagi STATIC
 	"src/decryption.c"
 	"src/menu.h"
 	"src/menu.c"
+	"src/sound.c"
 )
 
 target_include_directories(tinyagi PUBLIC include)

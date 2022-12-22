@@ -10,9 +10,7 @@ add_executable (tinyagi_glfw
 	"font.c"
 	"winmm_audio.h" 
 	"winmm_audio.c" 
-	"panic.h" 
-	"synth.h" 
-	"synth.c"
+	"panic.h"
  "e:/slask/tinyagi/tinyagi-glfw/font.c")
 
 	
