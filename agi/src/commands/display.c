@@ -54,7 +54,8 @@ void display_v(uint8_t vRow, uint8_t vCol, uint8_t vMsg)
 
 void graphics()
 {
-	UNIMPLEMENTED
+	// TODO: Maybe OK, figure out if this is enough
+	show_pic();
 }
 
 void open_dialogue()
