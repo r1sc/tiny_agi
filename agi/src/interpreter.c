@@ -1,4 +1,5 @@
 #include <string.h>
+#include <ctype.h>
 
 #include "state.h"
 #include "heap.h"
@@ -444,12 +445,49 @@ bool _find_word_group_of_word(char* word, size_t len) {
 void _parse_word_groups() {
 	system_state.num_parsed_word_groups = 0;
 
+	system_state.input_buffer[system_state.input_pos] = 0;
+
+	// Remove punctuation and convert to lower case
 	char* c = system_state.input_buffer;
+	while (*c) {
+		if (*c == '.' || *c == ',' || *c == '!' || *c == '?' || *c == ';') {
+			*c = ' ';
+		}
+		else {
+			*c = tolower(*c);
+		}
+		c++;
+	}
+
+	// Trim excess spaces
+	c = system_state.input_buffer;
+	bool prev_was_whitespace = false;
+	while (*c) {
+		if (*c == ' ') {
+			if (prev_was_whitespace && *(c+1) != 0) {
+				strcpy(c, c + 1);
+			}
+			prev_was_whitespace = true;
+		} else {
+			prev_was_whitespace = false;
+		}
+		c++;
+	}
+
+	// Right trim ending spaces
+	c--;
+	while (*c == ' ') {
+		*c = 0;
+		c--;
+	}
+
+	c = system_state.input_buffer;
+
 	char* word_start = c;
 	size_t word_len = 0;
 	int word_i = 0;
 
-	while (c < system_state.input_buffer + system_state.input_pos) {
+	while (*c) {
 		if (*c == ' ' || *c == '.') {
 			// Find out word group to parsed word
 			if (!_find_word_group_of_word(word_start, word_len)) {

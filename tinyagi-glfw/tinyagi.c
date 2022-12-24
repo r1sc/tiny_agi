@@ -38,8 +38,7 @@ agi_file_t get_file(const char* filename) {
 	if (result.data) {
 		fseek(f, 0, SEEK_SET);
 		fread(result.data, 1, result.size, f);
-	}
-	else {
+	} else {
 		panic("Failed to allocate memory for file %s, of size %d", path, result.size);
 	}
 
@@ -52,22 +51,22 @@ void free_file(agi_file_t file) {
 }
 
 agi_save_data_file_ptr agi_save_data_open(const char* mode) {
-	FILE *f = fopen("savegame", mode);
+	FILE* f = fopen("savegame", mode);
 	return (agi_save_data_file_ptr*)f;
 }
 
 void agi_save_data_write(agi_save_data_file_ptr file_ptr, void* data, size_t size) {
-	FILE *f = (FILE*)file_ptr;
+	FILE* f = (FILE*)file_ptr;
 	fwrite(data, size, 1, f);
 }
 
 void agi_save_data_read(agi_save_data_file_ptr file_ptr, void* destination, size_t size) {
-	FILE *f = (FILE*)file_ptr;
+	FILE* f = (FILE*)file_ptr;
 	fread(destination, size, 1, f);
 }
 
 void agi_save_data_close(agi_save_data_file_ptr file_ptr) {
-	FILE *f = (FILE*)file_ptr;
+	FILE* f = (FILE*)file_ptr;
 	fclose(f);
 }
 
@@ -115,37 +114,63 @@ void window_resize(GLFWwindow* window, int width, int height) {
 
 bool show_priority = false;
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-	if ((key == GLFW_KEY_ENTER || key == GLFW_KEY_KP_ENTER) && action == GLFW_PRESS) {
-		state.enter_pressed = true;
-	}
+	if (action != GLFW_PRESS)
+		return;
 
-	if ((key == GLFW_KEY_UP || key == GLFW_KEY_KP_8) && action == GLFW_PRESS)
-		agi_input_queue_push_keypress(0, AGI_KEY_UP);
-	else if ((key == GLFW_KEY_DOWN || key == GLFW_KEY_KP_2) && action == GLFW_PRESS)
-		agi_input_queue_push_keypress(0, AGI_KEY_DOWN);
-	else if ((key == GLFW_KEY_LEFT || key == GLFW_KEY_KP_4) && action == GLFW_PRESS)
-		agi_input_queue_push_keypress(0, AGI_KEY_LEFT);
-	else if ((key == GLFW_KEY_RIGHT || key == GLFW_KEY_KP_6) && action == GLFW_PRESS)
-		agi_input_queue_push_keypress(0, AGI_KEY_RIGHT);
-	else if (key == GLFW_KEY_KP_7 && action == GLFW_PRESS)
-		agi_input_queue_push_keypress(0, AGI_KEY_HOME);
-	else if (key == GLFW_KEY_KP_9 && action == GLFW_PRESS)
-		agi_input_queue_push_keypress(0, AGI_KEY_PGUP);
-	else if (key == GLFW_KEY_KP_1 && action == GLFW_PRESS)
-		agi_input_queue_push_keypress(0, AGI_KEY_END);
-	else if (key == GLFW_KEY_KP_3 && action == GLFW_PRESS)
-		agi_input_queue_push_keypress(0, AGI_KEY_PGDN);
-
-	if (key == GLFW_KEY_TAB && action == GLFW_PRESS) {
-		show_priority = !show_priority;
-	}
-
-	if (key == GLFW_KEY_BACKSPACE && action == GLFW_PRESS) {
-		agi_input_queue_push_keypress('\b', 0);
-	}
-
-	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
-		agi_input_queue_push_keypress((char)27, 0);
+	switch (key) {
+		case GLFW_KEY_ENTER:
+		case GLFW_KEY_KP_ENTER:
+			state.enter_pressed = true;
+			break;
+		case GLFW_KEY_UP:
+		case GLFW_KEY_KP_8:
+			agi_input_queue_push_keypress(0, AGI_KEY_UP);
+			break;
+		case GLFW_KEY_DOWN:
+		case GLFW_KEY_KP_2:
+			agi_input_queue_push_keypress(0, AGI_KEY_DOWN);
+			break;
+		case GLFW_KEY_LEFT:
+		case GLFW_KEY_KP_4:
+			agi_input_queue_push_keypress(0, AGI_KEY_LEFT);
+			break;
+		case GLFW_KEY_RIGHT:
+		case GLFW_KEY_KP_6:
+			agi_input_queue_push_keypress(0, AGI_KEY_RIGHT);
+			break;
+		case GLFW_KEY_KP_7:
+			agi_input_queue_push_keypress(0, AGI_KEY_HOME);
+			break;
+		case GLFW_KEY_KP_9:
+			agi_input_queue_push_keypress(0, AGI_KEY_PGUP);
+			break;
+		case GLFW_KEY_KP_1:
+			agi_input_queue_push_keypress(0, AGI_KEY_END);
+			break;
+		case GLFW_KEY_KP_3:
+			agi_input_queue_push_keypress(0, AGI_KEY_PGDN);
+			break;
+		case GLFW_KEY_TAB:
+			show_priority = !show_priority;
+			break;
+		case GLFW_KEY_BACKSPACE:
+			agi_input_queue_push_keypress('\b', 0);
+			break;
+		case GLFW_KEY_ESCAPE:
+			agi_input_queue_push_keypress((char)27, 0);
+			break;
+		case GLFW_KEY_F1:
+		case GLFW_KEY_F2:
+		case GLFW_KEY_F3:
+		case GLFW_KEY_F4:
+		case GLFW_KEY_F5:
+		case GLFW_KEY_F6:
+		case GLFW_KEY_F7:
+		case GLFW_KEY_F8:
+		case GLFW_KEY_F9:
+		case GLFW_KEY_F10:
+			agi_input_queue_push_keypress(0, (key - GLFW_KEY_F1) + AGI_KEY_F1);
+			break;
 	}
 }
 

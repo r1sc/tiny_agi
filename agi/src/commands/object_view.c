@@ -29,15 +29,21 @@ uint8_t calculate_priority(uint8_t objNo) {
 }
 
 #define MIN(x, y) (x < y ? x : y)
-bool obj_baseline_on_pri(int x, int y, int width, uint8_t searchFor) {
-	int controlLine = -1;
-	int maxX = MIN(x + width, 160);
-	for (int px = x; px < maxX; px++) {
-		uint8_t pri = pic_pri_get(px, y);
-		if (pri == searchFor)
-			return true;
+bool obj_baseline_on_pri(int x, int y, int width, bool check_entire_baseline, uint8_t searchFor) {
+	if (check_entire_baseline) {
+		// Check entire baseline
+		int maxX = MIN(x + width, 160);
+		for (int px = x; px < maxX; px++) {
+			uint8_t pri = pic_pri_get(px, y);
+			if (pri == searchFor)
+				return true;
+		}
+		return false;
 	}
-	return false;
+
+	// Just check target pixel
+	uint8_t pri = pic_pri_get(x, y);
+	return pri == searchFor;
 }
 
 void set_loop_from_dir(uint8_t objNo, int dir) {
@@ -102,8 +108,7 @@ void update_object(uint8_t objNo) {
 				OBJ.move_distance_y += stepSize;
 				if (OBJ.move_distance_y > 0)
 					OBJ.move_distance_y = 0;
-			}
-			else if (OBJ.direction == DIR_DOWN || OBJ.direction == DIR_DOWN_LEFT || OBJ.direction == DIR_DOWN_RIGHT) {
+			} else if (OBJ.direction == DIR_DOWN || OBJ.direction == DIR_DOWN_LEFT || OBJ.direction == DIR_DOWN_RIGHT) {
 				newY += stepSize;
 				OBJ.move_distance_y -= stepSize;
 				if (OBJ.move_distance_y < 0)
@@ -114,18 +119,20 @@ void update_object(uint8_t objNo) {
 				OBJ.move_distance_x += stepSize;
 				if (OBJ.move_distance_x > 0)
 					OBJ.move_distance_x = 0;
-			}
-			else if (OBJ.direction == DIR_RIGHT || OBJ.direction == DIR_DOWN_RIGHT || OBJ.direction == DIR_UP_RIGHT) {
+			} else if (OBJ.direction == DIR_RIGHT || OBJ.direction == DIR_DOWN_RIGHT || OBJ.direction == DIR_UP_RIGHT) {
 				newX += stepSize;
 				OBJ.move_distance_x -= stepSize;
 				if (OBJ.move_distance_x < 0)
 					OBJ.move_distance_x = 0;
 			}
 
-			bool unconditionalStop = obj_baseline_on_pri(newX, newY, cell->width, 0);
-			bool conditionalStop = !OBJ.ignore_blocks && (obj_baseline_on_pri(newX, newY, cell->width, 1) || (state.block_active && point_on_block(newX, newY, state.block)));
-			bool confinedOnWater = (OBJ.allowed_on == OBJ_ON_WATER) && obj_baseline_on_pri(newX, newY, cell->width, 3);
-			bool confinedOnLand = (OBJ.allowed_on == OBJ_ON_LAND) && obj_baseline_on_pri(newX, newY, cell->width, 3);
+			bool check_entire_baseline = OBJ.y != newY;
+			int check_x = MIN(159, (check_entire_baseline ? newX : newX > OBJ.x ? OBJ.x + cell->width : newX));
+
+			bool unconditionalStop = obj_baseline_on_pri(check_x, newY, cell->width, check_entire_baseline, 0);
+			bool conditionalStop = !OBJ.ignore_blocks && (obj_baseline_on_pri(check_x, newY, cell->width, check_entire_baseline, 1) || (state.block_active && point_on_block(newX, newY, state.block)));
+			bool confinedOnWater = (OBJ.allowed_on == OBJ_ON_WATER) && obj_baseline_on_pri(check_x, newY, cell->width, check_entire_baseline, 3);
+			bool confinedOnLand = (OBJ.allowed_on == OBJ_ON_LAND) && obj_baseline_on_pri(check_x, newY, cell->width, check_entire_baseline, 3);
 			bool stop = unconditionalStop || conditionalStop || confinedOnWater || confinedOnLand;
 
 			if (!OBJ.ignore_objects) {
@@ -154,20 +161,17 @@ void update_object(uint8_t objNo) {
 				if (objNo != 0) {
 					state.variables[VAR_4_OBJ_BORDER_OBJNO] = objNo;
 				}
-			}
-			else if (newY <= 0 || (!OBJ.ignore_horizon && newY <= state.horizon)) {
+			} else if (newY <= 0 || (!OBJ.ignore_horizon && newY <= state.horizon)) {
 				state.variables[objNo == 0 ? VAR_2_EGO_BORDER_CODE : VAR_5_OBJ_BORDER_CODE] = BORDER_TOP;
 				if (objNo != 0) {
 					state.variables[VAR_4_OBJ_BORDER_OBJNO] = objNo;
 				}
-			}
-			else if (newX <= 0) {
+			} else if (newX <= 0) {
 				state.variables[objNo == 0 ? VAR_2_EGO_BORDER_CODE : VAR_5_OBJ_BORDER_CODE] = BORDER_LEFT;
 				if (objNo != 0) {
 					state.variables[VAR_4_OBJ_BORDER_OBJNO] = objNo;
 				}
-			}
-			else if (newX >= 160) {
+			} else if (newX >= 160) {
 				state.variables[objNo == 0 ? VAR_2_EGO_BORDER_CODE : VAR_5_OBJ_BORDER_CODE] = BORDER_RIGHT;
 				if (objNo != 0) {
 					state.variables[VAR_4_OBJ_BORDER_OBJNO] = objNo;
@@ -191,8 +195,8 @@ void update_object(uint8_t objNo) {
 		OBJ.steps_to_next_update--;
 
 		if (objNo == 0) {
-			state.flags[FLAG_3_EGO_TOUCHED_TRIGGER] = obj_baseline_on_pri(OBJ.x, OBJ.y, cell->width, 2);
-			state.flags[FLAG_0_EGO_ON_WATER] = obj_baseline_on_pri(OBJ.x, OBJ.y, cell->width, 3);
+			state.flags[FLAG_3_EGO_TOUCHED_TRIGGER] = obj_baseline_on_pri(OBJ.x, OBJ.y, cell->width, true, 2);
+			state.flags[FLAG_0_EGO_ON_WATER] = obj_baseline_on_pri(OBJ.x, OBJ.y, cell->width, true, 3);
 		}
 
 		if (OBJ.is_cycling) {
@@ -210,16 +214,13 @@ void update_object(uint8_t objNo) {
 							OBJ.is_cycling = false;
 							OBJ.direction = DIR_STOPPED;
 							OBJ.cycling_mode = CYCLE_MODE_NORMAL;
-						}
-						else {
+						} else {
 							OBJ.cel_no = numCels - 1;
 						}
-					}
-					else {
+					} else {
 						OBJ.cel_no--;
 					}
-				}
-				else {
+				} else {
 					if (OBJ.cel_no >= numCels - 1) {
 						if (OBJ.cycling_mode == CYCLE_MODE_END_OF_LOOP) {
 							if (OBJ.end_of_loop_flag > -1) {
@@ -230,12 +231,10 @@ void update_object(uint8_t objNo) {
 							OBJ.is_cycling = false;
 							OBJ.direction = DIR_STOPPED;
 							OBJ.cycling_mode = CYCLE_MODE_NORMAL;
-						}
-						else {
+						} else {
 							OBJ.cel_no = 0;
 						}
-					}
-					else {
+					} else {
 						OBJ.cel_no++;
 					}
 				}
@@ -344,6 +343,10 @@ void animate_obj(uint8_t objNo) {
 	OBJ.allowed_on = OBJ_ON_ANYTHING;
 	OBJ.ignore_objects = false;
 	OBJ.ignore_blocks = false;
+	OBJ.fix_loop = false;
+
+	OBJ.loop_no = 0;
+	OBJ.cel_no = 0;
 }
 
 void block(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2) {
@@ -614,8 +617,16 @@ void set_upper_left(uint8_t num, uint8_t num2) {
 
 void set_view(uint8_t objNo, uint8_t viewNo) {
 	OBJ.view_no = viewNo;
-	OBJ.loop_no = 0;
-	OBJ.cel_no = 0;
+	uint8_t numLoops = _view_num_loops(viewNo);
+	if (OBJ.loop_no >= numLoops) {
+		OBJ.loop_no = 0;
+	}
+
+	uint8_t numCels = _view_num_cels(viewNo, OBJ.loop_no);
+	if (OBJ.cel_no >= numLoops) {
+		OBJ.cel_no = 0;
+	}
+
 	OBJ.cycling_mode = CYCLE_MODE_NORMAL;
 }
 

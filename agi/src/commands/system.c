@@ -115,7 +115,7 @@ void restore_game() {
 				entry = heap_data.script_entries[++i];
 				uint8_t y = entry.script_type;
 				uint8_t pri = entry.resource_number;
-				add_to_pic(view_no, loop_no, cel_no, x, y, pri, 0);
+				add_to_pic(view_no, loop_no, cel_no, x, y, pri, 4);
 				break;
 			case SCRIPT_ENTRY_DISCARD_PIC:
 				discard_pic_no(entry.resource_number);
