@@ -34,6 +34,8 @@ add_library (tinyagi STATIC
 	"src/view.h"
 	"src/input_queue.h"
 	"src/input_queue.c"  
+	"src/text_parser.h"
+	"src/text_parser.c" 
 	"src/heap.c" 
 	"src/heap.h" 
 	"src/decryption.h"

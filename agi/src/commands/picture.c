@@ -136,136 +136,136 @@ void _pic_draw(uint8_t pic_no) {
 	{
 		uint8_t value = buffer[i++];
 		switch (value) {
-		case PIC_SET_COLOR:
-			vis_enabled = true;
-			vis_color = buffer[i++];
-			break;
-		case PIC_DISABLE:
-			vis_enabled = false;
-			break;
-		case PRI_SET_COLOR:
-			pri_enabled = true;
-			pri_color = buffer[i++];
-			break;
-		case PRI_DISABLE:
-			pri_enabled = false;
-			break;
-		case DRAW_Y_CORNER:
-		{
-			uint8_t x1 = buffer[i++];
-			uint8_t y1 = buffer[i++];
-			_pset(x1, y1);
-			while (1) {
-				uint8_t y2 = buffer[i];
-				if (y2 >= 0xF0)
-					break;
-				i++;
-				_draw_line(x1, y1, x1, y2);
-				y1 = y2;
-				uint8_t x2 = buffer[i];
-				if (x2 >= 0xF0)
-					break;
-				i++;
-				_draw_line(x1, y1, x2, y1);
-				x1 = x2;
-			}
-		}
-		break;
-		case DRAW_X_CORNER:
-		{
-			uint8_t x1 = buffer[i++];
-			uint8_t y1 = buffer[i++];
-			_pset(x1, y1);
-			while (1) {
-				uint8_t x2 = buffer[i];
-				if (x2 >= 0xF0)
-					break;
-				i++;
-				_draw_line(x1, y1, x2, y1);
-				x1 = x2;
-				uint8_t y2 = buffer[i];
-				if (y2 >= 0xF0)
-					break;
-				i++;
-				_draw_line(x1, y1, x1, y2);
-				y1 = y2;
-			}
-		}
-		break;
-		case DRAW_ABS:
-		{
-			uint8_t x1 = buffer[i++];
-			uint8_t y1 = buffer[i++];
-			_pset(x1, y1);
-			while (1) {
-				uint8_t x2 = buffer[i];
-				if (x2 >= 0xF0)
-					break;
-				i++;
-				uint8_t y2 = buffer[i++];
-				_draw_line(x1, y1, x2, y2);
-				x1 = x2;
-				y1 = y2;
-			}
-
-		}
-		break;
-		case DRAW_REL:
-		{
-			uint8_t x1 = buffer[i++];
-			uint8_t y1 = buffer[i++];
-			_pset(x1, y1);
-
-			while (1) {
-				uint8_t xd = buffer[i];
-				if (xd >= 0xF0)
-					break;
-				i++;
-
-				int xDisp = (xd >> 4) & 7;
-				if (xd & 0x80)
-					xDisp = -xDisp;
-
-				int yDisp = xd & 7;
-				if (xd & 8)
-					yDisp = -yDisp;
-
-				uint8_t x2 = x1 + xDisp;
-				uint8_t y2 = y1 + yDisp;
-				_draw_line(x1, y1, x2, y2);
-				x1 = x2;
-				y1 = y2;
-			}
-		}
-		break;
-		case DRAW_FILL:
-		{
-			while (1) {
-				uint8_t x = buffer[i];
-				if (x >= 0xF0)
-					break;
-				i++;
-				uint8_t y = buffer[i++];
-				_flood_fill(x, y);
-			}
-
-		}
-		break;
-		case SET_PEN:
-			i++;
-			break;
-		case DRAW_PEN:
-			while (buffer[i] < 0xF0) {
-				uint8_t x = buffer[i++];
-				uint8_t y = buffer[i++];
-				_pset(x, y);
+			case PIC_SET_COLOR:
+				vis_enabled = true;
+				vis_color = buffer[i++];
+				break;
+			case PIC_DISABLE:
+				vis_enabled = false;
+				break;
+			case PRI_SET_COLOR:
+				pri_enabled = true;
+				pri_color = buffer[i++];
+				break;
+			case PRI_DISABLE:
+				pri_enabled = false;
+				break;
+			case DRAW_Y_CORNER:
+			{
+				uint8_t x1 = buffer[i++];
+				uint8_t y1 = buffer[i++];
+				_pset(x1, y1);
+				while (1) {
+					uint8_t y2 = buffer[i];
+					if (y2 >= 0xF0)
+						break;
+					i++;
+					_draw_line(x1, y1, x1, y2);
+					y1 = y2;
+					uint8_t x2 = buffer[i];
+					if (x2 >= 0xF0)
+						break;
+					i++;
+					_draw_line(x1, y1, x2, y1);
+					x1 = x2;
+				}
 			}
 			break;
-		case END:
-			return;
-		default:
-			panic("Unimplemented pic command %x!", value);
+			case DRAW_X_CORNER:
+			{
+				uint8_t x1 = buffer[i++];
+				uint8_t y1 = buffer[i++];
+				_pset(x1, y1);
+				while (1) {
+					uint8_t x2 = buffer[i];
+					if (x2 >= 0xF0)
+						break;
+					i++;
+					_draw_line(x1, y1, x2, y1);
+					x1 = x2;
+					uint8_t y2 = buffer[i];
+					if (y2 >= 0xF0)
+						break;
+					i++;
+					_draw_line(x1, y1, x1, y2);
+					y1 = y2;
+				}
+			}
 			break;
+			case DRAW_ABS:
+			{
+				uint8_t x1 = buffer[i++];
+				uint8_t y1 = buffer[i++];
+				_pset(x1, y1);
+				while (1) {
+					uint8_t x2 = buffer[i];
+					if (x2 >= 0xF0)
+						break;
+					i++;
+					uint8_t y2 = buffer[i++];
+					_draw_line(x1, y1, x2, y2);
+					x1 = x2;
+					y1 = y2;
+				}
+
+			}
+			break;
+			case DRAW_REL:
+			{
+				uint8_t x1 = buffer[i++];
+				uint8_t y1 = buffer[i++];
+				_pset(x1, y1);
+
+				while (1) {
+					uint8_t xd = buffer[i];
+					if (xd >= 0xF0)
+						break;
+					i++;
+
+					int xDisp = (xd >> 4) & 7;
+					if (xd & 0x80)
+						xDisp = -xDisp;
+
+					int yDisp = xd & 7;
+					if (xd & 8)
+						yDisp = -yDisp;
+
+					uint8_t x2 = x1 + xDisp;
+					uint8_t y2 = y1 + yDisp;
+					_draw_line(x1, y1, x2, y2);
+					x1 = x2;
+					y1 = y2;
+				}
+			}
+			break;
+			case DRAW_FILL:
+			{
+				while (1) {
+					uint8_t x = buffer[i];
+					if (x >= 0xF0)
+						break;
+					i++;
+					uint8_t y = buffer[i++];
+					_flood_fill(x, y);
+				}
+
+			}
+			break;
+			case SET_PEN:
+				i++;
+				break;
+			case DRAW_PEN:
+				while (buffer[i] < 0xF0) {
+					uint8_t x = buffer[i++];
+					uint8_t y = buffer[i++];
+					_pset(x, y);
+				}
+				break;
+			case END:
+				return;
+			default:
+				panic("Unimplemented pic command %x!", value);
+				break;
 		}
 	}
 	panic("No end of picture marker found!");
