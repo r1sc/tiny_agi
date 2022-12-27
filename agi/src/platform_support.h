@@ -22,9 +22,9 @@ extern void check_key();
 extern void wait_for_enter();
 
 extern void _draw_char(unsigned int start_x, unsigned int start_y, unsigned char c, uint8_t fg, uint8_t bg);
-
-extern void agi_play_sound(uint8_t* sound_data);
-extern void agi_stop_sound();
+//
+//extern void agi_play_sound(uint8_t* sound_data);
+//extern void agi_stop_sound();
 
 extern uint8_t font_data[];
 

@@ -13,6 +13,9 @@ void _draw_char(unsigned int start_x, unsigned int start_y, unsigned char c, uin
 	if (c == '\n')
 		return;
 
+	if (start_y >= 200)
+		return;
+
 	for (unsigned int y = 0; y < 8; y++) {
 		int screen_y = y + start_y;
 		unsigned char rowData = font_data[c * 8 + y];

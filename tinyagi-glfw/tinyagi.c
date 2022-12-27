@@ -10,7 +10,7 @@
 #include <gl/GL.h>
 
 #include "agi.h"
-#include "winmm_audio.h"
+#include "waveout.h"
 
 static uint8_t screen_priority[160 * 168];
 static uint32_t framebuffer[320 * 200];
@@ -108,8 +108,17 @@ inline int priority_get(int x, int y) {
 	return screen_priority[y * 160 + x];
 }
 
-void window_resize(GLFWwindow* window, int width, int height) {
-	glViewport(0, 0, width, height);
+void window_resize(GLFWwindow* window, int w, int h) {
+	float aspect = 320.0f / 200.0f;
+	int width = w;
+	int height = width / aspect;
+
+	if (height > h) {
+		height = h;
+		width = height * aspect;
+	}
+
+	glViewport((w - width) / 2, (h - height) / 2, width, height);
 }
 
 bool show_priority = false;
@@ -177,11 +186,6 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 void character_callback(GLFWwindow* window, unsigned int codepoint) {
 	char c = (char)codepoint;
 	agi_input_queue_push_keypress(c, 0);
-}
-
-void agi_stop_sound() {}
-void agi_play_sound(uint8_t* sound_data) {
-	//state.flags[state.sound_flag] = true;
 }
 
 GLFWwindow* window;

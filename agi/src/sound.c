@@ -1,16 +1,8 @@
 #include "sound.h"
 #include "platform_support.h"
 
-typedef struct
-{
-    uint32_t hz;
-    uint32_t duration;
-    uint8_t attenuation;
-} chan_note_t;
-
-#define NUM_CHANNELS 3
-static uint16_t channel_offsets[NUM_CHANNELS];
-static chan_note_t channel_notes[NUM_CHANNELS];
+chan_note_t channel_notes[AGI_NUM_CHANNELS];
+static uint16_t channel_offsets[AGI_NUM_CHANNELS];
 
 static uint8_t* sound_data;
 
@@ -37,14 +29,13 @@ chan_note_t read_chan(uint32_t offset)
     return note;
 }
 
-bool agi_sound_tick(int delta_ms)
+void agi_sound_tick(int delta_ms)
 {
     int num_channels_done = 0;
-    for (size_t i = 0; i < NUM_CHANNELS; i++)
+    for (size_t i = 0; i < AGI_NUM_CHANNELS; i++)
     {       
         if(sound_data == NULL) {
-            pwm_synth_channels[i].hz = 0;
-            pwm_synth_channels[i].sample_pos = 0;
+			channel_notes[i].hz = 0;
             continue;
         }
 
@@ -68,24 +59,13 @@ bool agi_sound_tick(int delta_ms)
         if((channel_notes[i].attenuation & 0x0F) == 0x0F) {
             channel_notes[i].hz = 0;
         }
-
-        if (pwm_synth_channels[i].hz != channel_notes[i].hz)
-        {
-            pwm_synth_channels[i].hz = channel_notes[i].hz;
-            pwm_synth_channels[i].sample_pos = 0;
-        }        
     }
-
-    if(num_channels_done == NUM_CHANNELS){
-        return false;
-    }
-    return true;
 }
 
 void agi_sound_start(uint8_t* new_sound_data)
 {
     sound_data = new_sound_data;
-    for (size_t i = 0; i < NUM_CHANNELS; i++)
+    for (size_t i = 0; i < AGI_NUM_CHANNELS; i++)
     {
         /* code */
         channel_notes[i].duration = 0;
@@ -94,6 +74,5 @@ void agi_sound_start(uint8_t* new_sound_data)
 }
 
 void agi_sound_stop() {
-    sound_data = NULL;   
-    pwm_synth_silence_all_channels();
+	sound_data = NULL;
 }

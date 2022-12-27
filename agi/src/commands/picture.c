@@ -76,7 +76,7 @@ void _flood_fill(uint8_t startX, uint8_t startY)
 	if (!vis_enabled && !pri_enabled) return;
 	if (vis_enabled && vis_color == 15) return;
 
-#define QUEUE_LEN 4096
+#define QUEUE_LEN 8192
 	uint8_t queue[QUEUE_LEN];
 	unsigned int wp = 0;
 	unsigned int rp = 0;

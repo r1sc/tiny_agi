@@ -247,7 +247,7 @@ void update_object(uint8_t objNo) {
 }
 
 void update_all_active() {
-	for (uint8_t i = 0; i < 16; i++) {
+	for (uint8_t i = 0; i < MAX_NUM_OBJECTS; i++) {
 		if (state.objects[i].active && state.objects[i].drawn) {
 			update_object(i);
 		}
@@ -268,10 +268,10 @@ int cmpfunc(const void* a, const void* b) {
 
 
 void agi_draw_all_active() {
-	uint8_t objs_sorted[16];
+	uint8_t objs_sorted[MAX_NUM_OBJECTS];
 	int num_sorted = 0;
 
-	for (int objNo = 15; objNo >= 0; objNo--) {
+	for (int objNo = MAX_NUM_OBJECTS - 1; objNo >= 0; objNo--) {
 		if (OBJ.active && OBJ.drawn) {
 			if (OBJ.old_view_no > -1) {
 				_draw_view(OBJ.old_view_no, OBJ.old_loop_no, OBJ.old_cel_no, OBJ.old_x, OBJ.old_y, 0, true, false); //erase
