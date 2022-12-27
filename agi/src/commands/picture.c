@@ -9,6 +9,7 @@ static bool pri_enabled = false;
 static uint8_t vis_color = 0;
 static uint8_t pri_color = 0;
 static uint8_t pic_vispri[160 * 168];
+static uint8_t pen_style = 0;
 
 void pic_vis_set(int x, int y, int color) {
 	pic_vispri[y * 160 + x] = (pic_vispri[y * 160 + x] & 0x0F) | (color << 4);
@@ -125,6 +126,7 @@ void _pic_draw(uint8_t pic_no) {
 	pri_enabled = false;
 	vis_color = 0;
 	pri_color = 0;
+	pen_style = 0;
 
 	uint8_t* buffer = heap_data.loaded_pics[pic_no].buffer;
 	if (!buffer) {
@@ -252,15 +254,25 @@ void _pic_draw(uint8_t pic_no) {
 			}
 			break;
 			case SET_PEN:
-				i++;
+				while (buffer[i] < 0xF0) {
+					pen_style = buffer[i];
+					i++;
+				}
 				break;
 			case DRAW_PEN:
+			{
+				bool is_texture = (pen_style & 0x20) == 0x20;
 				while (buffer[i] < 0xF0) {
+					uint8_t texture_number = 0;
+					if (is_texture) {
+						texture_number = buffer[i++];
+					}
 					uint8_t x = buffer[i++];
 					uint8_t y = buffer[i++];
 					_pset(x, y);
 				}
 				break;
+			}
 			case END:
 				return;
 			default:
