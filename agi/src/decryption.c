@@ -1,7 +1,7 @@
 #include "decryption.h"
 #include "heap.h"
 
-const char* decryptionKey = "Avis Durgan";
+static const char* decryptionKey = "Avis Durgan";
 
 void decrypt_item_file(uint8_t* item_file, size_t size)
 {

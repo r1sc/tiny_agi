@@ -12,8 +12,8 @@
 #include "agi.h"
 #include "winmm_audio.h"
 
-uint8_t screen_priority[160 * 168];
-uint32_t framebuffer[320 * 200];
+static uint8_t screen_priority[160 * 168];
+static uint32_t framebuffer[320 * 200];
 
 void panic(const char* fmt, ...) {
 	va_list vl;

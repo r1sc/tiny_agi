@@ -676,8 +676,9 @@ void process_input_queue() {
 	queue_pos = 0;
 }
 
-uint32_t last_ms = 0;
-uint32_t last_clock = 0;
+static uint32_t last_ms = 0;
+static uint32_t last_clock = 0;
+
 bool agi_logic_run_cycle(uint32_t now_ms) {
 	uint32_t target_ms = ((uint32_t)state.variables[10]) * 50;
 

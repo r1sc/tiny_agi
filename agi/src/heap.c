@@ -8,7 +8,6 @@
 
 agi_heap_t heap_data;
 
-
 void heap_reload_object_file() {
 	agi_file_t item_file = get_file("object");
 

@@ -9,10 +9,10 @@ typedef struct
 } chan_note_t;
 
 #define NUM_CHANNELS 3
-uint16_t channel_offsets[NUM_CHANNELS];
-chan_note_t channel_notes[NUM_CHANNELS];
+static uint16_t channel_offsets[NUM_CHANNELS];
+static chan_note_t channel_notes[NUM_CHANNELS];
 
-uint8_t* sound_data;
+static uint8_t* sound_data;
 
 #define read_16(x) (sound_data[x + 1] << 8) | sound_data[x]
 

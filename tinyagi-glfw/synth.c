@@ -3,15 +3,16 @@
 #include "synth.h"
 #include "panic.h"
 
-int sample_rate = 8000;
-int num_channels = 2;
-int bits_per_sample = 8;
+static int sample_rate = 8000;
+static int num_channels = 2;
+static int bits_per_sample = 8;
 
-uint8_t buffer[8000]; // 1s sound
-uint8_t *buffer_pos;
-uint8_t* write_pos;
+static uint8_t buffer[8000]; // 1s sound
+static uint8_t *buffer_pos;
+static uint8_t* write_pos;
 
-HWAVEOUT waveout;
+static HWAVEOUT waveout;
+
 void write_next_buffer() {
 	size_t len = buffer_pos - write_pos;
 	WAVEHDR wave_header = {
@@ -47,9 +48,9 @@ void CALLBACK wave_out_callback(HWAVEOUT hwo, UINT uMsg, DWORD_PTR dwInstance, D
 }
 
 #define NUM_CHANNELS 4
-size_t raw_sample_size;
-uint8_t* raw_sample;
-synth_channel_t channels[NUM_CHANNELS];
+static size_t raw_sample_size;
+static uint8_t* raw_sample;
+static synth_channel_t channels[NUM_CHANNELS];
 
 
 uint8_t step_channel(synth_channel_t* channel) {

@@ -4,11 +4,11 @@
 #include "../heap.h"
 #include "../platform_support.h"
 
-bool vis_enabled = false;
-bool pri_enabled = false;
-uint8_t vis_color = 0;
-uint8_t pri_color = 0;
-uint8_t pic_vispri[160 * 168];
+static bool vis_enabled = false;
+static bool pri_enabled = false;
+static uint8_t vis_color = 0;
+static uint8_t pri_color = 0;
+static uint8_t pic_vispri[160 * 168];
 
 void pic_vis_set(int x, int y, int color) {
 	pic_vispri[y * 160 + x] = (pic_vispri[y * 160 + x] & 0x0F) | (color << 4);

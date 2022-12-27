@@ -121,10 +121,10 @@ int read_num(const char** source) {
 	return num;
 }
 
-int line_width;
-int total_line_width;
-int rows;
-int max_width;
+static int line_width;
+static int total_line_width;
+static int rows;
+static int max_width;
 
 char* format_and_print(char* dest, const char* source) {
 	char* last_space = dest;

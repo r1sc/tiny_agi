@@ -344,9 +344,6 @@ void animate_obj(uint8_t objNo) {
 	OBJ.ignore_objects = false;
 	OBJ.ignore_blocks = false;
 	OBJ.fix_loop = false;
-
-	OBJ.loop_no = 0;
-	OBJ.cel_no = 0;
 }
 
 void block(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2) {
