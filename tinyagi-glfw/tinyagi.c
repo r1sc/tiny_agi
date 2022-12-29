@@ -24,7 +24,7 @@ void panic(const char* fmt, ...) {
 	exit(1);
 }
 
-const char* game_path = "C:\\classic\\sierra\\pq";
+const char* game_path = "C:\\classic\\sierra\\sq2";
 agi_file_t get_file(const char* filename) {
 	char path[256];
 	sprintf(path, "%s\\%s\0", game_path, filename);
@@ -111,11 +111,11 @@ inline int priority_get(int x, int y) {
 void window_resize(GLFWwindow* window, int w, int h) {
 	float aspect = 320.0f / 200.0f;
 	int width = w;
-	int height = width / aspect;
+	int height = (int)(width / aspect);
 
 	if (height > h) {
 		height = h;
-		width = height * aspect;
+		width = (int)(height * aspect);
 	}
 
 	glViewport((w - width) / 2, (h - height) / 2, width, height);
@@ -190,6 +190,9 @@ void character_callback(GLFWwindow* window, unsigned int codepoint) {
 
 GLFWwindow* window;
 
+int offset_x = 0;
+int offset_y = 0;
+
 void render() {
 	if (show_priority) {
 		for (size_t y = 0; y < 168; y++) {
@@ -199,6 +202,9 @@ void render() {
 		}
 	}
 	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 320, 200, GL_BGRA_EXT, GL_UNSIGNED_BYTE, framebuffer);
+
+	glLoadIdentity();
+	glTranslatef(offset_x, offset_y, 0);
 
 	glBegin(GL_QUADS);
 	glTexCoord2f(0, 0); glVertex2f(0, 0);
@@ -218,6 +224,20 @@ void wait_for_enter() {
 		Sleep(10);
 		glfwPollEvents();
 	}
+}
+
+void agi_shake_screen() {
+
+	for(int i = 0; i < 20; i++) {
+		offset_x = (rand() % 20) - 10;
+		offset_y = (rand() % 20) - 10;
+		render();
+		glfwPollEvents();
+		Sleep(10);
+	}
+
+	offset_x = 0;
+	offset_y = 0;
 }
 
 void check_key() {

@@ -4,6 +4,7 @@
 #include "../actions.h"
 #include "../platform_support.h"
 #include "../text_display.h"
+#include "../text_parser.h"
 
 void get_string(uint8_t str, uint8_t msg, uint8_t col, uint8_t row, uint8_t maxLen) {
 	UNIMPLEMENTED

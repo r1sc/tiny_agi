@@ -21,28 +21,15 @@ extern void priority_set(int x, int y, int priority);
 extern void check_key();
 extern void wait_for_enter();
 
-extern void _draw_char(unsigned int start_x, unsigned int start_y, unsigned char c, uint8_t fg, uint8_t bg);
-//
+extern void agi_shake_screen();
+
 //extern void agi_play_sound(uint8_t* sound_data);
 //extern void agi_stop_sound();
 
 extern uint8_t font_data[];
-
 
 typedef void* agi_save_data_file_ptr;
 agi_save_data_file_ptr agi_save_data_open(const char* mode);
 void agi_save_data_write(agi_save_data_file_ptr file_ptr, void* data, size_t size);
 void agi_save_data_read(agi_save_data_file_ptr file_ptr, void* destination, size_t size);
 void agi_save_data_close(agi_save_data_file_ptr file_ptr);
-
-/* Sound */
-
-typedef struct {
-	uint16_t hz;
-	float sample_pos;
-} pwm_synth_audio_channel_state_t;
-
-#define PWM_SYNTH_NUM_CHANNELS 3
-extern pwm_synth_audio_channel_state_t pwm_synth_channels[PWM_SYNTH_NUM_CHANNELS];
-
-extern void pwm_synth_silence_all_channels();

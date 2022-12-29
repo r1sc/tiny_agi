@@ -80,14 +80,14 @@ void _print(const char *message, int row, int col, uint8_t max_width, bool pause
 void print(uint8_t msg)
 {
 	const char *message = get_message(state.current_logic, msg);
-	bool pause = true; // TODO: Broken //!state.flags[FLAG_15_NON_BLOCKING_WINDOWS];
+	bool pause = !state.flags[FLAG_15_NON_BLOCKING_WINDOWS]; // TODO: Broken //!state.flags[FLAG_15_NON_BLOCKING_WINDOWS];
 	_print(message, 0, 0, 30, pause);
 }
 
 void print_at(uint8_t msg, uint8_t row, uint8_t col, uint8_t maxWidth)
 {
 	const char *message = get_message(state.current_logic, msg);
-	bool pause = true; // TODO: Broken //!state.flags[FLAG_15_NON_BLOCKING_WINDOWS];
+	bool pause = !state.flags[FLAG_15_NON_BLOCKING_WINDOWS]; // TODO: Broken //!state.flags[FLAG_15_NON_BLOCKING_WINDOWS];
 	_print(message, row, col, maxWidth, pause);
 }
 
@@ -115,7 +115,7 @@ void set_text_attribute(uint8_t fg, uint8_t bg)
 
 void shake_screen(uint8_t num)
 {
-	UNIMPLEMENTED
+	agi_shake_screen();
 }
 
 void status_line_off()

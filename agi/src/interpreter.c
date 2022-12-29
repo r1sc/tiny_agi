@@ -6,6 +6,7 @@
 #include "actions.h"
 #include "platform_support.h"
 #include "text_display.h"
+#include "text_parser.h"
 #include "input_queue.h"
 #include "menu.h"
 #include "sound.h"
