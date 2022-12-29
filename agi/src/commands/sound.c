@@ -16,7 +16,8 @@ void load_sound(uint8_t num) {
 void sound(uint8_t num, uint8_t flag) {
 	state.sound_flag = flag;
 	state.flags[flag] = false;
-	agi_sound_start(heap_data.loaded_sounds[num].buffer);
+	//agi_sound_start(heap_data.loaded_sounds[num].buffer);
+	stop_sound();
 }
 
 void stop_sound() {

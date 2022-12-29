@@ -556,9 +556,6 @@ static uint32_t last_clock = 0;
 bool agi_logic_run_cycle(uint32_t now_ms) {
 	uint32_t target_ms = ((uint32_t)state.variables[10]) * 50;
 
-	uint32_t delta = now_ms - last_ms;
-	agi_sound_tick((int)delta);
-
 	if (now_ms >= last_ms + target_ms) {
 		last_ms = now_ms;
 

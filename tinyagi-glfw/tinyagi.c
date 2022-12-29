@@ -24,7 +24,7 @@ void panic(const char* fmt, ...) {
 	exit(1);
 }
 
-const char* game_path = "C:\\classic\\sierra\\sq2";
+const char* game_path = "C:\\classic\\sierra\\pq";
 agi_file_t get_file(const char* filename) {
 	char path[256];
 	sprintf(path, "%s\\%s\0", game_path, filename);
@@ -249,7 +249,7 @@ int main() {
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	glOrtho(0, 320, 200, 0, -1, 1);
+	glOrtho(0, 320, 200, 0, 0, 1);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
@@ -262,13 +262,42 @@ int main() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 320, 200, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, framebuffer);
 
+	//waveout_initialize(22050, 8192);
+
 	int clock_counter = 0;
-	double last_s = 0;
+	double last_ms = 0;
 	while (!glfwWindowShouldClose(window)) {
 		double now = glfwGetTime() * 1000;
 
 		agi_logic_run_cycle((uint32_t)now);
+
+		int delta = (int)(last_ms == 0 ? 0 : now - last_ms);
+		last_ms = now;
+		agi_sound_tick(delta);
+
 		agi_draw_all_active();
+
+		// DOESN'T REALLY WORK - fix later
+
+		/*int16_t* buffer = NULL;
+		float an = 0;
+		int hz = channel_notes[0].hz;
+		float an_step = hz * (360.0f / 22050.0f);
+		float PI = 3.141519;
+		float DEG2RAD = PI / 180.0f;
+
+		while ((buffer = waveout_get_current_buffer())) {
+			for (size_t i = 0; i < 8192; i++) {
+				buffer[i] = (int16_t)(sin(an * DEG2RAD) * INT16_MAX);
+				an += an_step;
+				if (an >= 360) {
+					an -= 360;
+				}
+			}
+			
+			waveout_queue_buffer();
+		}*/
+		
 		render();
 
 		glfwPollEvents();

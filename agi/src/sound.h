@@ -5,8 +5,8 @@
 
 typedef struct
 {
-	uint32_t hz;
-	uint32_t duration;
+	int hz;
+	int duration;
 	uint8_t attenuation;
 } chan_note_t;
 
