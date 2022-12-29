@@ -98,6 +98,9 @@ void _draw_text(uint8_t* row, uint8_t* col, const char* text, uint8_t fg, uint8_
 }
 
 void redraw_prompt(const char* prompt_text) {	
+	if (!state.input_prompt_active)
+		return;
+
 	uint8_t row = state.input_line_row;
 	uint8_t col = 0;
 	_draw_text(&row, &col, "                                        ", 0, 0);

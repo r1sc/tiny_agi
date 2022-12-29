@@ -21,7 +21,7 @@ extern void priority_set(int x, int y, int priority);
 extern void check_key();
 extern void wait_for_enter();
 
-extern void agi_shake_screen();
+extern void agi_shake_screen(uint8_t times);
 
 //extern void agi_play_sound(uint8_t* sound_data);
 //extern void agi_stop_sound();

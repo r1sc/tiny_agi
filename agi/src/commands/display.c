@@ -115,7 +115,7 @@ void set_text_attribute(uint8_t fg, uint8_t bg)
 
 void shake_screen(uint8_t num)
 {
-	agi_shake_screen();
+	agi_shake_screen(num);
 }
 
 void status_line_off()

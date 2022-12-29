@@ -226,14 +226,13 @@ void wait_for_enter() {
 	}
 }
 
-void agi_shake_screen() {
-
-	for(int i = 0; i < 20; i++) {
+void agi_shake_screen(uint8_t times) {
+	for(int i = 0; i < 5 * times; i++) {
 		offset_x = (rand() % 20) - 10;
 		offset_y = (rand() % 20) - 10;
 		render();
 		glfwPollEvents();
-		Sleep(10);
+		Sleep(30);
 	}
 
 	offset_x = 0;
