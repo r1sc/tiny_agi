@@ -1,0 +1,16 @@
+﻿{
+  "configurations": [
+    {
+      "name": "Pico",
+      "generator": "Unix Makefiles",
+      "configurationType": "Debug",
+      "buildRoot": "${projectDir}\\out\\build\\${name}",
+      "installRoot": "${projectDir}\\out\\install\\${name}",
+      "cmakeCommandArgs": "",
+      "buildCommandArgs": "",
+      "ctestCommandArgs": "",
+      "intelliSenseMode": "linux-gcc-arm",
+      "inheritEnvironments": [ "msvc_x86" ]
+    }
+  ]
+}

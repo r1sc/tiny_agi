@@ -70,9 +70,10 @@ agi_file_t get_file(const char *filename)
 {
     const fileentry_t *file_entry = ar_find_file(filename);
 
-    agi_file_t file;
-    file.size = file_entry->length;
-    file.data = ar_ptr_to(file_entry);
+	agi_file_t file = {
+		.size = file_entry->length,
+		.data = ar_ptr_to(file_entry) 
+	};
     return file;
 }
 
@@ -89,6 +90,8 @@ void ext_stop_sound()
 {
     agi_sound_stop();
 }
+
+void agi_shake_screen(uint8_t count) {}
 
 // char *font_data;
 
@@ -159,17 +162,35 @@ unsigned char font_data[2048] =
         0x1C, 0x36, 0x36, 0x1C, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x18, 0x18, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x18, 0x00, 0x00, 0x00, 0x0F, 0x0C, 0x0C, 0xCC, 0x6C, 0x3C, 0x1C, 0x0C,
         0x3C, 0x36, 0x36, 0x36, 0x36, 0x00, 0x00, 0x00, 0x38, 0x0C, 0x18, 0x30, 0x3C, 0x00, 0x00, 0x00, 0x00, 0x00, 0x3C, 0x3C, 0x3C, 0x3C, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
+#define SAVE_START (uint8_t*)0x10110000;
+uint8_t* save_offset = SAVE_START;
+
 agi_save_data_file_ptr agi_save_data_open(const char* mode) {
-	return NULL;
+    printf("Save/restore open\n");
+    save_offset = SAVE_START;
+    return 0;
 }
 
 void agi_save_data_write(agi_save_data_file_ptr file_ptr, void* data, size_t size) {
+    printf("Save write %d bytes\n", size);
+	for(size_t i = 0; i < size; i++) {
+        *save_offset = ((uint8_t*)data)[i];
+        save_offset++;
+    }
 }
 
 void agi_save_data_read(agi_save_data_file_ptr file_ptr, void* destination, size_t size) {
+    printf("Restore read %d bytes\n", size);
+    uint8_t* data = (uint8_t*)destination;
+
+	for(size_t i = 0; i < size; i++) {
+        data[i] = *save_offset;
+        save_offset++;
+    }
 }
 
 void agi_save_data_close(agi_save_data_file_ptr file_ptr) {
+    printf("Save/restore complete\n");
 }
 
 void check_key() {

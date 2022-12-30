@@ -23,8 +23,8 @@ extern void wait_for_enter();
 
 extern void agi_shake_screen(uint8_t times);
 
-//extern void agi_play_sound(uint8_t* sound_data);
-//extern void agi_stop_sound();
+extern void agi_play_sound(uint8_t* sound_data);
+extern void agi_stop_sound();
 
 extern uint8_t font_data[];
 

@@ -9,7 +9,6 @@
 #include "text_parser.h"
 #include "input_queue.h"
 #include "menu.h"
-#include "sound.h"
 
 /* Test definitions */
 

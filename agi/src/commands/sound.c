@@ -2,7 +2,7 @@
 #include "../state.h"
 #include "../heap.h"
 #include "../vol.h"
-#include "../sound.h"
+#include "../platform_support.h"
 
 void load_sound(uint8_t num) {
 	heap_write_script_entry(SCRIPT_ENTRY_LOAD_SOUND, num);
@@ -16,8 +16,8 @@ void load_sound(uint8_t num) {
 void sound(uint8_t num, uint8_t flag) {
 	state.sound_flag = flag;
 	state.flags[flag] = false;
-	//agi_sound_start(heap_data.loaded_sounds[num].buffer);
-	stop_sound();
+	agi_play_sound(heap_data.loaded_sounds[num].buffer);
+	// stop_sound();
 }
 
 void stop_sound() {
@@ -25,5 +25,5 @@ void stop_sound() {
 		state.flags[state.sound_flag] = true;
 		state.sound_flag = -1;
 	}
-	agi_sound_stop();
+	agi_stop_sound();
 }

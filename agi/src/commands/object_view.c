@@ -99,7 +99,8 @@ void update_object(uint8_t objNo) {
 			if (OBJ.move_mode == OBJ_MOVEMODE_WANDER) {
 				OBJ.wander_distance--;
 				if (OBJ.wander_distance == 0 || OBJ.direction == DIR_STOPPED) {
-					wander(objNo);
+					OBJ.direction = random_between(1, 9);
+					OBJ.wander_distance = random_between(6, 51);
 				}
 			}
 
@@ -131,9 +132,13 @@ void update_object(uint8_t objNo) {
 
 			bool unconditionalStop = obj_baseline_on_pri(check_x, newY, cell->width, check_entire_baseline, 0);
 			bool conditionalStop = !OBJ.ignore_blocks && (obj_baseline_on_pri(check_x, newY, cell->width, check_entire_baseline, 1) || (state.block_active && point_on_block(newX, newY, state.block)));
-			bool confinedOnWater = (OBJ.allowed_on == OBJ_ON_WATER) && obj_baseline_on_pri(check_x, newY, cell->width, check_entire_baseline, 3);
+			bool confinedOnWater = (OBJ.allowed_on == OBJ_ON_WATER) && !obj_baseline_on_pri(check_x, newY, cell->width, check_entire_baseline, 3);
 			bool confinedOnLand = (OBJ.allowed_on == OBJ_ON_LAND) && obj_baseline_on_pri(check_x, newY, cell->width, check_entire_baseline, 3);
 			bool stop = unconditionalStop || conditionalStop || confinedOnWater || confinedOnLand;
+
+			if (OBJ.move_mode == OBJ_MOVEMODE_WANDER && stop) {
+				OBJ.direction = OBJ.direction = random_between(1, 9);
+			}
 
 			if (!OBJ.ignore_objects) {
 				for (size_t i = 0; i < MAX_NUM_OBJECTS; i++) {
@@ -148,7 +153,6 @@ void update_object(uint8_t objNo) {
 					}
 				}
 			}
-
 
 			if (OBJ.move_mode == OBJ_MOVEMODE_MOVE_TO && OBJ.move_distance_x == 0 && OBJ.move_distance_y == 0) {
 				OBJ.move_mode = OBJ_MOVEMODE_NORMAL;
@@ -171,7 +175,7 @@ void update_object(uint8_t objNo) {
 				if (objNo != 0) {
 					state.variables[VAR_4_OBJ_BORDER_OBJNO] = objNo;
 				}
-			} else if (newX >= 160) {
+			} else if (newX + cell->width >= 160) {
 				state.variables[objNo == 0 ? VAR_2_EGO_BORDER_CODE : VAR_5_OBJ_BORDER_CODE] = BORDER_RIGHT;
 				if (objNo != 0) {
 					state.variables[VAR_4_OBJ_BORDER_OBJNO] = objNo;
@@ -686,7 +690,6 @@ void wander(uint8_t objNo) {
 	if (objNo == 0) {
 		program_control();
 	}
-	OBJ.move_mode = OBJ_MOVEMODE_WANDER;
-	OBJ.direction = random_between(1, 9);
-	OBJ.wander_distance = random_between(6, 51);
+
+	OBJ.move_mode = OBJ_MOVEMODE_WANDER;	
 }

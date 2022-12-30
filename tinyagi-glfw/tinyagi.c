@@ -50,6 +50,9 @@ void free_file(agi_file_t file) {
 	free(file.data);
 }
 
+void agi_play_sound(uint8_t* data) {}
+void agi_stop_sound() {}
+
 agi_save_data_file_ptr agi_save_data_open(const char* mode) {
 	FILE* f = fopen("savegame", mode);
 	return (agi_save_data_file_ptr*)f;
@@ -292,7 +295,7 @@ int main() {
 
 		int delta = (int)(last_ms == 0 ? 0 : now - last_ms);
 		last_ms = now;
-		agi_sound_tick(delta);
+		//agi_sound_tick(delta);
 
 		agi_draw_all_active();
 
