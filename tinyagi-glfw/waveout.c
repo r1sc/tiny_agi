@@ -5,14 +5,14 @@
 
 #define NUM_BUFFERS 4
 
-HWAVEOUT waveout;
-WAVEHDR audio_headers[NUM_BUFFERS];
-int16_t* buffers[NUM_BUFFERS];
+static HWAVEOUT waveout;
+static WAVEHDR audio_headers[NUM_BUFFERS];
+static int16_t* buffers[NUM_BUFFERS];
 
-int16_t* queue[NUM_BUFFERS];
-size_t queue_read = 0;
-size_t queue_write = 0;
-int rw = 0;
+static int16_t* queue[NUM_BUFFERS];
+static size_t queue_read = 0;
+static size_t queue_write = 0;
+static int rw = 0;
 
 void push_free_buffer(int16_t* buffer_ptr) {
 	rw++;
@@ -48,7 +48,7 @@ void waveout_queue_buffer() {
 	}
 }
 
-BOOL shutting_down = FALSE;
+static BOOL shutting_down = FALSE;
 void waveout_free() {
 	shutting_down = TRUE;
 	waveOutReset(waveout);

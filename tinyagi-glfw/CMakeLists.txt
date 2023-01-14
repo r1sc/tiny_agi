@@ -14,7 +14,7 @@ add_executable (tinyagi_glfw
 	"font.c"
 	"synth.h"
 	"synth.c"
-)
+ "e:/slask/tinyagi/tinyagi-glfw/agi_sound.c" "e:/slask/tinyagi/tinyagi-glfw/agi_sound.h")
 
 	
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)

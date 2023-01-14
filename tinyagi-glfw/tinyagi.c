@@ -10,7 +10,7 @@
 #include <gl/GL.h>
 
 #include "agi.h"
-#include "waveout.h"
+#include "agi_sound.h"
 
 static uint8_t screen_priority[160 * 168];
 static uint32_t framebuffer[320 * 200];
@@ -24,7 +24,7 @@ void panic(const char* fmt, ...) {
 	exit(1);
 }
 
-const char* game_path = "C:\\classic\\sierra\\sq2";
+const char* game_path = "C:\\classic\\sierra\\pq";
 agi_file_t get_file(const char* filename) {
 	char path[256];
 	sprintf(path, "%s\\%s\0", game_path, filename);
@@ -50,8 +50,13 @@ void free_file(agi_file_t file) {
 	free(file.data);
 }
 
-void agi_play_sound(uint8_t* data) {}
-void agi_stop_sound() {}
+void agi_play_sound(uint8_t* data) {
+	agi_sound_start(data);
+}
+
+void agi_stop_sound() {
+	agi_sound_stop();
+}
 
 agi_save_data_file_ptr agi_save_data_open(const char* mode) {
 	FILE* f = fopen("savegame", mode);
@@ -249,6 +254,8 @@ void check_key() {
 }
 
 int main() {
+	agi_sound_init();
+
 	if (!glfwInit())
 		return -1;
 
@@ -298,28 +305,13 @@ int main() {
 		//agi_sound_tick(delta);
 
 		agi_draw_all_active();
-
-		// DOESN'T REALLY WORK - fix later
-
-		/*int16_t* buffer = NULL;
-		float an = 0;
-		int hz = channel_notes[0].hz;
-		float an_step = hz * (360.0f / 22050.0f);
-		float PI = 3.141519;
-		float DEG2RAD = PI / 180.0f;
-
-		while ((buffer = waveout_get_current_buffer())) {
-			for (size_t i = 0; i < 8192; i++) {
-				buffer[i] = (int16_t)(sin(an * DEG2RAD) * INT16_MAX);
-				an += an_step;
-				if (an >= 360) {
-					an -= 360;
-				}
+		if (agi_sound_fill()) {
+			if (state.sound_flag > -1 && state.flags[state.sound_flag] == false)
+			{
+				state.flags[state.sound_flag] = true;
+				state.sound_flag = -1;
 			}
-			
-			waveout_queue_buffer();
-		}*/
-		
+		}
 		render();
 
 		glfwPollEvents();
