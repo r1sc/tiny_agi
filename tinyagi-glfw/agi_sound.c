@@ -52,6 +52,7 @@ bool agi_sound_fill()
 	double ms_per_sample = 60.0 / (double)(SAMPLE_RATE);
 	size_t i = 0;
 	bool channel_done = false;
+	float volume = 0.1f;
 
 	int16_t* buffer = waveout_get_current_buffer();
 	if(buffer != NULL) {
@@ -83,7 +84,7 @@ bool agi_sound_fill()
 				}
 			}
 
-			*buffer++ = (int16_t)(sin(an * DEG2RAD) * INT16_MAX);
+			*buffer++ = (int16_t)(sin(an * DEG2RAD) * volume * INT16_MAX);
 			an += (360.0 * (double)channel_notes[i].hz) / (double)SAMPLE_RATE;
 		}
 		waveout_queue_buffer();

@@ -24,7 +24,7 @@ void panic(const char* fmt, ...) {
 	exit(1);
 }
 
-const char* game_path = "C:\\classic\\sierra\\pq";
+const char* game_path = "C:\\classic\\sierra\\kq3";
 agi_file_t get_file(const char* filename) {
 	char path[256];
 	sprintf(path, "%s\\%s\0", game_path, filename);
@@ -230,6 +230,12 @@ void wait_for_enter() {
 	state.enter_pressed = false;
 	while (!state.enter_pressed) {
 		Sleep(10);
+		if (agi_sound_fill()) {
+			if (state.sound_flag > -1 && state.flags[state.sound_flag] == false) {
+				state.flags[state.sound_flag] = true;
+				state.sound_flag = -1;
+			}
+		}
 		glfwPollEvents();
 	}
 }
