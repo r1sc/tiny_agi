@@ -57,11 +57,13 @@ void new_room(uint8_t room_no)
 	stop_update(0);
 	for (uint8_t objNo = 0; objNo < MAX_NUM_OBJECTS; objNo++)
 	{
-		OBJ.active = false;
-		OBJ.drawn = false;
-		OBJ.update = true;
-		OBJ.old_view_no = -1;
-		OBJ.step_size = OBJ.step_time = OBJ.steps_to_next_update = OBJ.cycle_time = OBJ.cycles_to_next_update = 1;
+		object_t* obj = &state.objects[objNo];
+
+		obj->active = false;
+		obj->drawn = false;
+		obj->update = true;
+		obj->old_view_no = -1;
+		obj->step_size = obj->step_time = obj->steps_to_next_update = obj->cycle_time = obj->cycles_to_next_update = 1;
 	}
 
 	player_control();

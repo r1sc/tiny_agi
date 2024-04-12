@@ -83,10 +83,7 @@ void _draw_view(uint8_t view_no, uint8_t loop_no, uint8_t cel_no, uint8_t x, uin
 					uint8_t screenY = y - (cell->height - 1) + sy;
 					uint8_t screenX = sx; // + (mirrored ? cell->width - 1 : 0);
 					if (screenX < 160 && screenY < 168 && screenX >= 0 && screenY >= 0) {
-						if (add_to_pic == false && priority_get(screenX, screenY) == 255) {
-							;
-						}
-						else if (erase) {
+						if (erase) {
 							screen_set_160(screenX, screenY, pic_vis_get(screenX, screenY));
 							priority_set(screenX, screenY, pic_pri_get(screenX, screenY));
 						}

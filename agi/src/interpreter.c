@@ -231,7 +231,7 @@ uint8_t next_data() {
 void jump() {
 	int16_t a = (int16_t)next_data();
 	int16_t b = (int16_t)next_data();
-	int16_t jump = a | (b << 8);
+	int16_t jump = (int16_t)(a | (b << 8));
 	state.pc += jump;
 }
 
@@ -383,29 +383,31 @@ void step() {
 }
 
 void set_dir_from_move_distance(uint8_t objNo) {
-	if (OBJ.move_distance_x < 0 && OBJ.move_distance_y < 0) {
-		OBJ.direction = DIR_UP_LEFT;
+	object_t* obj = &state.objects[objNo];
+
+	if (obj->move_distance_x < 0 && obj->move_distance_y < 0) {
+		obj->direction = DIR_UP_LEFT;
 	}
-	else if (OBJ.move_distance_x < 0 && OBJ.move_distance_y > 0) {
-		OBJ.direction = DIR_DOWN_LEFT;
+	else if (obj->move_distance_x < 0 && obj->move_distance_y > 0) {
+		obj->direction = DIR_DOWN_LEFT;
 	}
-	else if (OBJ.move_distance_x > 0 && OBJ.move_distance_y < 0) {
-		OBJ.direction = DIR_UP_RIGHT;
+	else if (obj->move_distance_x > 0 && obj->move_distance_y < 0) {
+		obj->direction = DIR_UP_RIGHT;
 	}
-	else if (OBJ.move_distance_x > 0 && OBJ.move_distance_y > 0) {
-		OBJ.direction = DIR_DOWN_RIGHT;
+	else if (obj->move_distance_x > 0 && obj->move_distance_y > 0) {
+		obj->direction = DIR_DOWN_RIGHT;
 	}
-	else if (OBJ.move_distance_x < 0) {
-		OBJ.direction = DIR_LEFT;
+	else if (obj->move_distance_x < 0) {
+		obj->direction = DIR_LEFT;
 	}
-	else if (OBJ.move_distance_x > 0) {
-		OBJ.direction = DIR_RIGHT;
+	else if (obj->move_distance_x > 0) {
+		obj->direction = DIR_RIGHT;
 	}
-	else if (OBJ.move_distance_y < 0) {
-		OBJ.direction = DIR_UP;
+	else if (obj->move_distance_y < 0) {
+		obj->direction = DIR_UP;
 	}
-	else if (OBJ.move_distance_y > 0) {
-		OBJ.direction = DIR_DOWN;
+	else if (obj->move_distance_y > 0) {
+		obj->direction = DIR_DOWN;
 	}
 }
 
@@ -554,7 +556,7 @@ static uint32_t last_ms = 0;
 static uint32_t last_clock = 0;
 
 bool agi_logic_run_cycle(uint32_t now_ms) {
-	uint32_t target_ms = ((uint32_t)state.variables[10]) * 50;
+	uint32_t target_ms = ((uint32_t)state.variables[VAR_10_INTERPRETER_CYCLE_TIME]) * 50;
 
 	if (now_ms >= last_ms + target_ms) {
 		last_ms = now_ms;
@@ -622,7 +624,8 @@ bool agi_logic_run_cycle(uint32_t now_ms) {
 
 			// recalculate direction of motion
 			for (uint8_t objNo = 0; objNo < MAX_NUM_OBJECTS; objNo++) {
-				if (OBJ.active && OBJ.update && OBJ.drawn && OBJ.move_mode == OBJ_MOVEMODE_MOVE_TO) {
+				object_t* obj = &state.objects[objNo];
+				if (obj->active && obj->update && obj->drawn && obj->move_mode == OBJ_MOVEMODE_MOVE_TO) {
 					set_dir_from_move_distance(objNo);
 				}
 			}

@@ -12,9 +12,10 @@ add_executable (tinyagi_glfw
 	"waveout.c" 
 	"panic.h"
 	"font.c"
-	"synth.h"
-	"synth.c"
- "e:/slask/tinyagi/tinyagi-glfw/agi_sound.c" "e:/slask/tinyagi/tinyagi-glfw/agi_sound.h")
+	"agi_sound.c" 
+	"agi_sound.h" 
+	"strings.h" 
+	"peep.h")
 
 	
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)

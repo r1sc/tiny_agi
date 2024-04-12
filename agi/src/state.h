@@ -12,7 +12,7 @@ typedef struct {
 } logicStackEntry_t;
 
 
-typedef struct {
+typedef struct object {
 	bool active;
 	bool drawn;
 	bool fix_loop;

@@ -240,7 +240,7 @@ char* format_and_print(char* dest, const char* source) {
 }
 
 void print_message_box(const char* text, int width, int desired_row, int desired_col) {
-	char dest[600];
+	static char dest[600];
 	
 	line_width = 0;
 	rows = 0;

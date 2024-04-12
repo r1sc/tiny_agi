@@ -3,7 +3,6 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-#define OBJ state.objects[objNo]
 #define UNIMPLEMENTED printf("(Logic: %d, pc: %d) Unimplemented command: %s\n", state.current_logic, state.pc, __func__);
 #define WARNING(x) printf("Unimplemented command: %s - %s\n", __func__, x);
 

@@ -46,7 +46,8 @@ bool obj_in_room(uint8_t item, uint8_t var) {
 }
 
 bool posn(uint8_t objNo, uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2) {
-	return OBJ.x >= x1 && OBJ.x <= x2 && OBJ.y >= y1 && OBJ.y <= y2;
+	object_t* obj = &state.objects[objNo];
+	return obj->x >= x1 && obj->x <= x2 && obj->y >= y1 && obj->y <= y2;
 }
 
 bool controller(uint8_t ctr) {
@@ -138,18 +139,21 @@ bool compare_strings(uint8_t str, uint8_t str2) {
 }
 
 bool obj_in_box(uint8_t objNo, uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2) {
-	cell_t* cell = _object_cell(&OBJ);
-	return (OBJ.x + cell->width) > x1 && OBJ.x <= x2 && OBJ.y >= y1 && OBJ.y <= y2;
+	object_t* obj = &state.objects[objNo];
+	cell_t* cell = _object_cell(obj);
+	return (obj->x + cell->width) > x1 && obj->x <= x2 && obj->y >= y1 && obj->y <= y2;
 }
 
 bool center_posn(uint8_t objNo, uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2) {
-	cell_t* cell = _object_cell(&OBJ);
-	int midX = OBJ.x + (cell->width >> 1);
-	return midX >= x1 && midX <= x2 && OBJ.y >= y1 && OBJ.y <= y2;
+	object_t* obj = &state.objects[objNo];
+	cell_t* cell = _object_cell(obj);
+	int midX = obj->x + (cell->width >> 1);
+	return midX >= x1 && midX <= x2 && obj->y >= y1 && obj->y <= y2;
 }
 
 bool right_posn(uint8_t objNo, uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2) {
-	cell_t* cell = _object_cell(&OBJ);
-	int right_x = OBJ.x + cell->width;
-	return right_x >= x1 && right_x <= x2 && OBJ.y >= y1 && OBJ.y <= y2;
+	object_t* obj = &state.objects[objNo];
+	cell_t* cell = _object_cell(obj);
+	int right_x = obj->x + cell->width;
+	return right_x >= x1 && right_x <= x2 && obj->y >= y1 && obj->y <= y2;
 }
